@@ -1,0 +1,12 @@
+{
+    "id": "cctv",
+    "title": "CCTV Viewer",
+    "icon": "cctv.png",
+    "version": "1.0.0",
+    "singleton": true,
+    "resizable": false,
+    "width": 960,
+    "height": 640,
+    "minimumWidth": 600,
+    "minimumHeight": 400
+}

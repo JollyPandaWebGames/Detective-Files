@@ -1,0 +1,30 @@
+{
+    "version": "1.0",
+
+    "comment": "Global workstation settings. User preferences are saved to StorageManager and override these defaults.",
+
+    "language": "en",
+
+    "display": {
+        "theme":       "default",
+        "wallpaper":   "default",
+        "pixelCursor": true
+    },
+
+    "audio": {
+        "enabled":        true,
+        "volume":         80,
+        "uiSoundEffects": true
+    },
+
+    "accessibility": {
+        "highContrast":     false,
+        "reducedMotion":    false,
+        "keyboardNav":      true
+    },
+
+    "developer": {
+        "debugMode":     false,
+        "showEventLog":  false
+    }
+}

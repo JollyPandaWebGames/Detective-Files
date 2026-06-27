@@ -1,0 +1,12 @@
+{
+    "id": "case-management",
+    "title": "Case Management",
+    "icon": "case.png",
+    "version": "1.0.0",
+    "singleton": true,
+    "resizable": false,
+    "width": 900,
+    "height": 680,
+    "minimumWidth": 600,
+    "minimumHeight": 400
+}

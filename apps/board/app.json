@@ -1,0 +1,12 @@
+{
+    "id": "board",
+    "title": "Investigation Board",
+    "icon": "board.png",
+    "version": "1.0.0",
+    "singleton": true,
+    "resizable": false,
+    "width": 1024,
+    "height": 768,
+    "minimumWidth": 600,
+    "minimumHeight": 400
+}

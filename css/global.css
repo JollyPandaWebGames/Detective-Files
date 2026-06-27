@@ -1,0 +1,73 @@
+/*
+ * Detective Files
+ * Global Stylesheet
+ *
+ * Contains only:
+ * - CSS reset
+ * - Body and root element baseline
+ * - Font imports
+ *
+ * Do NOT add component or application styles here.
+ * Every application owns its own stylesheet.
+ * Every manager component owns its own stylesheet.
+ */
+
+/* ── Pixel Font Imports ───────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+
+/* ── Reset ────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin:     0;
+    padding:    0;
+}
+
+/* ── Root & Body ──────────────────────────────────────────────── */
+html,
+body {
+    width:      100%;
+    height:     100%;
+    overflow:   hidden;
+    background: var(--color-bg-primary);
+    color:      var(--color-text-primary);
+    font-family: var(--font-ui), var(--font-fallback);
+    font-size:  var(--font-size-md);
+    line-height: var(--line-height-normal);
+
+    /* Pixel rendering — prevents font antialiasing */
+    -webkit-font-smoothing: none;
+    image-rendering: pixelated;
+}
+
+/* ── Workstation Root Mount Point ─────────────────────────────── */
+#workstation-root {
+    width:    100%;
+    height:   100%;
+    position: relative;
+}
+
+/* ── Selection ────────────────────────────────────────────────── */
+::selection {
+    background: var(--color-highlight);
+    color:      var(--color-bg-primary);
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width:  6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-window);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-secondary);
+}

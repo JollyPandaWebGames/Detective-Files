@@ -1,0 +1,12 @@
+{
+    "id": "case_001",
+    "version": "1.0",
+    "title": "The Missing Scientist",
+    "description": "A renowned scientist has disappeared from his laboratory under mysterious circumstances. Investigate the scene and find the truth.",
+    "difficulty": 2,
+    "type": "Missing Person",
+    "rankRequired": "Rookie",
+    "estimatedTime": 45,
+    "thumbnail": "cover.png",
+    "status": "available"
+}

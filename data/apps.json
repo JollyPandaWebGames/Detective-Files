@@ -1,0 +1,19 @@
+{
+    "version": "1.0",
+
+    "comment": "Registry of all installed workstation applications. Add or remove app ids here to install or uninstall applications. Never hardcode app ids in JavaScript.",
+
+    "installed": [
+        "case-management",
+        "police-mail",
+        "messenger",
+        "evidence",
+        "forensics",
+        "cctv",
+        "city-map",
+        "board",
+        "criminal-database",
+        "settings",
+        "recycle-bin"
+    ]
+}

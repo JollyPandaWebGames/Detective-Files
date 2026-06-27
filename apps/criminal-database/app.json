@@ -1,0 +1,12 @@
+{
+    "id": "criminal-database",
+    "title": "Criminal Database",
+    "icon": "database.png",
+    "version": "1.0.0",
+    "singleton": true,
+    "resizable": false,
+    "width": 820,
+    "height": 620,
+    "minimumWidth": 600,
+    "minimumHeight": 400
+}

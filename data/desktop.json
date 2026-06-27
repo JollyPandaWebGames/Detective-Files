@@ -1,0 +1,19 @@
+{
+    "version": "1.0",
+
+    "comment": "Desktop environment configuration. All desktop behaviour is driven from this file.",
+
+    "wallpaper": "assets/wallpapers/default.png",
+
+    "iconGrid": {
+        "columnWidth": 80,
+        "rowHeight":   80,
+        "marginTop":   16,
+        "marginLeft":  16
+    },
+
+    "taskbar": {
+        "position": "bottom",
+        "height":   36
+    }
+}

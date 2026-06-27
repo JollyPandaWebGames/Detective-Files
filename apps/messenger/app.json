@@ -1,0 +1,12 @@
+{
+    "id": "messenger",
+    "title": "Messenger",
+    "icon": "chat.png",
+    "version": "1.0.0",
+    "singleton": true,
+    "resizable": false,
+    "width": 700,
+    "height": 560,
+    "minimumWidth": 600,
+    "minimumHeight": 400
+}

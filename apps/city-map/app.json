@@ -1,0 +1,12 @@
+{
+    "id": "city-map",
+    "title": "City Map",
+    "icon": "map.png",
+    "version": "1.0.0",
+    "singleton": true,
+    "resizable": false,
+    "width": 900,
+    "height": 700,
+    "minimumWidth": 600,
+    "minimumHeight": 400
+}

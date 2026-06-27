@@ -1,0 +1,18 @@
+/*
+ * Recycle Bin
+ * Application Stylesheet
+ *
+ * All classes must be scoped with the .recycle-bin- prefix.
+ * Never use generic class names such as .container or .button.
+ * Never modify global styles from this file.
+ */
+
+/* ── Root Container ──────────────────────────────────────────── */
+.recycle-bin-window {
+    width:      100%;
+    height:     100%;
+    background: var(--color-bg-window);
+    color:      var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:  var(--font-size-md);
+}

@@ -1,0 +1,22 @@
+/*
+ * Detective Files
+ * CSS Variables — Animation
+ *
+ * Animations are subtle and minimal per UI_GUIDELINES.md.
+ * No bouncing, scaling, or large transitions are permitted.
+ */
+
+:root {
+
+    /* ── Durations ───────────────────────────────────────────── */
+    --duration-instant:  50ms;
+    --duration-fast:    100ms;
+    --duration-normal:  150ms;
+    --duration-slow:    250ms;
+
+    /* ── Easing ──────────────────────────────────────────────── */
+    --ease-default:  linear;
+    --ease-in:       ease-in;
+    --ease-out:      ease-out;
+
+}

@@ -1,0 +1,24 @@
+{
+    "version": "1.0",
+    "id": "default",
+    "name": "Police Dark",
+
+    "comment": "Default workstation theme. All values map to CSS custom properties.",
+
+    "colors": {
+        "bgPrimary":       "#0B1118",
+        "bgSecondary":     "#131C26",
+        "bgWindow":        "#1A2430",
+        "bgTaskbar":       "#111821",
+        "borderWindow":    "#4D5C72",
+        "titlebar":        "#223247",
+        "titlebarActive":  "#2D4768",
+        "textPrimary":     "#E5EEF7",
+        "textSecondary":   "#9FB2C7",
+        "highlight":       "#2DA8FF",
+        "success":         "#37D67A",
+        "warning":         "#FFC94A",
+        "danger":          "#FF5D5D",
+        "disabled":        "#5A6573"
+    }
+}

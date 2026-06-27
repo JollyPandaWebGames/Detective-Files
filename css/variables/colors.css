@@ -1,0 +1,38 @@
+/*
+ * Detective Files
+ * CSS Variables — Colors
+ *
+ * Single source of truth for all color values.
+ * Never use raw hex codes anywhere else in the codebase.
+ * All colors defined here follow UI_GUIDELINES.md.
+ */
+
+:root {
+
+    /* ── Backgrounds ─────────────────────────────────────────── */
+    --color-bg-primary:          #0B1118;
+    --color-bg-secondary:        #131C26;
+    --color-bg-window:           #1A2430;
+    --color-bg-taskbar:          #111821;
+
+    /* ── Borders ─────────────────────────────────────────────── */
+    --color-border-window:       #4D5C72;
+    --color-border-pixel:        2px solid var(--color-border-window);
+
+    /* ── Title Bars ──────────────────────────────────────────── */
+    --color-titlebar:            #223247;
+    --color-titlebar-active:     #2D4768;
+
+    /* ── Text ────────────────────────────────────────────────── */
+    --color-text-primary:        #E5EEF7;
+    --color-text-secondary:      #9FB2C7;
+    --color-text-disabled:       #5A6573;
+
+    /* ── Semantic Colors ─────────────────────────────────────── */
+    --color-highlight:           #2DA8FF;
+    --color-success:             #37D67A;
+    --color-warning:             #FFC94A;
+    --color-danger:              #FF5D5D;
+    --color-disabled:            #5A6573;
+
+}

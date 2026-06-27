@@ -1,0 +1,12 @@
+{
+    "id": "recycle-bin",
+    "title": "Recycle Bin",
+    "icon": "bin.png",
+    "version": "1.0.0",
+    "singleton": true,
+    "resizable": false,
+    "width": 560,
+    "height": 440,
+    "minimumWidth": 600,
+    "minimumHeight": 400
+}
