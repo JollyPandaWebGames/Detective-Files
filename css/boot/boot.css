@@ -1,0 +1,117 @@
+/*
+ * CID OS
+ * Boot Screen Stylesheet
+ *
+ * Scoped to: .boot-screen
+ * Loaded by: BootScreen.js
+ *
+ * This file owns every style for the boot sequence.
+ * Do not add boot styles anywhere else.
+ */
+
+/* ── Boot Screen Root ─────────────────────────────────────────── */
+.boot-screen {
+    position:        fixed;
+    inset:           0;
+    z-index:         9000;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    background:      var(--color-bg-primary);
+    color:           var(--color-text-primary);
+    font-family:     var(--font-ui), monospace;
+    overflow:        hidden;
+}
+
+/* ── Boot Panel ───────────────────────────────────────────────── */
+.boot-screen__panel {
+    width:      480px;
+    max-width:  90vw;
+    padding:    var(--space-8) var(--space-6);
+    border:     var(--color-border-pixel);
+    background: var(--color-bg-secondary);
+}
+
+/* ── OS Title Block ───────────────────────────────────────────── */
+.boot-screen__title {
+    font-family:   var(--font-title), monospace;
+    font-size:     var(--font-size-lg);
+    color:         var(--color-highlight);
+    margin-bottom: var(--space-1);
+    letter-spacing: 2px;
+}
+
+.boot-screen__subtitle {
+    font-size:     var(--font-size-sm);
+    color:         var(--color-text-secondary);
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border-window);
+}
+
+/* ── Divider ──────────────────────────────────────────────────── */
+.boot-screen__divider {
+    height:           1px;
+    background:       var(--color-border-window);
+    margin:           var(--space-4) 0;
+}
+
+/* ── Log Lines ────────────────────────────────────────────────── */
+.boot-screen__log {
+    display:        flex;
+    flex-direction: column;
+    gap:            var(--space-2);
+    min-height:     120px;
+}
+
+.boot-screen__log-line {
+    font-size:   var(--font-size-sm);
+    color:       var(--color-text-secondary);
+    opacity:     0;
+    transition:  opacity var(--duration-fast) var(--ease-out);
+    line-height: var(--line-height-tight);
+}
+
+.boot-screen__log-line--visible {
+    opacity: 1;
+}
+
+.boot-screen__log-line--ok::after {
+    content: '  [ OK ]';
+    color:   var(--color-success);
+}
+
+.boot-screen__log-line--active {
+    color: var(--color-text-primary);
+}
+
+/* ── Progress Bar ─────────────────────────────────────────────── */
+.boot-screen__progress-wrap {
+    margin-top:    var(--space-6);
+    border:        1px solid var(--color-border-window);
+    height:        10px;
+    background:    var(--color-bg-primary);
+}
+
+.boot-screen__progress-fill {
+    height:     100%;
+    width:      0%;
+    background: var(--color-highlight);
+    transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* ── Footer ───────────────────────────────────────────────────── */
+.boot-screen__footer {
+    margin-top:  var(--space-6);
+    font-size:   var(--font-size-xs);
+    color:       var(--color-disabled);
+    text-align:  center;
+}
+
+/* ── Fade-out transition ──────────────────────────────────────── */
+.boot-screen--fading {
+    opacity:    0;
+    transition: opacity var(--duration-slow) var(--ease-in);
+    pointer-events: none;
+}

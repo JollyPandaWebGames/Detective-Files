@@ -2,42 +2,42 @@
  * Workstation
  *
  * Purpose:
- *   The root orchestrator of Detective Files.
- *   Responsible for booting the workstation environment in the correct order.
+ *   The root orchestrator of Detective Files / CID OS.
+ *   Controls the complete startup sequence from boot screen to desktop.
  *
- * Responsibilities:
- *   - Mount the workstation into the DOM
- *   - Initialize all managers in dependency order
- *   - Coordinate the startup sequence
- *   - Expose no gameplay logic whatsoever
+ * Boot Sequence:
+ *   1. Inject boot stylesheet
+ *   2. Apply theme (CSS variables must exist before any UI)
+ *   3. Show boot screen
+ *   4. Boot screen completes → build desktop
+ *   5. Show desktop
+ *   6. Load application registry (Mission 04)
  *
  * Rules:
+ *   The workstation never contains gameplay logic.
  *   The workstation never knows what applications do.
- *   The workstation never contains case or gameplay logic.
- *   All UI and behavior is delegated to managers and applications.
+ *   All UI and behavior is delegated to managers and subsystems.
  *
  * Dependencies:
- *   EventBus            — must boot first
- *   StorageManager      — must boot before other managers
- *   ThemeManager        — applies visual configuration early
- *   ApplicationManager  — discovers and loads applications
- *   DesktopManager      — renders the desktop environment
- *   WindowManager       — manages all application windows
+ *   BootScreen         — visual boot sequence
+ *   ThemeManager       — CSS variable injection
+ *   DesktopManager     — desktop DOM and layers
+ *   ApplicationManager — application plugin registry
+ *   EventBus           — system-wide event bus
  */
 
-import EventBus            from './EventBus.js';
-import StorageManager      from '../managers/StorageManager.js';
-import ThemeManager        from '../managers/ThemeManager.js';
-import ApplicationManager  from '../managers/ApplicationManager.js';
-import DesktopManager      from '../managers/DesktopManager.js';
-import WindowManager       from '../managers/WindowManager.js';
+import EventBus           from './EventBus.js';
+import BootScreen         from './BootScreen.js';
+import ThemeManager       from '../managers/ThemeManager.js';
+import DesktopManager     from '../managers/DesktopManager.js';
+import ApplicationManager from '../managers/ApplicationManager.js';
 
 class Workstation {
 
     constructor() {
 
         /**
-         * The root DOM element the workstation mounts into.
+         * The #workstation-root DOM element.
          * @type {HTMLElement|null}
          */
         this._root = null;
@@ -45,49 +45,72 @@ class Workstation {
     }
 
     /**
-     * Boot the workstation.
-     * Initializes all subsystems in the correct dependency order.
+     * Entry point — begin the full startup sequence.
      *
      * @returns {Promise<void>}
      */
     async boot() {
 
-        console.info( 'Workstation: Booting Detective Files...' );
+        console.info( 'Workstation: CID OS starting...' );
 
         this._root = document.getElementById( 'workstation-root' );
 
         if ( !this._root ) {
-            console.error( 'Workstation: Root element #workstation-root not found. Aborting boot.' );
+            console.error( 'Workstation: #workstation-root not found. Aborting.' );
             return;
         }
 
-        // ── Boot Sequence ────────────────────────────────────────
-        // Order matters. Do not reorder without understanding dependencies.
-
-        // 1. Apply theme CSS variables before any UI renders.
+        // ── Step 1: Apply theme before anything renders ──────────
+        // CSS variables must exist before boot screen or desktop paint.
         await ThemeManager.initialize();
 
-        // 2. Discover and load all application plugins.
-        await ApplicationManager.initialize();
+        // ── Step 2: Inject boot screen stylesheet ────────────────
+        this._injectStylesheet( './css/boot/boot.css' );
 
-        // 3. Initialize the desktop environment.
-        //    (Desktop UI implementation added in Mission 01-02.)
+        // ── Step 3: Run the boot sequence ────────────────────────
+        const bootScreen = new BootScreen();
+        await bootScreen.run( this._root );
+
+        // ── Step 4: Build the desktop ────────────────────────────
         DesktopManager.initialize( this._root );
 
-        // 4. Populate desktop icons from installed applications.
+        // ── Step 5: Make the desktop visible ─────────────────────
+        DesktopManager.show();
+
+        // ── Step 6: Load application registry ───────────────────
+        // AppLoader and ApplicationManager are initialized here so
+        // DesktopManager can receive the icon list (Mission 02+).
+        await ApplicationManager.initialize();
+
         const installedApps = ApplicationManager.getInstalledApps();
         DesktopManager.renderIcons( installedApps );
 
-        // ── Boot Complete ────────────────────────────────────────
-        console.info( 'Workstation: Boot complete.' );
+        // ── Boot complete ────────────────────────────────────────
+        console.info( 'Workstation: CID OS ready.' );
         EventBus.emit( 'workstation:ready' );
+
+    }
+
+    /**
+     * Inject a stylesheet link into document head if not already present.
+     *
+     * @param {string} href - Stylesheet path.
+     * @returns {void}
+     */
+    _injectStylesheet( href ) {
+
+        const existing = document.querySelector( `link[href="${ href }"]` );
+        if ( existing ) return;
+
+        const link  = document.createElement( 'link' );
+        link.rel    = 'stylesheet';
+        link.href   = href;
+        document.head.appendChild( link );
 
     }
 
 }
 
 // ── Entry Point ──────────────────────────────────────────────────
-// Instantiate and boot the workstation when the module loads.
-
 const workstation = new Workstation();
 workstation.boot();

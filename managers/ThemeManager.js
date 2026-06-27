@@ -3,27 +3,45 @@
  *
  * Purpose:
  *   Manages visual themes for the workstation.
- *   Applies theme configuration by injecting CSS custom property overrides.
+ *   Applies theme configuration by writing CSS custom properties
+ *   directly onto the document root element at runtime.
  *
  * Responsibilities:
- *   - Load theme configuration from theme.json
- *   - Apply theme values as CSS variables on the document root
- *   - Notify applications of theme changes via EventBus
- *   - Persist the active theme selection
+ *   - Load theme configuration from /data/theme.json
+ *   - Map theme.json color keys to CSS custom properties
+ *   - Apply theme values so all components update automatically
+ *   - Notify the system of theme changes via EventBus
  *
  * Rules:
  *   ThemeManager only manages themes.
- *   It never touches window layout or application state.
+ *   Never touch window layout, application state, or storage here.
  *
  * Dependencies:
- *   EventBus       — to notify applications of theme changes
- *   StorageManager — to persist the selected theme
+ *   EventBus — to notify applications of theme changes
  */
 
-import EventBus      from '../core/EventBus.js';
-import StorageManager from './StorageManager.js';
+import EventBus from '../core/EventBus.js';
 
-const STORAGE_KEY_THEME = 'active-theme';
+/**
+ * Maps theme.json color keys to CSS custom property names.
+ * Any key not listed here is ignored.
+ */
+const COLOR_MAP = {
+    bgPrimary:      '--color-bg-primary',
+    bgSecondary:    '--color-bg-secondary',
+    bgWindow:       '--color-bg-window',
+    bgTaskbar:      '--color-bg-taskbar',
+    borderWindow:   '--color-border-window',
+    titlebar:       '--color-titlebar',
+    titlebarActive: '--color-titlebar-active',
+    textPrimary:    '--color-text-primary',
+    textSecondary:  '--color-text-secondary',
+    highlight:      '--color-highlight',
+    success:        '--color-success',
+    warning:        '--color-warning',
+    danger:         '--color-danger',
+    disabled:       '--color-disabled',
+};
 
 class ThemeManagerClass {
 
@@ -38,8 +56,8 @@ class ThemeManagerClass {
     }
 
     /**
-     * Load and apply the default or previously saved theme.
-     * Called once by Workstation during startup.
+     * Load and apply the default theme from /data/theme.json.
+     * Called once by Workstation during the boot sequence.
      *
      * @returns {Promise<void>}
      */
@@ -55,7 +73,7 @@ class ThemeManagerClass {
             const theme = await response.json();
             this.apply( theme );
 
-            console.info( 'ThemeManager: Default theme applied.' );
+            console.info( `ThemeManager: Applied theme "${ theme.name }".` );
         }
         catch ( error ) {
             console.error( 'ThemeManager: Unable to load theme configuration (data/theme.json).', error );
@@ -64,20 +82,39 @@ class ThemeManagerClass {
     }
 
     /**
-     * Apply a theme by injecting its values as CSS variables.
+     * Apply a theme configuration to the document.
+     * Writes each color value as a CSS custom property on :root.
      *
-     * @param {Object} theme - Theme configuration object.
+     * @param {Object} theme - Parsed theme.json object.
      * @returns {void}
      */
     apply( theme ) {
-        // Implementation added in Mission 01.
+
+        if ( !theme || !theme.colors ) {
+            console.warn( 'ThemeManager: apply() received an invalid theme object.' );
+            return;
+        }
+
+        const root = document.documentElement;
+
+        for ( const [ key, cssVar ] of Object.entries( COLOR_MAP ) ) {
+
+            const value = theme.colors[ key ];
+
+            if ( value ) {
+                root.style.setProperty( cssVar, value );
+            }
+
+        }
+
         this._activeTheme = theme;
-        console.info( 'ThemeManager: apply() called.' );
+
         EventBus.emit( 'theme:changed', theme );
+
     }
 
     /**
-     * Return the currently active theme.
+     * Return the currently active theme configuration.
      *
      * @returns {Object|null}
      */

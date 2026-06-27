@@ -1,0 +1,95 @@
+/*
+ * CID OS
+ * Desktop Stylesheet
+ *
+ * Scoped to: .cid-desktop
+ * Loaded by: DesktopManager.js
+ *
+ * This file owns every style for the desktop surface.
+ * Do not add taskbar, icon, or window styles here.
+ * Those each own their own stylesheets.
+ */
+
+/* ── Desktop Root ─────────────────────────────────────────────── */
+.cid-desktop {
+    position:   absolute;
+    inset:      0;
+    overflow:   hidden;
+    background: var(--color-bg-primary);
+
+    /* Desktop is never scrollable */
+    user-select: none;
+}
+
+/* ── Wallpaper Layer ──────────────────────────────────────────── */
+.cid-desktop__wallpaper {
+    position:            absolute;
+    inset:               0;
+    background-image:    none;
+    background-size:     cover;
+    background-position: center;
+    background-repeat:   no-repeat;
+
+    /* Pixel rendering for pixel-art wallpapers */
+    image-rendering: pixelated;
+    z-index:         0;
+}
+
+/* ── Wallpaper overlay — subtle darkening for readability ─────── */
+.cid-desktop__wallpaper::after {
+    content:    '';
+    position:   absolute;
+    inset:      0;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+/* ── Icon Area ────────────────────────────────────────────────── */
+/* Reserve space for future icons — taskbar height at the bottom */
+.cid-desktop__icon-area {
+    position: absolute;
+    top:      0;
+    left:     0;
+    right:    0;
+    bottom:   var(--taskbar-height);
+    z-index:  10;
+
+    /* Icon grid will be positioned inside here */
+    padding:  var(--space-4);
+}
+
+/* ── Window Layer ─────────────────────────────────────────────── */
+/* Application windows are mounted here */
+.cid-desktop__window-layer {
+    position: absolute;
+    inset:    0;
+    bottom:   var(--taskbar-height);
+    z-index:  100;
+    pointer-events: none; /* Children override this */
+}
+
+/* ── Taskbar Placeholder ──────────────────────────────────────── */
+/* Structural reservation — TaskbarManager fills content in Mission 02 */
+.cid-desktop__taskbar {
+    position:   absolute;
+    bottom:     0;
+    left:       0;
+    right:      0;
+    height:     var(--taskbar-height);
+    background: var(--color-bg-taskbar);
+    border-top: 1px solid var(--color-border-window);
+    z-index:    500;
+
+    /* Flex layout ready for Mission 02 */
+    display:     flex;
+    align-items: center;
+}
+
+/* ── Desktop entrance animation ───────────────────────────────── */
+.cid-desktop--entering {
+    opacity:    0;
+}
+
+.cid-desktop--visible {
+    opacity:    1;
+    transition: opacity var(--duration-slow) var(--ease-out);
+}

@@ -1,0 +1,39 @@
+/*
+ * CID OS
+ * Theme Stylesheet
+ *
+ * This file provides the runtime-overridable CSS custom property layer.
+ * ThemeManager reads theme.json and writes these properties onto :root
+ * via JavaScript, replacing the static defaults from variables/colors.css.
+ *
+ * The static defaults in variables/colors.css are the fallback.
+ * ThemeManager's apply() call is the runtime override.
+ *
+ * Do not hardcode colors in this file.
+ * Do not add component styles here.
+ */
+
+/*
+ * Theme variables are injected by ThemeManager.apply() onto :root
+ * using element.style.setProperty(). No static declarations needed.
+ *
+ * Mapping: theme.json key → CSS custom property
+ *
+ *   colors.bgPrimary       → --color-bg-primary
+ *   colors.bgSecondary     → --color-bg-secondary
+ *   colors.bgWindow        → --color-bg-window
+ *   colors.bgTaskbar       → --color-bg-taskbar
+ *   colors.borderWindow    → --color-border-window
+ *   colors.titlebar        → --color-titlebar
+ *   colors.titlebarActive  → --color-titlebar-active
+ *   colors.textPrimary     → --color-text-primary
+ *   colors.textSecondary   → --color-text-secondary
+ *   colors.highlight       → --color-highlight
+ *   colors.success         → --color-success
+ *   colors.warning         → --color-warning
+ *   colors.danger          → --color-danger
+ *   colors.disabled        → --color-disabled
+ *
+ * This mapping is documented here for reference only.
+ * The authoritative mapping lives in ThemeManager.js.
+ */

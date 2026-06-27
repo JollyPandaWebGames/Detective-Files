@@ -3,7 +3,7 @@
 
     "comment": "Desktop environment configuration. All desktop behaviour is driven from this file.",
 
-    "wallpaper": "assets/wallpapers/default.png",
+    "wallpaper": null,
 
     "iconGrid": {
         "columnWidth": 80,
