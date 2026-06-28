@@ -1,19 +1,122 @@
-{
-    "version": "1.0",
-
-    "comment": "Registry of all installed workstation applications. Add or remove app ids here to install or uninstall applications. Never hardcode app ids in JavaScript.",
-
-    "installed": [
-        "case-management",
-        "police-mail",
-        "messenger",
-        "evidence",
-        "forensics",
-        "cctv",
-        "city-map",
-        "board",
-        "criminal-database",
-        "settings",
-        "recycle-bin"
-    ]
-}
+[
+    {
+        "id": "case-management",
+        "title": "Case Management",
+        "icon": "case.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 900,
+        "height": 680,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "police-mail",
+        "title": "Police Mail",
+        "icon": "mail.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 820,
+        "height": 620,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "messenger",
+        "title": "Messenger",
+        "icon": "chat.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 700,
+        "height": 560,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "evidence",
+        "title": "Evidence Database",
+        "icon": "evidence.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 900,
+        "height": 680,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "forensics",
+        "title": "Forensics Lab",
+        "icon": "forensics.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 820,
+        "height": 620,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "cctv",
+        "title": "CCTV Viewer",
+        "icon": "cctv.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 960,
+        "height": 640,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "city-map",
+        "title": "City Map",
+        "icon": "map.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 900,
+        "height": 700,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "board",
+        "title": "Investigation Board",
+        "icon": "board.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 1024,
+        "height": 768,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "criminal-database",
+        "title": "Criminal Database",
+        "icon": "database.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 820,
+        "height": 620,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    },
+    {
+        "id": "settings",
+        "title": "Settings",
+        "icon": "settings.png",
+        "version": "1.0.0",
+        "singleton": true,
+        "resizable": false,
+        "width": 640,
+        "height": 480,
+        "minimumWidth": 600,
+        "minimumHeight": 400
+    }
+]

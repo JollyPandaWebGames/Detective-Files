@@ -1,0 +1,188 @@
+/*
+ * CID OS
+ * Taskbar Stylesheet
+ *
+ * Scoped to: .taskbar__, .start-menu
+ * Loaded by: TaskbarManager.js
+ *
+ * Owns all styles for:
+ *   - Taskbar strip
+ *   - Start button and its states
+ *   - Running apps area placeholder
+ *   - System clock
+ *   - Start Menu and its sections
+ */
+
+/* ── Taskbar Strip ────────────────────────────────────────────── */
+/* The .cid-desktop__taskbar element is built by DesktopManager.
+   TaskbarManager populates its content. */
+.cid-desktop__taskbar {
+    padding:         0 var(--space-2);
+    gap:             var(--space-2);
+    justify-content: flex-start;
+}
+
+/* ── Start Button ─────────────────────────────────────────────── */
+.taskbar__start-btn {
+    display:        inline-flex;
+    align-items:    center;
+    justify-content: center;
+    height:         26px;
+    padding:        0 var(--space-3);
+    background:     var(--color-bg-secondary);
+    color:          var(--color-text-primary);
+    border:         var(--color-border-pixel);
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-xs);
+    letter-spacing: 1px;
+    cursor:         pointer;
+    flex-shrink:    0;
+    transition:     background var(--duration-fast) var(--ease-default);
+    outline:        none;
+}
+
+.taskbar__start-btn:hover {
+    background: var(--color-titlebar);
+}
+
+.taskbar__start-btn:active,
+.taskbar__start-btn--active {
+    background: var(--color-titlebar-active);
+    border-color: var(--color-highlight);
+}
+
+.taskbar__start-btn:focus-visible {
+    outline: 2px solid var(--color-highlight);
+    outline-offset: 2px;
+}
+
+/* ── Running Apps Area ────────────────────────────────────────── */
+.taskbar__running-apps {
+    flex:        1;
+    height:      100%;
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    overflow:    hidden;
+
+    /* Populated in Mission 03 by WindowManager */
+}
+
+/* ── System Clock ─────────────────────────────────────────────── */
+.taskbar__clock {
+    display:     flex;
+    align-items: center;
+    height:      100%;
+    padding:     0 var(--space-3);
+    border-left: 1px solid var(--color-border-window);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-sm);
+    color:       var(--color-text-primary);
+    flex-shrink: 0;
+    min-width:   52px;
+    justify-content: center;
+    letter-spacing: 1px;
+}
+
+/* ── Start Menu ───────────────────────────────────────────────── */
+.start-menu {
+    position:   absolute;
+    bottom:     calc( var(--taskbar-height) + 2px );
+    left:       0;
+    width:      260px;
+    background: var(--color-bg-secondary);
+    border:     var(--color-border-pixel);
+    z-index:    600;
+    overflow-y: auto;
+    max-height: calc( 100vh - var(--taskbar-height) - 16px );
+
+    /* Hidden by default — shown via JS */
+}
+
+.start-menu[hidden] {
+    display: none;
+}
+
+/* ── Start Menu Header ────────────────────────────────────────── */
+.start-menu__header {
+    display:        flex;
+    align-items:    baseline;
+    gap:            var(--space-2);
+    padding:        var(--space-3) var(--space-4);
+    background:     var(--color-titlebar-active);
+    border-bottom:  1px solid var(--color-border-window);
+}
+
+.start-menu__header-title {
+    font-family: var(--font-title), monospace;
+    font-size:   var(--font-size-xs);
+    color:       var(--color-highlight);
+    letter-spacing: 2px;
+}
+
+.start-menu__header-sub {
+    font-size: var(--font-size-xs);
+    color:     var(--color-text-secondary);
+}
+
+/* ── Start Menu Sections ──────────────────────────────────────── */
+.start-menu__section {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border-window);
+}
+
+.start-menu__section:last-child {
+    border-bottom: none;
+}
+
+.start-menu__section-label {
+    padding:       var(--space-1) var(--space-4) var(--space-1);
+    font-size:     var(--font-size-xs);
+    color:         var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ── Start Menu Items ─────────────────────────────────────────── */
+.start-menu__item {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-3);
+    width:       100%;
+    padding:     var(--space-2) var(--space-4);
+    background:  none;
+    border:      none;
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-sm);
+    text-align:  left;
+    cursor:      pointer;
+    transition:  background var(--duration-instant) var(--ease-default);
+    outline:     none;
+}
+
+.start-menu__item:hover {
+    background: var(--color-titlebar);
+}
+
+.start-menu__item:focus-visible {
+    background: var(--color-titlebar);
+    outline: 2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+/* ── Start Menu Icon Placeholder ─────────────────────────────── */
+.start-menu__item-icon {
+    width:       20px;
+    height:      20px;
+    background:  var(--color-border-window);
+    flex-shrink: 0;
+    image-rendering: pixelated;
+}
+
+.start-menu__item-label {
+    flex: 1;
+    overflow:     hidden;
+    text-overflow: ellipsis;
+    white-space:  nowrap;
+}

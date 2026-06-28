@@ -1,0 +1,89 @@
+/*
+ * CID OS
+ * Desktop Icons Stylesheet
+ *
+ * Scoped to: .desktop-icon
+ * Loaded by: DesktopIconManager.js
+ *
+ * All icons are absolutely positioned inside .cid-desktop__icon-area.
+ * Positions are calculated and written by DesktopIconManager.
+ */
+
+/* ── Icon Root ────────────────────────────────────────────────── */
+.desktop-icon {
+    position:       absolute;
+    width:          72px;
+    display:        flex;
+    flex-direction: column;
+    align-items:    center;
+    gap:            var(--space-1);
+    padding:        var(--space-1);
+    cursor:         default;
+    border:         2px solid transparent;
+    outline:        none;
+    user-select:    none;
+    transition:     border-color var(--duration-instant) var(--ease-default);
+}
+
+/* ── Icon Image Area ──────────────────────────────────────────── */
+.desktop-icon__image {
+    width:            48px;
+    height:           48px;
+    background:       var(--color-border-window);
+    image-rendering:  pixelated;
+    flex-shrink:      0;
+
+    /* Placeholder appearance until real pixel icons exist */
+    display:          flex;
+    align-items:      center;
+    justify-content:  center;
+}
+
+/* ── Icon Label ───────────────────────────────────────────────── */
+.desktop-icon__label {
+    font-family:  var(--font-ui), monospace;
+    font-size:    var(--font-size-xs);
+    color:        var(--color-text-primary);
+    text-align:   center;
+    word-break:   break-word;
+    line-height:  var(--line-height-tight);
+    max-width:    72px;
+
+    /* Pixel-accurate text shadow for readability over wallpaper */
+    text-shadow:
+        1px 0 0 var(--color-bg-primary),
+       -1px 0 0 var(--color-bg-primary),
+        0 1px 0 var(--color-bg-primary),
+        0 -1px 0 var(--color-bg-primary);
+}
+
+/* ── Hover State ──────────────────────────────────────────────── */
+.desktop-icon:hover .desktop-icon__image {
+    background: var(--color-titlebar);
+}
+
+/* ── Selected State ───────────────────────────────────────────── */
+.desktop-icon--selected {
+    border-color: var(--color-highlight);
+    background:   rgba( 45, 168, 255, 0.12 );
+}
+
+.desktop-icon--selected .desktop-icon__image {
+    background: var(--color-titlebar-active);
+}
+
+.desktop-icon--selected .desktop-icon__label {
+    color: var(--color-highlight);
+}
+
+/* ── Focus State (keyboard navigation) ───────────────────────── */
+.desktop-icon:focus-visible {
+    border-color: var(--color-highlight);
+    outline:      none;
+}
+
+/* ── Icon Grid Container ──────────────────────────────────────── */
+/* .cid-desktop__icon-area needs position: relative for absolute children */
+.cid-desktop__icon-area {
+    position: relative;
+}

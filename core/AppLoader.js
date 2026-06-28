@@ -16,8 +16,9 @@
  *   AppLoader only knows how to find and load applications.
  *   Application identifiers must never be hardcoded here.
  *
- * Dependencies:
- *   apps.json — the source of installed application ids
+ * apps.json format:
+ *   A JSON array of app config objects, each with an "id" field.
+ *   Example: [{ "id": "police-mail", "title": "...", ... }]
  */
 
 class AppLoaderClass {
@@ -39,10 +40,10 @@ class AppLoaderClass {
     }
 
     /**
-     * Load the apps registry from configuration.
-     * Returns the list of application ids that should be installed.
+     * Load the full app registry from apps.json.
+     * Returns the complete array of app config objects.
      *
-     * @returns {Promise<string[]>} - Array of application ids.
+     * @returns {Promise<Object[]>} - Array of app config objects.
      */
     async loadRegistry() {
 
@@ -53,8 +54,22 @@ class AppLoaderClass {
                 throw new Error( `HTTP ${ response.status }` );
             }
 
-            const registry = await response.json();
-            return registry.installed ?? [];
+            const data = await response.json();
+
+            // Support both formats:
+            //   - Array: [{ id, title, ... }, ...]       (Mission 02+ format)
+            //   - Object: { installed: ["id1", "id2"] }  (Mission 00 legacy)
+            if ( Array.isArray( data ) ) {
+                return data;
+            }
+
+            // Legacy format — return minimal config objects from id list.
+            if ( data.installed && Array.isArray( data.installed ) ) {
+                return data.installed.map( id => ( { id } ) );
+            }
+
+            console.warn( 'AppLoader: Unrecognized apps.json format.' );
+            return [];
         }
         catch ( error ) {
             console.error( 'AppLoader: Unable to load application registry (data/apps.json).', error );
@@ -65,24 +80,31 @@ class AppLoaderClass {
 
     /**
      * Load an application's metadata from its app.json.
+     * Falls back to the registry config if app.json is unavailable.
      *
-     * @param {string} appId - The application identifier.
-     * @returns {Promise<Object|null>} - Parsed app.json, or null on failure.
+     * @param {Object} registryConfig - Config object from apps.json.
+     * @returns {Promise<Object|null>} - Merged config, or null on failure.
      */
-    async loadConfig( appId ) {
+    async loadConfig( registryConfig ) {
+
+        const appId = registryConfig.id;
 
         try {
             const response = await fetch( `${ this._appsPath }/${ appId }/app.json` );
 
             if ( !response.ok ) {
-                throw new Error( `HTTP ${ response.status }` );
+                // Fall back to registry config — sufficient for icon/title display.
+                console.warn( `AppLoader: No app.json for "${ appId }", using registry config.` );
+                return registryConfig;
             }
 
-            return await response.json();
+            // Merge: app.json takes precedence, registry config fills gaps.
+            const appJson = await response.json();
+            return { ...registryConfig, ...appJson };
         }
         catch ( error ) {
-            console.error( `AppLoader: Unable to load config for "${ appId }".`, error );
-            return null;
+            console.warn( `AppLoader: Could not load app.json for "${ appId }".`, error );
+            return registryConfig;
         }
 
     }
@@ -132,22 +154,22 @@ class AppLoaderClass {
      * Fully load an application: config, styles, and module.
      * Returns an instantiated application object ready to be managed.
      *
-     * @param {string} appId - The application identifier.
+     * @param {Object} registryConfig - Config entry from apps.json.
      * @returns {Promise<BaseApp|null>} - Instantiated app, or null on failure.
      */
-    async load( appId ) {
+    async load( registryConfig ) {
 
-        const config = await this.loadConfig( appId );
+        const config = await this.loadConfig( registryConfig );
         if ( !config ) {
             return null;
         }
 
-        const AppClass = await this.loadModule( appId );
+        const AppClass = await this.loadModule( config.id );
         if ( !AppClass ) {
             return null;
         }
 
-        this.loadStyles( appId );
+        this.loadStyles( config.id );
 
         return new AppClass( config );
 

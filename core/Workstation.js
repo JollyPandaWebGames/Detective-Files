@@ -6,31 +6,33 @@
  *   Controls the complete startup sequence from boot screen to desktop.
  *
  * Boot Sequence:
- *   1. Inject boot stylesheet
- *   2. Apply theme (CSS variables must exist before any UI)
- *   3. Show boot screen
- *   4. Boot screen completes → build desktop
- *   5. Show desktop
- *   6. Load application registry (Mission 04)
+ *   1. Apply theme (CSS variables before any UI renders)
+ *   2. Run boot screen
+ *   3. Build desktop DOM (DesktopManager)
+ *   4. Initialize taskbar with installed app list (TaskbarManager)
+ *   5. Render desktop icons (DesktopIconManager via DesktopManager)
+ *   6. Show desktop
  *
  * Rules:
- *   The workstation never contains gameplay logic.
- *   The workstation never knows what applications do.
+ *   Workstation never contains gameplay logic.
+ *   Workstation never knows what applications do.
  *   All UI and behavior is delegated to managers and subsystems.
  *
  * Dependencies:
  *   BootScreen         — visual boot sequence
  *   ThemeManager       — CSS variable injection
  *   DesktopManager     — desktop DOM and layers
+ *   TaskbarManager     — taskbar, clock, start menu
  *   ApplicationManager — application plugin registry
  *   EventBus           — system-wide event bus
  */
 
-import EventBus           from './EventBus.js';
-import BootScreen         from './BootScreen.js';
-import ThemeManager       from '../managers/ThemeManager.js';
-import DesktopManager     from '../managers/DesktopManager.js';
-import ApplicationManager from '../managers/ApplicationManager.js';
+import EventBus            from './EventBus.js';
+import BootScreen          from './BootScreen.js';
+import ThemeManager        from '../managers/ThemeManager.js';
+import DesktopManager      from '../managers/DesktopManager.js';
+import TaskbarManager      from '../managers/TaskbarManager.js';
+import ApplicationManager  from '../managers/ApplicationManager.js';
 
 class Workstation {
 
@@ -45,7 +47,7 @@ class Workstation {
     }
 
     /**
-     * Entry point — begin the full startup sequence.
+     * Entry point — begin the full CID OS startup sequence.
      *
      * @returns {Promise<void>}
      */
@@ -60,47 +62,47 @@ class Workstation {
             return;
         }
 
-        // ── Step 1: Apply theme before anything renders ──────────
-        // CSS variables must exist before boot screen or desktop paint.
+        // ── 1. Theme ─────────────────────────────────────────────
+        // CSS variables must exist before boot screen renders.
         await ThemeManager.initialize();
 
-        // ── Step 2: Inject boot screen stylesheet ────────────────
+        // ── 2. Boot Screen ────────────────────────────────────────
         this._injectStylesheet( './css/boot/boot.css' );
-
-        // ── Step 3: Run the boot sequence ────────────────────────
         const bootScreen = new BootScreen();
         await bootScreen.run( this._root );
 
-        // ── Step 4: Build the desktop ────────────────────────────
+        // ── 3. Desktop DOM ────────────────────────────────────────
         DesktopManager.initialize( this._root );
 
-        // ── Step 5: Make the desktop visible ─────────────────────
-        DesktopManager.show();
-
-        // ── Step 6: Load application registry ───────────────────
-        // AppLoader and ApplicationManager are initialized here so
-        // DesktopManager can receive the icon list (Mission 02+).
+        // ── 4. Application Registry ───────────────────────────────
+        // Must load before taskbar and icons so both get the full app list.
         await ApplicationManager.initialize();
-
         const installedApps = ApplicationManager.getInstalledApps();
+
+        // ── 5. Taskbar ────────────────────────────────────────────
+        TaskbarManager.initialize( DesktopManager.getTaskbar(), installedApps );
+
+        // ── 6. Desktop Icons ──────────────────────────────────────
         DesktopManager.renderIcons( installedApps );
 
-        // ── Boot complete ────────────────────────────────────────
+        // ── 7. Show Desktop ───────────────────────────────────────
+        DesktopManager.show();
+
+        // ── Boot Complete ─────────────────────────────────────────
         console.info( 'Workstation: CID OS ready.' );
         EventBus.emit( 'workstation:ready' );
 
     }
 
     /**
-     * Inject a stylesheet link into document head if not already present.
+     * Inject a stylesheet link into document head (idempotent).
      *
-     * @param {string} href - Stylesheet path.
+     * @param {string} href
      * @returns {void}
      */
     _injectStylesheet( href ) {
 
-        const existing = document.querySelector( `link[href="${ href }"]` );
-        if ( existing ) return;
+        if ( document.querySelector( `link[href="${ href }"]` ) ) return;
 
         const link  = document.createElement( 'link' );
         link.rel    = 'stylesheet';

@@ -3,68 +3,50 @@
  *
  * Purpose:
  *   Creates and manages the CID OS desktop environment.
- *   Owns the desktop DOM, wallpaper layer, icon area,
- *   window layer, and taskbar placeholder.
+ *   Owns the desktop DOM structure and coordinates with sub-managers.
  *
  * Responsibilities:
- *   - Build the desktop DOM structure
- *   - Apply wallpaper from configuration
- *   - Expose layer references for other managers (Mission 02+)
- *   - Manage desktop visibility state
+ *   - Build the desktop DOM: wallpaper, icon area, window layer, taskbar
+ *   - Apply and clear wallpaper
+ *   - Control desktop visibility (boot → visible transition)
+ *   - Delegate icon rendering to DesktopIconManager
+ *   - Delegate context menu to ContextMenuManager
+ *   - Expose layer references to other managers
  *
  * Rules:
  *   DesktopManager never launches applications directly.
- *   Icon rendering is added in Mission 02.
- *   Taskbar content is added in Mission 02.
- *   Window management is WindowManager's responsibility.
+ *   Window management belongs to WindowManager (Mission 03).
  *
  * Dependencies:
- *   EventBus — to emit desktop-level events
+ *   EventBus           — desktop-level events
+ *   DesktopIconManager — icon grid rendering and selection
+ *   ContextMenuManager — right-click context menu
  */
 
-import EventBus from '../core/EventBus.js';
+import EventBus          from '../core/EventBus.js';
+import DesktopIconManager from './DesktopIconManager.js';
+import ContextMenuManager from './ContextMenuManager.js';
 
 class DesktopManagerClass {
 
     constructor() {
 
-        /**
-         * The workstation root element the desktop mounts into.
-         * @type {HTMLElement|null}
-         */
+        /** @type {HTMLElement|null} */
         this._root = null;
 
-        /**
-         * The desktop root element.
-         * @type {HTMLElement|null}
-         */
+        /** @type {HTMLElement|null} Desktop root element */
         this._desktop = null;
 
-        /**
-         * The wallpaper layer element.
-         * @type {HTMLElement|null}
-         */
+        /** @type {HTMLElement|null} Wallpaper layer */
         this._wallpaperEl = null;
 
-        /**
-         * The desktop icon area element.
-         * Exposed for DesktopIconManager in Mission 02.
-         * @type {HTMLElement|null}
-         */
+        /** @type {HTMLElement|null} Icon area — used by DesktopIconManager */
         this._iconArea = null;
 
-        /**
-         * The window layer element.
-         * Exposed for WindowManager in Mission 03.
-         * @type {HTMLElement|null}
-         */
+        /** @type {HTMLElement|null} Window layer — used by WindowManager (Mission 03) */
         this._windowLayer = null;
 
-        /**
-         * The taskbar placeholder element.
-         * Populated by TaskbarManager in Mission 02.
-         * @type {HTMLElement|null}
-         */
+        /** @type {HTMLElement|null} Taskbar element — used by TaskbarManager */
         this._taskbar = null;
 
     }
@@ -74,8 +56,8 @@ class DesktopManagerClass {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Build the desktop DOM and mount it inside the workstation root.
-     * Called by Workstation after BootScreen finishes.
+     * Build and mount the desktop DOM into the workstation root.
+     * Called by Workstation after BootScreen completes.
      *
      * @param {HTMLElement} root - The #workstation-root element.
      * @returns {void}
@@ -85,13 +67,16 @@ class DesktopManagerClass {
         this._root = root;
         this._build();
 
+        // Initialize context menu bound to the desktop element.
+        ContextMenuManager.initialize( this._desktop );
+
         console.info( 'DesktopManager: Desktop initialized.' );
 
     }
 
     /**
-     * Make the desktop visible.
-     * Called by Workstation after the boot screen has faded out.
+     * Trigger the desktop fade-in animation.
+     * Called by Workstation after all managers are ready.
      *
      * @returns {void}
      */
@@ -99,13 +84,25 @@ class DesktopManagerClass {
 
         if ( !this._desktop ) return;
 
-        // Remove entering class, add visible class to trigger the fade-in.
         requestAnimationFrame( () => {
             this._desktop.classList.remove( 'cid-desktop--entering' );
             this._desktop.classList.add( 'cid-desktop--visible' );
         } );
 
         EventBus.emit( 'desktop:visible' );
+
+    }
+
+    /**
+     * Render all desktop icons for the installed application list.
+     * Delegates to DesktopIconManager.
+     *
+     * @param {Object[]} apps - Installed app configs from ApplicationManager.
+     * @returns {void}
+     */
+    renderIcons( apps ) {
+
+        DesktopIconManager.initialize( this._iconArea, apps );
 
     }
 
@@ -116,66 +113,43 @@ class DesktopManagerClass {
     /**
      * Set the desktop wallpaper image.
      *
-     * @param {string} imagePath - Path to the wallpaper image file.
+     * @param {string} imagePath - Path to the wallpaper image.
      * @returns {void}
      */
     setWallpaper( imagePath ) {
 
         if ( !this._wallpaperEl ) return;
-
         this._wallpaperEl.style.backgroundImage = `url('${ imagePath }')`;
-
-        console.info( `DesktopManager: Wallpaper set to "${ imagePath }".` );
+        console.info( `DesktopManager: Wallpaper → "${ imagePath }"` );
 
     }
 
     /**
-     * Clear the wallpaper (shows solid background color).
+     * Clear the desktop wallpaper.
      *
      * @returns {void}
      */
     clearWallpaper() {
 
         if ( !this._wallpaperEl ) return;
-
         this._wallpaperEl.style.backgroundImage = 'none';
 
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Icon Rendering (stub — implementation in Mission 02)
+    // Layer Access
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Render desktop icons for all installed applications.
-     * Implementation added in Mission 02.
-     *
-     * @param {Object[]} apps - Array of app config objects.
-     * @returns {void}
-     */
-    renderIcons( apps ) {
-        // Mission 02.
-        console.info( `DesktopManager: renderIcons() deferred to Mission 02 (${ apps.length } apps queued).` );
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // Layer Access (used by other managers)
-    // ─────────────────────────────────────────────────────────────
-
-    /**
-     * Return the icon area element.
-     * Used by DesktopIconManager (Mission 02).
-     *
+     * Return the taskbar element for TaskbarManager.
      * @returns {HTMLElement|null}
      */
-    getIconArea() {
-        return this._iconArea;
+    getTaskbar() {
+        return this._taskbar;
     }
 
     /**
-     * Return the window layer element.
-     * Used by WindowManager (Mission 03).
-     *
+     * Return the window layer for WindowManager (Mission 03).
      * @returns {HTMLElement|null}
      */
     getWindowLayer() {
@@ -183,13 +157,20 @@ class DesktopManagerClass {
     }
 
     /**
-     * Return the taskbar element.
-     * Used by TaskbarManager (Mission 02).
-     *
+     * Return the icon area for DesktopIconManager.
      * @returns {HTMLElement|null}
      */
-    getTaskbar() {
-        return this._taskbar;
+    getIconArea() {
+        return this._iconArea;
+    }
+
+    /**
+     * Return the desktop root element.
+     * Used by ContextMenuManager and WindowManager.
+     * @returns {HTMLElement|null}
+     */
+    getDesktopElement() {
+        return this._desktop;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -197,41 +178,43 @@ class DesktopManagerClass {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Build the full desktop DOM structure and append to root.
+     * Build the full desktop DOM structure.
      *
      * @returns {void}
      */
     _build() {
 
-        // Inject the desktop stylesheet.
         this._injectStylesheet( './css/desktop/desktop.css' );
+        this._injectStylesheet( './css/taskbar/taskbar.css' );
+        this._injectStylesheet( './css/icons/icons.css' );
+        this._injectStylesheet( './css/context-menu/context-menu.css' );
 
-        // ── Desktop root ─────────────────────────────────────────
+        // Desktop root.
         this._desktop = document.createElement( 'div' );
         this._desktop.className = 'cid-desktop cid-desktop--entering';
         this._desktop.setAttribute( 'aria-label', 'CID OS Desktop' );
         this._desktop.setAttribute( 'role', 'main' );
 
-        // ── Wallpaper layer ──────────────────────────────────────
+        // Wallpaper layer.
         this._wallpaperEl = document.createElement( 'div' );
         this._wallpaperEl.className = 'cid-desktop__wallpaper';
 
-        // ── Icon area ────────────────────────────────────────────
+        // Icon area.
         this._iconArea = document.createElement( 'div' );
         this._iconArea.className = 'cid-desktop__icon-area';
         this._iconArea.setAttribute( 'aria-label', 'Desktop icons' );
 
-        // ── Window layer ─────────────────────────────────────────
+        // Window layer (populated in Mission 03).
         this._windowLayer = document.createElement( 'div' );
         this._windowLayer.className = 'cid-desktop__window-layer';
 
-        // ── Taskbar placeholder ──────────────────────────────────
+        // Taskbar.
         this._taskbar = document.createElement( 'div' );
         this._taskbar.className = 'cid-desktop__taskbar';
         this._taskbar.setAttribute( 'aria-label', 'Taskbar' );
         this._taskbar.setAttribute( 'role', 'navigation' );
 
-        // ── Assemble ─────────────────────────────────────────────
+        // Assemble.
         this._desktop.appendChild( this._wallpaperEl );
         this._desktop.appendChild( this._iconArea );
         this._desktop.appendChild( this._windowLayer );
@@ -242,15 +225,14 @@ class DesktopManagerClass {
     }
 
     /**
-     * Inject a stylesheet link into the document head if not already present.
+     * Inject a stylesheet into document head (idempotent).
      *
-     * @param {string} href - Path to the stylesheet.
+     * @param {string} href
      * @returns {void}
      */
     _injectStylesheet( href ) {
 
-        const existing = document.querySelector( `link[href="${ href }"]` );
-        if ( existing ) return;
+        if ( document.querySelector( `link[href="${ href }"]` ) ) return;
 
         const link  = document.createElement( 'link' );
         link.rel    = 'stylesheet';

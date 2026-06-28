@@ -23,9 +23,9 @@
  *   EventBus       — to broadcast application state changes
  */
 
-import AppLoader        from '../core/AppLoader.js';
-import WindowManager    from './WindowManager.js';
-import EventBus         from '../core/EventBus.js';
+import AppLoader     from '../core/AppLoader.js';
+import WindowManager from './WindowManager.js';
+import EventBus      from '../core/EventBus.js';
 
 class ApplicationManagerClass {
 
@@ -36,6 +36,13 @@ class ApplicationManagerClass {
          * @type {Map<string, BaseApp>}
          */
         this._apps = new Map();
+
+        /**
+         * Registry configs loaded from apps.json, keyed by app id.
+         * Used by UI components that need metadata without instantiating apps.
+         * @type {Map<string, Object>}
+         */
+        this._registry = new Map();
 
         /**
          * Set of app ids that are currently running (window is open).
@@ -51,21 +58,27 @@ class ApplicationManagerClass {
 
     /**
      * Discover all installed applications and load their metadata.
-     * Does not launch any applications — only prepares them.
+     * Stores registry configs for UI use regardless of whether the
+     * JS module loads successfully.
      *
      * @returns {Promise<void>}
      */
     async initialize() {
 
-        const appIds = await AppLoader.loadRegistry();
-        console.info( `ApplicationManager: Discovered ${ appIds.length } application(s).` );
+        const registryConfigs = await AppLoader.loadRegistry();
+        console.info( `ApplicationManager: Discovered ${ registryConfigs.length } application(s).` );
 
-        for ( const appId of appIds ) {
+        for ( const registryConfig of registryConfigs ) {
 
-            const app = await AppLoader.load( appId );
+            const appId = registryConfig.id;
+
+            // Always store registry config — UI needs it even if the module fails.
+            this._registry.set( appId, registryConfig );
+
+            const app = await AppLoader.load( registryConfig );
 
             if ( !app ) {
-                console.warn( `ApplicationManager: Skipping "${ appId }" — failed to load.` );
+                console.warn( `ApplicationManager: Module for "${ appId }" unavailable — metadata available only.` );
                 continue;
             }
 
@@ -74,7 +87,7 @@ class ApplicationManagerClass {
 
         }
 
-        EventBus.emit( 'applications:ready', { count: this._apps.size } );
+        EventBus.emit( 'applications:ready', { count: this._registry.size } );
 
     }
 
@@ -94,7 +107,9 @@ class ApplicationManagerClass {
         const app = this._apps.get( appId );
 
         if ( !app ) {
-            console.error( `ApplicationManager: Cannot launch unknown application "${ appId }".` );
+            // Mission 02: log only — window system not implemented yet.
+            console.info( `Opening: ${ appId }` );
+            EventBus.emit( 'application:requested', { appId } );
             return;
         }
 
@@ -123,7 +138,7 @@ class ApplicationManagerClass {
     /**
      * Minimize a running application.
      *
-     * @param {string} appId - The application identifier.
+     * @param {string} appId
      * @returns {void}
      */
     minimize( appId ) {
@@ -141,7 +156,7 @@ class ApplicationManagerClass {
     /**
      * Restore a minimized application.
      *
-     * @param {string} appId - The application identifier.
+     * @param {string} appId
      * @returns {void}
      */
     restore( appId ) {
@@ -160,7 +175,7 @@ class ApplicationManagerClass {
     /**
      * Close a running application.
      *
-     * @param {string} appId - The application identifier.
+     * @param {string} appId
      * @returns {void}
      */
     close( appId ) {
@@ -180,9 +195,8 @@ class ApplicationManagerClass {
 
     /**
      * Fully unload an application from memory.
-     * Rarely needed — only on workstation shutdown or plugin updates.
      *
-     * @param {string} appId - The application identifier.
+     * @param {string} appId
      * @returns {void}
      */
     destroy( appId ) {
@@ -207,18 +221,19 @@ class ApplicationManagerClass {
 
     /**
      * Return metadata for all installed applications.
-     * Used by DesktopManager to render desktop icons and the start menu.
+     * Uses registry configs — available even if module failed to load.
+     * Used by TaskbarManager and DesktopIconManager to render UI.
      *
      * @returns {Object[]} - Array of app config objects.
      */
     getInstalledApps() {
-        return Array.from( this._apps.values() ).map( app => app.config );
+        return Array.from( this._registry.values() );
     }
 
     /**
      * Check whether an application is currently running.
      *
-     * @param {string} appId - The application identifier.
+     * @param {string} appId
      * @returns {boolean}
      */
     isRunning( appId ) {

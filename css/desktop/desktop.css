@@ -5,19 +5,17 @@
  * Scoped to: .cid-desktop
  * Loaded by: DesktopManager.js
  *
- * This file owns every style for the desktop surface.
- * Do not add taskbar, icon, or window styles here.
- * Those each own their own stylesheets.
+ * Owns the desktop surface, wallpaper, layer structure, and taskbar slot.
+ * Taskbar content styles live in css/taskbar/taskbar.css.
+ * Icon styles live in css/icons/icons.css.
  */
 
 /* ── Desktop Root ─────────────────────────────────────────────── */
 .cid-desktop {
-    position:   absolute;
-    inset:      0;
-    overflow:   hidden;
-    background: var(--color-bg-primary);
-
-    /* Desktop is never scrollable */
+    position:    absolute;
+    inset:       0;
+    overflow:    hidden;
+    background:  var(--color-bg-primary);
     user-select: none;
 }
 
@@ -25,26 +23,23 @@
 .cid-desktop__wallpaper {
     position:            absolute;
     inset:               0;
-    background-image:    none;
     background-size:     cover;
     background-position: center;
     background-repeat:   no-repeat;
-
-    /* Pixel rendering for pixel-art wallpapers */
-    image-rendering: pixelated;
-    z-index:         0;
+    image-rendering:     pixelated;
+    z-index:             0;
 }
 
-/* ── Wallpaper overlay — subtle darkening for readability ─────── */
+/* Subtle darkening overlay for icon readability */
 .cid-desktop__wallpaper::after {
     content:    '';
     position:   absolute;
     inset:      0;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba( 0, 0, 0, 0.35 );
+    pointer-events: none;
 }
 
 /* ── Icon Area ────────────────────────────────────────────────── */
-/* Reserve space for future icons — taskbar height at the bottom */
 .cid-desktop__icon-area {
     position: absolute;
     top:      0;
@@ -52,41 +47,35 @@
     right:    0;
     bottom:   var(--taskbar-height);
     z-index:  10;
-
-    /* Icon grid will be positioned inside here */
-    padding:  var(--space-4);
 }
 
 /* ── Window Layer ─────────────────────────────────────────────── */
-/* Application windows are mounted here */
+/* Application windows are mounted here in Mission 03 */
 .cid-desktop__window-layer {
-    position: absolute;
-    inset:    0;
-    bottom:   var(--taskbar-height);
-    z-index:  100;
-    pointer-events: none; /* Children override this */
+    position:       absolute;
+    inset:          0;
+    bottom:         var(--taskbar-height);
+    z-index:        100;
+    pointer-events: none;
 }
 
-/* ── Taskbar Placeholder ──────────────────────────────────────── */
-/* Structural reservation — TaskbarManager fills content in Mission 02 */
+/* ── Taskbar ──────────────────────────────────────────────────── */
 .cid-desktop__taskbar {
-    position:   absolute;
-    bottom:     0;
-    left:       0;
-    right:      0;
-    height:     var(--taskbar-height);
-    background: var(--color-bg-taskbar);
-    border-top: 1px solid var(--color-border-window);
-    z-index:    500;
-
-    /* Flex layout ready for Mission 02 */
+    position:    absolute;
+    bottom:      0;
+    left:        0;
+    right:       0;
+    height:      var(--taskbar-height);
+    background:  var(--color-bg-taskbar);
+    border-top:  1px solid var(--color-border-window);
+    z-index:     500;
     display:     flex;
     align-items: center;
 }
 
-/* ── Desktop entrance animation ───────────────────────────────── */
+/* ── Visibility Transitions ───────────────────────────────────── */
 .cid-desktop--entering {
-    opacity:    0;
+    opacity: 0;
 }
 
 .cid-desktop--visible {

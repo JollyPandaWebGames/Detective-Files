@@ -1,0 +1,58 @@
+/*
+ * CID OS
+ * Context Menu Stylesheet
+ *
+ * Scoped to: .context-menu
+ * Loaded by: ContextMenuManager.js
+ *
+ * The context menu is appended to document.body so it is never
+ * clipped by overflow: hidden on parent containers.
+ */
+
+/* ── Menu Root ────────────────────────────────────────────────── */
+.context-menu {
+    position:   fixed;
+    z-index:    900;
+    min-width:  160px;
+    background: var(--color-bg-secondary);
+    border:     var(--color-border-pixel);
+    padding:    var(--space-1) 0;
+}
+
+.context-menu[hidden] {
+    display: none;
+}
+
+/* ── Menu Items ───────────────────────────────────────────────── */
+.context-menu__item {
+    display:     block;
+    width:       100%;
+    padding:     var(--space-2) var(--space-4);
+    background:  none;
+    border:      none;
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-sm);
+    text-align:  left;
+    cursor:      pointer;
+    transition:  background var(--duration-instant) var(--ease-default);
+    outline:     none;
+}
+
+.context-menu__item:hover {
+    background: var(--color-titlebar);
+    color:      var(--color-text-primary);
+}
+
+.context-menu__item:focus-visible {
+    background: var(--color-titlebar);
+    outline:    2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+/* ── Separator (future use) ───────────────────────────────────── */
+.context-menu__separator {
+    height:     1px;
+    background: var(--color-border-window);
+    margin:     var(--space-1) 0;
+}
