@@ -6,12 +6,15 @@
  *   Controls the complete startup sequence from boot screen to desktop.
  *
  * Boot Sequence:
- *   1. Apply theme (CSS variables before any UI renders)
- *   2. Run boot screen
- *   3. Build desktop DOM (DesktopManager)
- *   4. Initialize taskbar with installed app list (TaskbarManager)
- *   5. Render desktop icons (DesktopIconManager via DesktopManager)
- *   6. Show desktop
+ *   1.  Apply theme  — CSS variables before any rendering
+ *   2.  Boot screen  — visual fake OS startup
+ *   3.  Desktop DOM  — DesktopManager builds layers
+ *   4.  App registry — ApplicationManager loads app metadata
+ *   5.  Taskbar      — TaskbarManager populates start menu + clock
+ *   6.  Desktop icons — DesktopIconManager renders grid
+ *   7.  Window system — WindowManager initializes (Mission 03)
+ *   8.  Test windows — TestWindows launcher (Mission 03, removed in 04)
+ *   9.  Show desktop — fade-in transition
  *
  * Rules:
  *   Workstation never contains gameplay logic.
@@ -24,15 +27,19 @@
  *   DesktopManager     — desktop DOM and layers
  *   TaskbarManager     — taskbar, clock, start menu
  *   ApplicationManager — application plugin registry
+ *   WindowManager      — window lifecycle (Mission 03)
+ *   TestWindows        — test launcher (Mission 03 only)
  *   EventBus           — system-wide event bus
  */
 
-import EventBus            from './EventBus.js';
-import BootScreen          from './BootScreen.js';
-import ThemeManager        from '../managers/ThemeManager.js';
-import DesktopManager      from '../managers/DesktopManager.js';
-import TaskbarManager      from '../managers/TaskbarManager.js';
-import ApplicationManager  from '../managers/ApplicationManager.js';
+import EventBus           from './EventBus.js';
+import BootScreen         from './BootScreen.js';
+import ThemeManager       from '../managers/ThemeManager.js';
+import DesktopManager     from '../managers/DesktopManager.js';
+import TaskbarManager     from '../managers/TaskbarManager.js';
+import ApplicationManager from '../managers/ApplicationManager.js';
+import WindowManager      from '../managers/WindowManager.js';
+import TestWindows        from './TestWindows.js';
 
 class Workstation {
 
@@ -63,7 +70,7 @@ class Workstation {
         }
 
         // ── 1. Theme ─────────────────────────────────────────────
-        // CSS variables must exist before boot screen renders.
+        // CSS variables must exist before any UI renders.
         await ThemeManager.initialize();
 
         // ── 2. Boot Screen ────────────────────────────────────────
@@ -75,7 +82,7 @@ class Workstation {
         DesktopManager.initialize( this._root );
 
         // ── 4. Application Registry ───────────────────────────────
-        // Must load before taskbar and icons so both get the full app list.
+        // Load before taskbar and icons — both need the full app list.
         await ApplicationManager.initialize();
         const installedApps = ApplicationManager.getInstalledApps();
 
@@ -85,7 +92,15 @@ class Workstation {
         // ── 6. Desktop Icons ──────────────────────────────────────
         DesktopManager.renderIcons( installedApps );
 
-        // ── 7. Show Desktop ───────────────────────────────────────
+        // ── 7. Window System ──────────────────────────────────────
+        // Must initialize after DesktopManager so the window layer exists.
+        WindowManager.initialize();
+
+        // ── 8. Test Windows (Mission 03 only) ─────────────────────
+        // Temporary launcher — replaced by real app launch in Mission 04.
+        TestWindows.initialize();
+
+        // ── 9. Show Desktop ───────────────────────────────────────
         DesktopManager.show();
 
         // ── Boot Complete ─────────────────────────────────────────

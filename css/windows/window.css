@@ -1,0 +1,216 @@
+/*
+ * CID OS
+ * Window System Stylesheet
+ *
+ * Scoped to: .cid-window
+ * Loaded by: WindowManager.js
+ *
+ * Owns all visual styles for:
+ *   - Window chrome (border, shadow)
+ *   - Title bar (active / inactive states)
+ *   - Window control buttons (minimize, close)
+ *   - Content area
+ *   - Status bar placeholder
+ *   - Minimize animation
+ */
+
+/* ── Window Root ──────────────────────────────────────────────── */
+.cid-window {
+    position:   absolute;
+    display:    flex;
+    flex-direction: column;
+    background: var(--color-bg-window);
+    border:     2px solid var(--color-border-window);
+    outline:    none;
+    min-width:  200px;
+    min-height: 120px;
+
+    /* Windows are brought to front by WindowManager via z-index */
+}
+
+/* Active window gets a brighter border */
+.cid-window--active {
+    border-color: var(--color-titlebar-active);
+}
+
+/* Hidden (minimized) window */
+.cid-window--minimized {
+    display: none;
+}
+
+/* ── Title Bar ────────────────────────────────────────────────── */
+.cid-window__titlebar {
+    display:         flex;
+    align-items:     center;
+    height:          var(--titlebar-height);
+    background:      var(--color-titlebar);
+    padding:         0 var(--space-2);
+    gap:             var(--space-2);
+    flex-shrink:     0;
+    cursor:          move;
+    user-select:     none;
+
+    /* Pixel border below title bar */
+    border-bottom: 1px solid var(--color-border-window);
+}
+
+/* Active title bar */
+.cid-window--active .cid-window__titlebar {
+    background: var(--color-titlebar-active);
+}
+
+/* ── Title Bar Icon ───────────────────────────────────────────── */
+.cid-window__titlebar-icon {
+    width:            16px;
+    height:           16px;
+    background:       var(--color-border-window);
+    flex-shrink:      0;
+    image-rendering:  pixelated;
+}
+
+/* ── Title Bar Text ───────────────────────────────────────────── */
+.cid-window__title {
+    flex:         1;
+    font-family:  var(--font-ui), monospace;
+    font-size:    var(--font-size-sm);
+    color:        var(--color-text-secondary);
+    white-space:  nowrap;
+    overflow:     hidden;
+    text-overflow: ellipsis;
+    line-height:  var(--line-height-tight);
+}
+
+.cid-window--active .cid-window__title {
+    color: var(--color-text-primary);
+}
+
+/* ── Window Control Buttons ───────────────────────────────────── */
+.cid-window__controls {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-1);
+    flex-shrink: 0;
+}
+
+.cid-window__btn {
+    width:       var(--window-button-size);
+    height:      var(--window-button-size);
+    display:     flex;
+    align-items: center;
+    justify-content: center;
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-secondary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    cursor:      pointer;
+    outline:     none;
+    padding:     0;
+    line-height: 1;
+    transition:  background var(--duration-instant) var(--ease-default),
+                 color      var(--duration-instant) var(--ease-default);
+}
+
+/* Minimize button */
+.cid-window__btn--minimize:hover {
+    background: var(--color-warning);
+    color:      var(--color-bg-primary);
+    border-color: var(--color-warning);
+}
+
+.cid-window__btn--minimize:active {
+    background: var(--color-warning);
+    opacity:    0.7;
+}
+
+/* Close button */
+.cid-window__btn--close:hover {
+    background:   var(--color-danger);
+    color:        var(--color-bg-primary);
+    border-color: var(--color-danger);
+}
+
+.cid-window__btn--close:active {
+    background: var(--color-danger);
+    opacity:    0.7;
+}
+
+/* Focus state for keyboard navigation */
+.cid-window__btn:focus-visible {
+    outline: 2px solid var(--color-highlight);
+    outline-offset: 1px;
+}
+
+/* ── Content Area ─────────────────────────────────────────────── */
+.cid-window__content {
+    flex:       1;
+    overflow:   auto;
+    padding:    var(--window-padding);
+    color:      var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:  var(--font-size-md);
+    position:   relative;
+}
+
+/* Custom pixel scrollbar inside windows */
+.cid-window__content::-webkit-scrollbar {
+    width:  6px;
+    height: 6px;
+}
+
+.cid-window__content::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+}
+
+.cid-window__content::-webkit-scrollbar-thumb {
+    background: var(--color-border-window);
+}
+
+/* ── Status Bar ───────────────────────────────────────────────── */
+.cid-window__statusbar {
+    height:         20px;
+    background:     var(--color-bg-secondary);
+    border-top:     1px solid var(--color-border-window);
+    padding:        0 var(--space-3);
+    display:        flex;
+    align-items:    center;
+    flex-shrink:    0;
+    font-family:    var(--font-ui), monospace;
+    font-size:      var(--font-size-xs);
+    color:          var(--color-text-secondary);
+}
+
+/* ── Placeholder Content ──────────────────────────────────────── */
+.cid-window__placeholder {
+    display:        flex;
+    flex-direction: column;
+    align-items:    center;
+    justify-content: center;
+    height:         100%;
+    gap:            var(--space-3);
+    color:          var(--color-text-secondary);
+}
+
+.cid-window__placeholder-title {
+    font-family:  var(--font-title), monospace;
+    font-size:    var(--font-size-xs);
+    color:        var(--color-border-window);
+    letter-spacing: 2px;
+}
+
+.cid-window__placeholder-sub {
+    font-size: var(--font-size-xs);
+    color:     var(--color-disabled);
+}
+
+/* ── Dragging State ───────────────────────────────────────────── */
+.cid-window--dragging {
+    opacity:    0.92;
+    cursor:     move;
+}
+
+/* Prevent text selection anywhere while dragging */
+.cid-os-dragging * {
+    user-select: none !important;
+    cursor:      move !important;
+}

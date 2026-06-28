@@ -136,17 +136,15 @@ class DesktopIconManagerClass {
         icon.setAttribute( 'role', 'button' );
         icon.setAttribute( 'aria-label', `Open ${ app.title }` );
 
-        // Pixel icon image area.
-        const img = document.createElement( 'div' );
-        img.className = 'desktop-icon__image';
-        img.setAttribute( 'aria-hidden', 'true' );
+        // Icon image area — PNG with automatic emoji fallback.
+        const imageArea = this._buildIconImage( app );
 
         // Application name label.
         const label = document.createElement( 'div' );
         label.className   = 'desktop-icon__label';
         label.textContent = app.title;
 
-        icon.appendChild( img );
+        icon.appendChild( imageArea );
         icon.appendChild( label );
 
         // Click: select + double-click detection.
@@ -164,6 +162,78 @@ class DesktopIconManagerClass {
         } );
 
         return icon;
+
+    }
+
+    /**
+     * Build the icon image area for an application.
+     *
+     * Rendering priority:
+     *   1. PNG image from the app's "icon" field path.
+     *   2. Emoji from the app's "emoji" field if the PNG fails or is absent.
+     *   3. Default folder emoji (📁) if neither field exists.
+     *
+     * The fallback is wired via the <img> onerror event — no external
+     * configuration or manual intervention is ever needed.
+     *
+     * @param {Object} app - App config object.
+     * @returns {HTMLElement} - The wrapper div containing either an <img> or <span>.
+     */
+    _buildIconImage( app ) {
+
+        const DEFAULT_EMOJI = '📁';
+
+        const wrapper = document.createElement( 'div' );
+        wrapper.className = 'desktop-icon__image';
+        wrapper.setAttribute( 'aria-hidden', 'true' );
+
+        // Resolve the emoji fallback — app's emoji or the hardcoded default.
+        const fallbackEmoji = app.emoji ?? DEFAULT_EMOJI;
+
+        if ( app.icon ) {
+
+            // Attempt to load the PNG icon.
+            const img = document.createElement( 'img' );
+            img.className = 'desktop-icon__image-png';
+            img.alt       = '';                  // Decorative — label carries the name.
+            img.src       = `apps/${ app.id }/assets/${ app.icon }`;
+
+            img.addEventListener( 'error', () => {
+
+                // PNG missing or failed — replace with emoji fallback.
+                img.remove();
+                wrapper.appendChild( this._buildEmojiSpan( fallbackEmoji ) );
+                wrapper.classList.add( 'desktop-icon__image--emoji' );
+
+            } );
+
+            wrapper.appendChild( img );
+
+        }
+        else {
+
+            // No icon field at all — go straight to emoji.
+            wrapper.appendChild( this._buildEmojiSpan( fallbackEmoji ) );
+            wrapper.classList.add( 'desktop-icon__image--emoji' );
+
+        }
+
+        return wrapper;
+
+    }
+
+    /**
+     * Build the emoji fallback span element.
+     *
+     * @param {string} emoji - The emoji character(s) to display.
+     * @returns {HTMLElement}
+     */
+    _buildEmojiSpan( emoji ) {
+
+        const span = document.createElement( 'span' );
+        span.className   = 'desktop-icon__image-emoji';
+        span.textContent = emoji;
+        return span;
 
     }
 
