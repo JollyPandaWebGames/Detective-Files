@@ -3,31 +3,36 @@
  *
  * Purpose:
  *   A reusable title bar component for CID OS windows.
- *   Encapsulates icon, title text, and control buttons as a
- *   standalone, independently testable building block.
+ *   Shows the application icon (emoji or PNG), title text, and
+ *   window control buttons (minimize, close).
  *
  * Responsibilities:
- *   - Render the icon placeholder, title text, and window controls
- *   - Attach drag events (title-bar-only drag initiation)
- *   - Expose minimize and close button callbacks
- *   - Update title text dynamically
+ *   - Render icon (emoji span or <img> with onerror fallback)
+ *   - Render title text
+ *   - Render minimize and close buttons with hover/pressed states
+ *   - Initiate drag on mousedown (desktop/tablet only — caller decides)
+ *   - Update title and icon dynamically
  *
  * Rules:
  *   TitleBar never knows which application it belongs to.
  *   TitleBar never communicates with WindowManager directly.
- *   All actions are communicated upward through callbacks.
+ *   Whether dragging is enabled is decided by the caller (Window).
  *
  * Usage:
- *   const bar = new TitleBar({ title, icon }, { onDragStart, onMinimize, onClose });
+ *   const bar = new TitleBar({ title, emoji, icon }, { onDragStart, onMinimize, onClose });
  *   windowRoot.appendChild(bar.element);
  */
+
+const DEFAULT_ICON_EMOJI = '🖥️';
 
 class TitleBar {
 
     /**
-     * @param {Object}   config               - Display configuration.
+     * @param {Object}   config
      * @param {string}   config.title         - Title bar text.
-     * @param {string}   [config.icon]        - Icon filename (placeholder until real icons exist).
+     * @param {string}   [config.emoji]       - Emoji shown as the icon.
+     * @param {string}   [config.icon]        - PNG path (future use).
+     * @param {boolean}  [config.draggable]   - Whether to fire onDragStart. Default true.
      *
      * @param {Object}   callbacks
      * @param {Function} callbacks.onDragStart - Called with (MouseEvent) on title bar mousedown.
@@ -36,27 +41,17 @@ class TitleBar {
      */
     constructor( config, callbacks ) {
 
-        /**
-         * @type {Object}
-         */
-        this._config = config;
-
-        /**
-         * @type {Object}
-         */
+        this._config    = config;
         this._callbacks = callbacks;
 
-        /**
-         * The root title bar element.
-         * @type {HTMLElement}
-         */
+        /** Root title bar element. @type {HTMLElement} */
         this.element = null;
 
-        /**
-         * The title text element (for dynamic updates).
-         * @type {HTMLElement|null}
-         */
+        /** Title text element for dynamic updates. @type {HTMLElement|null} */
         this._titleEl = null;
+
+        /** Icon container for dynamic updates. @type {HTMLElement|null} */
+        this._iconEl = null;
 
         this._build();
 
@@ -67,7 +62,7 @@ class TitleBar {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Update the title text.
+     * Update the title bar text.
      *
      * @param {string} title
      * @returns {void}
@@ -80,12 +75,25 @@ class TitleBar {
 
     }
 
+    /**
+     * Enable or disable drag initiation.
+     * Called by Window when responsive mode changes.
+     *
+     * @param {boolean} enabled
+     * @returns {void}
+     */
+    setDraggable( enabled ) {
+
+        this._config = { ...this._config, draggable: enabled };
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // DOM Construction
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Build the title bar DOM.
+     * Build the title bar DOM structure.
      *
      * @returns {void}
      */
@@ -95,9 +103,7 @@ class TitleBar {
         this.element.className = 'cid-window__titlebar';
 
         // ── Icon ─────────────────────────────────────────────────
-        const icon = document.createElement( 'div' );
-        icon.className = 'cid-window__titlebar-icon';
-        icon.setAttribute( 'aria-hidden', 'true' );
+        this._iconEl = this._buildIcon();
 
         // ── Title ─────────────────────────────────────────────────
         this._titleEl = document.createElement( 'div' );
@@ -107,23 +113,21 @@ class TitleBar {
         // ── Controls ──────────────────────────────────────────────
         const controls = document.createElement( 'div' );
         controls.className = 'cid-window__controls';
-
-        const minimizeBtn = this._buildButton( '_', 'minimize', 'Minimize' );
-        const closeBtn    = this._buildButton( '×', 'close',    'Close'    );
-
-        controls.appendChild( minimizeBtn );
-        controls.appendChild( closeBtn );
+        controls.appendChild( this._buildButton( '–', 'minimize', 'Minimize' ) );
+        controls.appendChild( this._buildButton( '×', 'close',    'Close'    ) );
 
         // ── Assemble ──────────────────────────────────────────────
-        this.element.appendChild( icon );
+        this.element.appendChild( this._iconEl );
         this.element.appendChild( this._titleEl );
         this.element.appendChild( controls );
 
-        // ── Drag Initiation (title bar only) ──────────────────────
+        // ── Drag initiation ───────────────────────────────────────
         this.element.addEventListener( 'mousedown', ( e ) => {
 
-            // Ignore clicks on control buttons.
             if ( e.target.closest( '.cid-window__btn' ) ) return;
+
+            // Only initiate drag if the caller says it's draggable.
+            if ( this._config.draggable === false ) return;
 
             e.preventDefault();
             this._callbacks.onDragStart( e );
@@ -133,11 +137,36 @@ class TitleBar {
     }
 
     /**
-     * Build a single window control button.
+     * Build the icon element.
+     * Priority: emoji field → default emoji.
+     * PNG support stubbed for when real assets exist.
      *
-     * @param {string} symbol    - Character shown on the button.
+     * @returns {HTMLElement}
+     */
+    _buildIcon() {
+
+        const wrapper = document.createElement( 'div' );
+        wrapper.className = 'cid-window__titlebar-icon';
+        wrapper.setAttribute( 'aria-hidden', 'true' );
+
+        const emoji = this._config.emoji ?? DEFAULT_ICON_EMOJI;
+
+        const span = document.createElement( 'span' );
+        span.className   = 'cid-window__titlebar-icon-emoji';
+        span.textContent = emoji;
+
+        wrapper.appendChild( span );
+
+        return wrapper;
+
+    }
+
+    /**
+     * Build a single control button.
+     *
+     * @param {string} symbol    - Character displayed.
      * @param {string} type      - 'minimize' | 'close'
-     * @param {string} ariaLabel - Accessible label.
+     * @param {string} ariaLabel
      * @returns {HTMLButtonElement}
      */
     _buildButton( symbol, type, ariaLabel ) {
@@ -147,17 +176,14 @@ class TitleBar {
         btn.textContent = symbol;
         btn.setAttribute( 'aria-label', ariaLabel );
         btn.setAttribute( 'tabindex', '0' );
+        btn.setAttribute( 'type', 'button' );
 
         btn.addEventListener( 'click', ( e ) => {
 
             e.stopPropagation();
 
-            if ( type === 'close' ) {
-                this._callbacks.onClose();
-            }
-            else if ( type === 'minimize' ) {
-                this._callbacks.onMinimize();
-            }
+            if ( type === 'close' )    this._callbacks.onClose();
+            if ( type === 'minimize' ) this._callbacks.onMinimize();
 
         } );
 

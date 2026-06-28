@@ -24,9 +24,10 @@
  *   EventBus      — to emit window lifecycle events
  */
 
-import Window        from '../ui/Window.js';
-import DesktopManager from './DesktopManager.js';
-import EventBus      from '../core/EventBus.js';
+import Window          from '../ui/Window.js';
+import DesktopManager  from './DesktopManager.js';
+import EventBus        from '../core/EventBus.js';
+import ResponsiveMode  from '../utils/ResponsiveMode.js';
 
 // Starting spawn position and cascade step for new windows.
 const SPAWN_ORIGIN_X  = 120;
@@ -99,10 +100,11 @@ class WindowManagerClass {
 
     /**
      * Create and mount a new window.
-     * Returns the Window instance for the caller to access the content area.
+     * Automatically adapts size and position to the current responsive mode.
+     * Returns the Window instance so the caller can access the content area.
      *
-     * @param {string} windowId    - Unique identifier (usually the app id).
-     * @param {Object} config      - Window config: title, width, height, icon.
+     * @param {string} windowId - Unique identifier (usually the app id).
+     * @param {Object} config   - Window config: title, emoji, width, height, icon.
      * @returns {Window}
      */
     create( windowId, config ) {
@@ -122,12 +124,21 @@ class WindowManagerClass {
             }
         );
 
-        // Set size from config.
-        const width  = config.width  ?? 640;
-        const height = config.height ?? 480;
+        // Resolve size based on responsive mode.
+        // Phone: Window CSS handles fullscreen — setSize() is a no-op there.
+        // Tablet: scale down to 80% of requested dimensions.
+        // Desktop: use requested dimensions directly.
+        let width  = config.width  ?? 640;
+        let height = config.height ?? 480;
+
+        if ( ResponsiveMode.isTablet() ) {
+            width  = Math.round( width  * 0.8 );
+            height = Math.round( height * 0.8 );
+        }
+
         win.setSize( width, height );
 
-        // Calculate cascade spawn position.
+        // Position via cascade (no-op on phone).
         const { x, y } = this._nextSpawnPosition( width, height );
         win.setPosition( x, y );
 

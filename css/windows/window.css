@@ -3,88 +3,140 @@
  * Window System Stylesheet
  *
  * Scoped to: .cid-window
- * Loaded by: WindowManager.js
+ * Loaded by: WindowManager.initialize()
  *
- * Owns all visual styles for:
- *   - Window chrome (border, shadow)
- *   - Title bar (active / inactive states)
- *   - Window control buttons (minimize, close)
+ * Covers:
+ *   - Window chrome (border, background)
+ *   - Title bar — active / inactive states
+ *   - Title bar icon (emoji)
+ *   - Window control buttons — normal / hover / pressed
  *   - Content area
- *   - Status bar placeholder
- *   - Minimize animation
+ *   - Status bar
+ *   - Placeholder content
+ *   - Minimize / dragging states
+ *   - Responsive modes (desktop, tablet, phone)
  */
 
-/* ── Window Root ──────────────────────────────────────────────── */
-.cid-window {
-    position:   absolute;
-    display:    flex;
-    flex-direction: column;
-    background: var(--color-bg-window);
-    border:     2px solid var(--color-border-window);
-    outline:    none;
-    min-width:  200px;
-    min-height: 120px;
+/* ──────────────────────────────────────────────────────────────── */
+/* Window Root                                                       */
+/* ──────────────────────────────────────────────────────────────── */
 
-    /* Windows are brought to front by WindowManager via z-index */
+.cid-window {
+    position:       absolute;
+    display:        flex;
+    flex-direction: column;
+    background:     var(--color-bg-window);
+    border:         2px solid var(--color-border-window);
+    outline:        none;
+    min-width:      260px;
+    min-height:     160px;
+
+    /* Windows are stacked by WindowManager via inline z-index */
 }
 
-/* Active window gets a brighter border */
+/* Active window — brighter border */
 .cid-window--active {
     border-color: var(--color-titlebar-active);
 }
 
-/* Hidden (minimized) window */
+/* Minimized — hidden but not destroyed */
 .cid-window--minimized {
     display: none;
 }
 
-/* ── Title Bar ────────────────────────────────────────────────── */
-.cid-window__titlebar {
-    display:         flex;
-    align-items:     center;
-    height:          var(--titlebar-height);
-    background:      var(--color-titlebar);
-    padding:         0 var(--space-2);
-    gap:             var(--space-2);
-    flex-shrink:     0;
-    cursor:          move;
-    user-select:     none;
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive Modes                                                  */
+/* ──────────────────────────────────────────────────────────────── */
 
-    /* Pixel border below title bar */
+/* Phone — fullscreen overlay */
+.cid-window--mode-phone {
+    position:   fixed;
+    inset:      0;
+    width:      100% !important;
+    height:     100% !important;
+    border:     none;
+    z-index:    800 !important;
+}
+
+/* Tablet — floating but smaller (WindowManager scales dimensions) */
+.cid-window--mode-tablet {
+    /* Size is set by WindowManager — no override needed here */
+}
+
+/* Desktop — standard floating window */
+.cid-window--mode-desktop {
+    /* Default behaviour */
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Title Bar                                                         */
+/* ──────────────────────────────────────────────────────────────── */
+
+.cid-window__titlebar {
+    display:      flex;
+    align-items:  center;
+    height:       var(--titlebar-height);
+    background:   var(--color-titlebar);
+    padding:      0 var(--space-2);
+    gap:          var(--space-2);
+    flex-shrink:  0;
+    cursor:       move;
+    user-select:  none;
     border-bottom: 1px solid var(--color-border-window);
 }
 
-/* Active title bar */
+/* Active window title bar */
 .cid-window--active .cid-window__titlebar {
     background: var(--color-titlebar-active);
 }
 
-/* ── Title Bar Icon ───────────────────────────────────────────── */
-.cid-window__titlebar-icon {
-    width:            16px;
-    height:           16px;
-    background:       var(--color-border-window);
-    flex-shrink:      0;
-    image-rendering:  pixelated;
+/* Phone — title bar is not draggable */
+.cid-window--mode-phone .cid-window__titlebar {
+    cursor: default;
 }
 
-/* ── Title Bar Text ───────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────── */
+/* Title Bar Icon (emoji)                                            */
+/* ──────────────────────────────────────────────────────────────── */
+
+.cid-window__titlebar-icon {
+    width:       20px;
+    height:      20px;
+    display:     flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cid-window__titlebar-icon-emoji {
+    font-size:       14px;
+    line-height:     1;
+    image-rendering: auto;  /* let OS render emoji naturally */
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Title Text                                                        */
+/* ──────────────────────────────────────────────────────────────── */
+
 .cid-window__title {
-    flex:         1;
-    font-family:  var(--font-ui), monospace;
-    font-size:    var(--font-size-sm);
-    color:        var(--color-text-secondary);
-    white-space:  nowrap;
-    overflow:     hidden;
+    flex:          1;
+    font-family:   var(--font-ui), monospace;
+    font-size:     var(--font-size-sm);
+    color:         var(--color-text-secondary);
+    white-space:   nowrap;
+    overflow:      hidden;
     text-overflow: ellipsis;
-    line-height:  var(--line-height-tight);
+    line-height:   var(--line-height-tight);
 }
 
 .cid-window--active .cid-window__title {
     color: var(--color-text-primary);
 }
 
-/* ── Window Control Buttons ───────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────── */
+/* Window Control Buttons                                            */
+/* ──────────────────────────────────────────────────────────────── */
+
 .cid-window__controls {
     display:     flex;
     align-items: center;
@@ -102,19 +154,21 @@
     border:      1px solid var(--color-border-window);
     color:       var(--color-text-secondary);
     font-family: var(--font-ui), monospace;
-    font-size:   var(--font-size-xs);
+    font-size:   11px;
     cursor:      pointer;
     outline:     none;
     padding:     0;
     line-height: 1;
-    transition:  background var(--duration-instant) var(--ease-default),
-                 color      var(--duration-instant) var(--ease-default);
+    transition:
+        background var(--duration-instant) var(--ease-default),
+        color      var(--duration-instant) var(--ease-default),
+        border-color var(--duration-instant) var(--ease-default);
 }
 
-/* Minimize button */
+/* Minimize — yellow warning on hover */
 .cid-window__btn--minimize:hover {
-    background: var(--color-warning);
-    color:      var(--color-bg-primary);
+    background:   var(--color-warning);
+    color:        var(--color-bg-primary);
     border-color: var(--color-warning);
 }
 
@@ -123,7 +177,7 @@
     opacity:    0.7;
 }
 
-/* Close button */
+/* Close — red danger on hover */
 .cid-window__btn--close:hover {
     background:   var(--color-danger);
     color:        var(--color-bg-primary);
@@ -135,81 +189,94 @@
     opacity:    0.7;
 }
 
-/* Focus state for keyboard navigation */
+/* Keyboard focus */
 .cid-window__btn:focus-visible {
-    outline: 2px solid var(--color-highlight);
+    outline:        2px solid var(--color-highlight);
     outline-offset: 1px;
 }
 
-/* ── Content Area ─────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────── */
+/* Content Area                                                      */
+/* ──────────────────────────────────────────────────────────────── */
+
 .cid-window__content {
-    flex:       1;
-    overflow:   auto;
-    padding:    var(--window-padding);
-    color:      var(--color-text-primary);
+    flex:        1;
+    overflow:    auto;
+    padding:     var(--window-padding);
+    color:       var(--color-text-primary);
     font-family: var(--font-ui), monospace;
-    font-size:  var(--font-size-md);
-    position:   relative;
+    font-size:   var(--font-size-md);
+    position:    relative;
 }
 
-/* Custom pixel scrollbar inside windows */
-.cid-window__content::-webkit-scrollbar {
-    width:  6px;
-    height: 6px;
-}
+/* Pixel scrollbar inside windows */
+.cid-window__content::-webkit-scrollbar        { width: 6px; height: 6px; }
+.cid-window__content::-webkit-scrollbar-track  { background: var(--color-bg-secondary); }
+.cid-window__content::-webkit-scrollbar-thumb  { background: var(--color-border-window); }
 
-.cid-window__content::-webkit-scrollbar-track {
-    background: var(--color-bg-secondary);
-}
+/* ──────────────────────────────────────────────────────────────── */
+/* Status Bar                                                        */
+/* ──────────────────────────────────────────────────────────────── */
 
-.cid-window__content::-webkit-scrollbar-thumb {
-    background: var(--color-border-window);
-}
-
-/* ── Status Bar ───────────────────────────────────────────────── */
 .cid-window__statusbar {
-    height:         20px;
-    background:     var(--color-bg-secondary);
-    border-top:     1px solid var(--color-border-window);
-    padding:        0 var(--space-3);
-    display:        flex;
-    align-items:    center;
-    flex-shrink:    0;
-    font-family:    var(--font-ui), monospace;
-    font-size:      var(--font-size-xs);
-    color:          var(--color-text-secondary);
+    height:      20px;
+    background:  var(--color-bg-secondary);
+    border-top:  1px solid var(--color-border-window);
+    padding:     0 var(--space-3);
+    display:     flex;
+    align-items: center;
+    flex-shrink: 0;
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    color:       var(--color-text-secondary);
 }
 
-/* ── Placeholder Content ──────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────── */
+/* Placeholder Content                                               */
+/* ──────────────────────────────────────────────────────────────── */
+
 .cid-window__placeholder {
-    display:        flex;
-    flex-direction: column;
-    align-items:    center;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
     justify-content: center;
-    height:         100%;
-    gap:            var(--space-3);
-    color:          var(--color-text-secondary);
+    height:          100%;
+    gap:             var(--space-3);
+    color:           var(--color-text-secondary);
+    text-align:      center;
+    padding:         var(--space-4);
+}
+
+.cid-window__placeholder-emoji {
+    font-size:       40px;
+    line-height:     1;
+    image-rendering: auto;
+    opacity:         0.6;
 }
 
 .cid-window__placeholder-title {
-    font-family:  var(--font-title), monospace;
-    font-size:    var(--font-size-xs);
-    color:        var(--color-border-window);
-    letter-spacing: 2px;
+    font-family:    var(--font-ui), monospace;
+    font-size:      var(--font-size-md);
+    color:          var(--color-text-secondary);
+    letter-spacing: 1px;
 }
 
 .cid-window__placeholder-sub {
-    font-size: var(--font-size-xs);
-    color:     var(--color-disabled);
+    font-size:  var(--font-size-xs);
+    color:      var(--color-disabled);
+    max-width:  280px;
+    line-height: var(--line-height-normal);
 }
 
-/* ── Dragging State ───────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────────────── */
+/* Dragging State                                                    */
+/* ──────────────────────────────────────────────────────────────── */
+
 .cid-window--dragging {
-    opacity:    0.92;
-    cursor:     move;
+    opacity: 0.92;
 }
 
-/* Prevent text selection anywhere while dragging */
+/* Suppress text selection everywhere while a drag is in progress */
 .cid-os-dragging * {
     user-select: none !important;
     cursor:      move !important;

@@ -2,101 +2,74 @@
  * Window
  *
  * Purpose:
- *   A reusable class representing a single application window in CID OS.
- *   Owns its DOM structure, drag behaviour, and visual state.
+ *   A reusable window component for CID OS.
+ *   Adapts its layout and behaviour based on the current responsive mode:
+ *     - Desktop / Tablet: floating, draggable, cascade-positioned
+ *     - Phone: fullscreen, no drag, ignores position config
  *
  * Responsibilities:
- *   - Build window chrome using the TitleBar component
- *   - Handle viewport-clamped dragging (title bar only)
- *   - Expose the content area for application UI injection (Mission 04+)
- *   - Maintain minimized / active visual state
+ *   - Build window chrome (TitleBar, content area, status bar)
+ *   - Handle viewport-clamped dragging on desktop/tablet
+ *   - Apply phone fullscreen layout automatically
+ *   - React to responsive mode changes at runtime
+ *   - Expose contentEl for application UI injection (Mission 04+)
  *   - Report user actions to WindowManager via callbacks
  *
  * Rules:
  *   Window never knows which application it belongs to.
- *   Window never communicates with WindowManager directly.
- *   All callbacks are provided by WindowManager at construction time.
- *
- * Usage:
- *   const win = new Window(config, callbacks);
- *   layer.appendChild(win.element);
- *   win.setPosition(x, y);
- *   win.setSize(width, height);
+ *   Window never imports WindowManager — all actions go via callbacks.
+ *   Applications never know which responsive mode is active.
  *
  * @param {Object} config
- * @param {string} config.id      - Unique window id.
- * @param {string} config.title   - Title bar text.
- * @param {string} [config.icon]  - Icon filename (placeholder for now).
- * @param {number} config.width   - Initial width.
- * @param {number} config.height  - Initial height.
+ *   @param {string} config.id       - Unique window identifier.
+ *   @param {string} config.title    - Title bar text.
+ *   @param {string} [config.emoji]  - Icon emoji for the title bar.
+ *   @param {string} [config.icon]   - PNG icon path (future use).
+ *   @param {number} [config.width]  - Preferred width (ignored in phone mode).
+ *   @param {number} [config.height] - Preferred height (ignored in phone mode).
  *
- * @param {Object}   callbacks
- * @param {Function} callbacks.onFocus    - Called on mousedown anywhere on the window.
- * @param {Function} callbacks.onClose    - Called when the close button is clicked.
- * @param {Function} callbacks.onMinimize - Called when the minimize button is clicked.
+ * @param {Object} callbacks
+ *   @param {Function} callbacks.onFocus    - Called on mousedown.
+ *   @param {Function} callbacks.onClose    - Called when close is clicked.
+ *   @param {Function} callbacks.onMinimize - Called when minimize is clicked.
  */
 
-import TitleBar from './TitleBar.js';
+import TitleBar       from './TitleBar.js';
+import ResponsiveMode from '../utils/ResponsiveMode.js';
+import EventBus       from '../core/EventBus.js';
 
-// Minimum visible pixels that must remain inside the viewport during drag.
+// How many pixels must remain visible after viewport clamping.
 const MIN_VISIBLE = 80;
 
 class Window {
 
     constructor( config, callbacks ) {
 
-        /**
-         * Unique window identifier (matches application id).
-         * @type {string}
-         */
+        /** Unique window id. @type {string} */
         this.id = config.id;
 
-        /**
-         * Window configuration snapshot.
-         * @type {Object}
-         */
+        /** @type {Object} */
         this._config = config;
 
-        /**
-         * Callbacks provided by WindowManager.
-         * @type {Object}
-         */
+        /** @type {Object} */
         this._callbacks = callbacks;
 
-        /**
-         * Root window element.
-         * @type {HTMLElement|null}
-         */
+        /** Root window element. @type {HTMLElement|null} */
         this.element = null;
 
-        /**
-         * The content area — applications inject their UI here in Mission 04.
-         * @type {HTMLElement|null}
-         */
+        /** Content area — applications inject UI here. @type {HTMLElement|null} */
         this.contentEl = null;
 
-        /**
-         * The status bar element.
-         * @type {HTMLElement|null}
-         */
+        /** Status bar element. @type {HTMLElement|null} */
         this.statusbarEl = null;
 
-        /**
-         * The TitleBar component instance.
-         * @type {TitleBar|null}
-         */
+        /** TitleBar component instance. @type {TitleBar|null} */
         this._titleBar = null;
 
-        /**
-         * Whether the window is currently minimized.
-         * @type {boolean}
-         */
+        /** Whether this window is hidden (minimized). @type {boolean} */
         this.isMinimized = false;
 
-        /**
-         * Whether the window is active (top of stack).
-         * @type {boolean}
-         */
+        /** Whether this window is the active (focused) window. @type {boolean} */
         this.isActive = false;
 
         // ── Drag state ────────────────────────────────────────────
@@ -104,11 +77,15 @@ class Window {
         this._dragOffsetX = 0;
         this._dragOffsetY = 0;
 
-        // Bound drag handler references — stored for cleanup.
-        this._onMouseMove = this._handleDragMove.bind( this );
-        this._onMouseUp   = this._handleDragEnd.bind( this );
+        // Bound handler references — stored for cleanup.
+        this._onMouseMove    = this._handleDragMove.bind( this );
+        this._onMouseUp      = this._handleDragEnd.bind( this );
+        this._onModeChange   = this._handleModeChange.bind( this );
 
         this._build();
+
+        // Listen for responsive mode changes to adapt layout at runtime.
+        EventBus.on( 'responsive:changed', this._onModeChange );
 
     }
 
@@ -117,13 +94,16 @@ class Window {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Move the window to an absolute position.
+     * Move the window to an absolute desktop position.
+     * No-op in phone mode (window is fullscreen).
      *
-     * @param {number} x - Left offset in pixels.
-     * @param {number} y - Top offset in pixels.
+     * @param {number} x
+     * @param {number} y
      * @returns {void}
      */
     setPosition( x, y ) {
+
+        if ( ResponsiveMode.isPhone() ) return;
 
         this.element.style.left = `${ x }px`;
         this.element.style.top  = `${ y }px`;
@@ -132,6 +112,7 @@ class Window {
 
     /**
      * Resize the window.
+     * No-op in phone mode (CSS handles fullscreen sizing).
      *
      * @param {number} width
      * @param {number} height
@@ -139,17 +120,14 @@ class Window {
      */
     setSize( width, height ) {
 
+        if ( ResponsiveMode.isPhone() ) return;
+
         this.element.style.width  = `${ width }px`;
         this.element.style.height = `${ height }px`;
 
     }
 
-    /**
-     * Raise this window to the active (focused) state.
-     * Updates the title bar and border to the active visual.
-     *
-     * @returns {void}
-     */
+    /** Mark this window as active (focused). */
     activate() {
 
         this.isActive = true;
@@ -158,11 +136,7 @@ class Window {
 
     }
 
-    /**
-     * Lower this window to the inactive state.
-     *
-     * @returns {void}
-     */
+    /** Mark this window as inactive. */
     deactivate() {
 
         this.isActive = false;
@@ -171,11 +145,7 @@ class Window {
 
     }
 
-    /**
-     * Hide the window without destroying it (minimized state).
-     *
-     * @returns {void}
-     */
+    /** Hide the window (minimized state — DOM stays alive). */
     hide() {
 
         this.isMinimized = true;
@@ -183,11 +153,7 @@ class Window {
 
     }
 
-    /**
-     * Restore the window from minimized state.
-     *
-     * @returns {void}
-     */
+    /** Restore the window from minimized state. */
     show() {
 
         this.isMinimized = false;
@@ -197,9 +163,7 @@ class Window {
 
     /**
      * Set the CSS z-index for stacking order.
-     *
      * @param {number} z
-     * @returns {void}
      */
     setZIndex( z ) {
 
@@ -209,51 +173,42 @@ class Window {
 
     /**
      * Update the title bar text.
-     *
      * @param {string} title
-     * @returns {void}
      */
     setTitle( title ) {
 
-        if ( this._titleBar ) {
-            this._titleBar.setTitle( title );
-        }
-
+        if ( this._titleBar ) this._titleBar.setTitle( title );
         this.element.setAttribute( 'aria-label', title );
 
     }
 
     /**
      * Update the status bar text.
-     *
      * @param {string} text
-     * @returns {void}
      */
     setStatus( text ) {
 
-        if ( this.statusbarEl ) {
-            this.statusbarEl.textContent = text;
-        }
+        if ( this.statusbarEl ) this.statusbarEl.textContent = text;
 
     }
 
     /**
-     * Remove the window from the DOM and clean up all event listeners.
-     * Called by WindowManager.close().
-     *
-     * @returns {void}
+     * Remove the window from the DOM and clean up all references.
+     * Called exclusively by WindowManager.close().
      */
     destroy() {
 
-        // Remove drag listeners if a drag was in progress.
+        // Stop any active drag.
         document.removeEventListener( 'mousemove', this._onMouseMove );
         document.removeEventListener( 'mouseup',   this._onMouseUp   );
+
+        // Stop listening for mode changes.
+        EventBus.off( 'responsive:changed', this._onModeChange );
 
         if ( this.element && this.element.parentNode ) {
             this.element.parentNode.removeChild( this.element );
         }
 
-        // Null all references to help garbage collection.
         this.element     = null;
         this.contentEl   = null;
         this.statusbarEl = null;
@@ -266,7 +221,7 @@ class Window {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Build the full window DOM structure.
+     * Build the full window DOM and apply the current responsive mode.
      *
      * @returns {void}
      */
@@ -281,11 +236,13 @@ class Window {
         this.element.setAttribute( 'tabindex', '-1' );
         this.element.setAttribute( 'data-window-id', this.id );
 
-        // ── Title bar (via TitleBar component) ───────────────────
+        // ── Title bar ────────────────────────────────────────────
         this._titleBar = new TitleBar(
             {
-                title: this._config.title,
-                icon:  this._config.icon,
+                title:     this._config.title,
+                emoji:     this._config.emoji,
+                icon:      this._config.icon,
+                draggable: ResponsiveMode.isDraggable(),
             },
             {
                 onDragStart: ( e ) => this._handleDragStart( e ),
@@ -309,17 +266,19 @@ class Window {
         this.element.appendChild( this.contentEl );
         this.element.appendChild( this.statusbarEl );
 
-        // ── Focus on any click ────────────────────────────────────
-        // mousedown rather than click so focus happens before button events.
+        // ── Focus on any mousedown ────────────────────────────────
         this.element.addEventListener( 'mousedown', () => {
             this._callbacks.onFocus( this.id );
         } );
 
+        // ── Apply initial responsive mode ─────────────────────────
+        this._applyMode( ResponsiveMode.get() );
+
     }
 
     /**
-     * Build the placeholder content shown before an application injects its UI.
-     * Removed and replaced in Mission 04 when BaseApp.create() runs.
+     * Build the placeholder content.
+     * Replaced by real application UI in Mission 04.
      *
      * @returns {HTMLElement}
      */
@@ -328,18 +287,64 @@ class Window {
         const wrap = document.createElement( 'div' );
         wrap.className = 'cid-window__placeholder';
 
-        const title = document.createElement( 'div' );
-        title.className   = 'cid-window__placeholder-title';
-        title.textContent = this._config.title.toUpperCase();
+        const emojiEl = document.createElement( 'div' );
+        emojiEl.className   = 'cid-window__placeholder-emoji';
+        emojiEl.textContent = this._config.emoji ?? '🖥️';
 
-        const sub = document.createElement( 'div' );
-        sub.className   = 'cid-window__placeholder-sub';
-        sub.textContent = 'Application not loaded';
+        const titleEl = document.createElement( 'div' );
+        titleEl.className   = 'cid-window__placeholder-title';
+        titleEl.textContent = this._config.title;
 
-        wrap.appendChild( title );
-        wrap.appendChild( sub );
+        const subEl = document.createElement( 'div' );
+        subEl.className   = 'cid-window__placeholder-sub';
+        subEl.textContent = 'This application is under development.';
+
+        wrap.appendChild( emojiEl );
+        wrap.appendChild( titleEl );
+        wrap.appendChild( subEl );
 
         return wrap;
+
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Responsive Mode
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Apply a responsive mode to this window's CSS and behaviour.
+     *
+     * @param {string} mode - 'desktop' | 'tablet' | 'phone'
+     * @returns {void}
+     */
+    _applyMode( mode ) {
+
+        // Remove all existing mode classes first.
+        this.element.classList.remove(
+            'cid-window--mode-desktop',
+            'cid-window--mode-tablet',
+            'cid-window--mode-phone'
+        );
+
+        this.element.classList.add( `cid-window--mode-${ mode }` );
+
+        // Toggle drag availability in TitleBar.
+        const draggable = mode !== 'phone';
+        if ( this._titleBar ) {
+            this._titleBar.setDraggable( draggable );
+        }
+
+    }
+
+    /**
+     * Handle a responsive mode change emitted by ResponsiveMode.
+     *
+     * @param {{ mode: string }} payload
+     * @returns {void}
+     */
+    _handleModeChange( { mode } ) {
+
+        this._applyMode( mode );
 
     }
 
@@ -348,8 +353,7 @@ class Window {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Begin dragging the window.
-     * Only called from TitleBar's mousedown callback.
+     * Begin dragging. Only reachable when TitleBar's draggable flag is true.
      *
      * @param {MouseEvent} e
      * @returns {void}
@@ -369,8 +373,7 @@ class Window {
     }
 
     /**
-     * Move the window in response to mouse movement during a drag.
-     * Clamps position so at least MIN_VISIBLE pixels remain on-screen.
+     * Move the window while dragging, clamped to viewport.
      *
      * @param {MouseEvent} e
      * @returns {void}
@@ -383,20 +386,19 @@ class Window {
         let y = e.clientY - this._dragOffsetY;
 
         const winW = this.element.offsetWidth;
-        const winH = this.element.offsetHeight;
 
-        // Clamp horizontal: prevent pushing window too far left or right.
-        x = Math.max( MIN_VISIBLE - winW, Math.min( x, window.innerWidth - MIN_VISIBLE ) );
+        // Keep at least MIN_VISIBLE pixels on every edge.
+        x = Math.max( MIN_VISIBLE - winW, Math.min( x, window.innerWidth  - MIN_VISIBLE ) );
+        y = Math.max( 0,                  Math.min( y, window.innerHeight  - MIN_VISIBLE ) );
 
-        // Clamp vertical: prevent title bar from going above viewport or too far down.
-        y = Math.max( 0, Math.min( y, window.innerHeight - MIN_VISIBLE ) );
-
-        this.setPosition( x, y );
+        // Write directly — bypass setPosition() which no-ops in phone mode.
+        this.element.style.left = `${ x }px`;
+        this.element.style.top  = `${ y }px`;
 
     }
 
     /**
-     * End the drag operation and clean up listeners.
+     * End the drag operation.
      *
      * @returns {void}
      */
