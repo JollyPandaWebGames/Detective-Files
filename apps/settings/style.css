@@ -2,17 +2,387 @@
  * Settings
  * Application Stylesheet
  *
- * All classes must be scoped with the .settings- prefix.
- * Never use generic class names such as .container or .button.
+ * Scoped to: .settings
+ * All classes prefixed with .settings__
  * Never modify global styles from this file.
+ *
+ * Layout modes:
+ *   Desktop/Tablet — two-column: sidebar (left) + panel (right)
+ *   Phone          — single-column: category selector + panel stacked
  */
 
-/* ── Root Container ──────────────────────────────────────────── */
-.settings-window {
+/* ── Root ─────────────────────────────────────────────────────── */
+.settings {
+    display:    flex;
     width:      100%;
     height:     100%;
+    overflow:   hidden;
+    font-family: var(--font-ui), monospace;
+    font-size:  var(--font-size-sm);
+    color:      var(--color-text-primary);
+    background: var(--color-bg-window);
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────── */
+.settings__sidebar {
+    width:        180px;
+    flex-shrink:  0;
+    display:      flex;
+    flex-direction: column;
+    background:   var(--color-bg-secondary);
+    border-right: 1px solid var(--color-border-window);
+    overflow-y:   auto;
+    padding:      var(--space-2) 0;
+}
+
+/* ── Sidebar Nav Buttons ──────────────────────────────────────── */
+.settings__nav-btn {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    width:       100%;
+    padding:     var(--space-2) var(--space-4);
+    background:  none;
+    border:      none;
+    border-left: 3px solid transparent;
+    color:       var(--color-text-secondary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-sm);
+    text-align:  left;
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-fast) linear,
+                 color      var(--duration-fast) linear;
+}
+
+.settings__nav-btn:hover {
     background: var(--color-bg-window);
     color:      var(--color-text-primary);
+}
+
+.settings__nav-btn--active {
+    background:   var(--color-bg-window);
+    border-color: var(--color-highlight);
+    color:        var(--color-highlight);
+}
+
+.settings__nav-btn:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+.settings__nav-emoji {
+    font-size:       14px;
+    image-rendering: auto;
+    flex-shrink:     0;
+}
+
+.settings__nav-label {
+    flex: 1;
+}
+
+/* ── Right Panel ──────────────────────────────────────────────── */
+.settings__panel {
+    flex:       1;
+    overflow-y: auto;
+    padding:    var(--space-4) var(--space-6);
+    display:    flex;
+    flex-direction: column;
+    gap:        var(--space-4);
+}
+
+/* ── Panel Scrollbar ──────────────────────────────────────────── */
+.settings__panel::-webkit-scrollbar       { width: 6px; }
+.settings__panel::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.settings__panel::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+/* ── Panel Header ─────────────────────────────────────────────── */
+.settings__panel-header {
+    display:      flex;
+    align-items:  center;
+    gap:          var(--space-3);
+    padding-bottom: var(--space-3);
+    border-bottom:  1px solid var(--color-border-window);
+    margin-bottom:  var(--space-1);
+}
+
+.settings__panel-header-emoji {
+    font-size:       20px;
+    image-rendering: auto;
+}
+
+.settings__panel-header-title {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-sm);
+    color:          var(--color-text-primary);
+    letter-spacing: 1px;
+}
+
+/* ── Settings Group ───────────────────────────────────────────── */
+.settings__group {
+    display:       flex;
+    flex-direction: column;
+    gap:           var(--space-2);
+}
+
+.settings__group-label {
+    font-size:      var(--font-size-xs);
+    color:          var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-bottom: var(--space-1);
+    border-bottom:  1px solid var(--color-border-window);
+}
+
+/* ── Toggle Row ───────────────────────────────────────────────── */
+.settings__toggle-row {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-3);
+    cursor:      pointer;
+    padding:     var(--space-2) 0;
+}
+
+/* Hide the actual checkbox — we use a custom track */
+.settings__checkbox {
+    position: absolute;
+    opacity:  0;
+    width:    0;
+    height:   0;
+}
+
+/* Pixel-art toggle track */
+.settings__toggle-track {
+    width:        32px;
+    height:       14px;
+    background:   var(--color-bg-secondary);
+    border:       1px solid var(--color-border-window);
+    flex-shrink:  0;
+    position:     relative;
+    transition:   background var(--duration-fast) linear;
+}
+
+.settings__toggle-track::after {
+    content:    '';
+    position:   absolute;
+    top:        1px;
+    left:       1px;
+    width:      10px;
+    height:     10px;
+    background: var(--color-disabled);
+    transition: left var(--duration-fast) linear,
+                background var(--duration-fast) linear;
+}
+
+.settings__checkbox:checked + .settings__toggle-track {
+    background:   var(--color-titlebar-active);
+    border-color: var(--color-highlight);
+}
+
+.settings__checkbox:checked + .settings__toggle-track::after {
+    left:       19px;
+    background: var(--color-highlight);
+}
+
+.settings__checkbox:focus-visible + .settings__toggle-track {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: 2px;
+}
+
+.settings__toggle-label {
+    font-size: var(--font-size-sm);
+    color:     var(--color-text-primary);
+}
+
+/* ── Select Dropdown ──────────────────────────────────────────── */
+.settings__select-wrap {
+    position: relative;
+}
+
+.settings__select {
+    width:       100%;
+    padding:     var(--space-2) var(--space-3);
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
     font-family: var(--font-ui), monospace;
-    font-size:  var(--font-size-md);
+    font-size:   var(--font-size-sm);
+    cursor:      pointer;
+    outline:     none;
+    appearance:  none;
+    -webkit-appearance: none;
+}
+
+.settings__select:focus {
+    border-color: var(--color-highlight);
+}
+
+.settings__select option:disabled {
+    color: var(--color-disabled);
+}
+
+/* ── Radio Group ──────────────────────────────────────────────── */
+.settings__radio-group {
+    display:        flex;
+    flex-direction: column;
+    gap:            var(--space-1);
+}
+
+.settings__radio-row {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-3);
+    cursor:      pointer;
+    padding:     var(--space-1) 0;
+}
+
+.settings__radio {
+    accent-color: var(--color-highlight);
+    width:        14px;
+    height:       14px;
+    flex-shrink:  0;
+    cursor:       pointer;
+}
+
+.settings__radio-label {
+    font-size: var(--font-size-sm);
+    color:     var(--color-text-primary);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.settings__btn {
+    display:     inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding:     var(--space-2) var(--space-4);
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-sm);
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-fast) linear;
+}
+
+.settings__btn:hover {
+    background:   var(--color-titlebar);
+    border-color: var(--color-highlight);
+}
+
+.settings__btn:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: 2px;
+}
+
+.settings__btn--danger {
+    border-color: var(--color-danger);
+    color:        var(--color-danger);
+}
+
+.settings__btn--danger:hover {
+    background:   var(--color-danger);
+    color:        var(--color-bg-primary);
+    border-color: var(--color-danger);
+}
+
+/* ── About Card ───────────────────────────────────────────────── */
+.settings__about {
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    padding:     var(--space-6);
+    display:     flex;
+    flex-direction: column;
+    gap:         var(--space-3);
+}
+
+.settings__about-logo {
+    font-size:       48px;
+    text-align:      center;
+    image-rendering: auto;
+}
+
+.settings__about-name {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-sm);
+    color:          var(--color-highlight);
+    text-align:     center;
+    letter-spacing: 2px;
+}
+
+.settings__about-row {
+    display:         flex;
+    justify-content: space-between;
+    align-items:     center;
+    padding:         var(--space-1) 0;
+    border-bottom:   1px solid var(--color-border-window);
+    font-size:       var(--font-size-xs);
+}
+
+.settings__about-row:last-child {
+    border-bottom: none;
+}
+
+.settings__about-key {
+    color: var(--color-text-secondary);
+}
+
+.settings__about-val {
+    color: var(--color-text-primary);
+}
+
+/* ── Reset Confirmation ───────────────────────────────────────── */
+.settings__reset-confirm {
+    display:    flex;
+    align-items: center;
+    flex-wrap:  wrap;
+    gap:        var(--space-3);
+    padding:    var(--space-3);
+    background: rgba( 255, 93, 93, 0.08 );
+    border:     1px solid var(--color-danger);
+    margin-top: var(--space-2);
+}
+
+.settings__reset-confirm-text {
+    flex:      1;
+    font-size: var(--font-size-xs);
+    color:     var(--color-warning);
+}
+
+/* ── Responsive: Phone ────────────────────────────────────────── */
+@media ( max-width: 639px ) {
+
+    .settings {
+        flex-direction: column;
+    }
+
+    .settings__sidebar {
+        width:         100%;
+        flex-direction: row;
+        overflow-x:    auto;
+        overflow-y:    hidden;
+        padding:       var(--space-1) 0;
+        border-right:  none;
+        border-bottom: 1px solid var(--color-border-window);
+    }
+
+    .settings__nav-btn {
+        flex-direction: column;
+        gap:            var(--space-1);
+        padding:        var(--space-2) var(--space-3);
+        border-left:    none;
+        border-bottom:  3px solid transparent;
+        font-size:      var(--font-size-xs);
+        white-space:    nowrap;
+    }
+
+    .settings__nav-btn--active {
+        border-bottom-color: var(--color-highlight);
+        border-left-color:   transparent;
+    }
+
+    .settings__panel {
+        padding: var(--space-3) var(--space-4);
+    }
+
 }

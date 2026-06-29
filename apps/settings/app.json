@@ -1,12 +1,13 @@
 {
     "id": "settings",
     "title": "Settings",
-    "icon": "settings.png",
+    "icon": "icons/Settings.png",
+    "emoji": "⚙️",
     "version": "1.0.0",
     "singleton": true,
     "resizable": false,
-    "width": 640,
-    "height": 480,
+    "width": 700,
+    "height": 520,
     "minimumWidth": 600,
     "minimumHeight": 400
 }

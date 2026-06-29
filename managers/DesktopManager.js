@@ -70,6 +70,16 @@ class DesktopManagerClass {
         // Initialize context menu bound to the desktop element.
         ContextMenuManager.initialize( this._desktop );
 
+        // React to wallpaper changes from SettingsManager.
+        EventBus.on( 'wallpaper:changed', ( { path } ) => {
+            if ( path ) {
+                this.setWallpaper( path );
+            }
+            else {
+                this.clearWallpaper();
+            }
+        } );
+
         console.info( 'DesktopManager: Desktop initialized.' );
 
     }
@@ -111,16 +121,23 @@ class DesktopManagerClass {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Set the desktop wallpaper image.
+     * Set the desktop wallpaper.
+     * Accepts any valid CSS background value:
+     *   - CSS gradient string: 'linear-gradient(...)'
+     *   - Image URL string:    'url("assets/wallpapers/office.jpg")'
      *
-     * @param {string} imagePath - Path to the wallpaper image.
+     * @param {string} cssValue - Any valid CSS background value.
      * @returns {void}
      */
-    setWallpaper( imagePath ) {
+    setWallpaper( cssValue ) {
 
         if ( !this._wallpaperEl ) return;
-        this._wallpaperEl.style.backgroundImage = `url('${ imagePath }')`;
-        console.info( `DesktopManager: Wallpaper → "${ imagePath }"` );
+
+        // Detect whether this is a plain file path (no CSS function) and wrap it.
+        const isPlainPath = cssValue && !cssValue.includes( '(' );
+        const value       = isPlainPath ? `url('${ cssValue }')` : cssValue;
+
+        this._wallpaperEl.style.backgroundImage = value;
 
     }
 
