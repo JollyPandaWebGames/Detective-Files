@@ -50,13 +50,20 @@
 }
 
 /* ── Window Layer ─────────────────────────────────────────────── */
-/* Application windows are mounted here in Mission 03 */
+/* Application windows are mounted here in Mission 03.
+   The layer itself has pointer-events:none so clicks on empty
+   desktop space pass through to icons beneath.
+   Individual windows override this with pointer-events:auto. */
 .cid-desktop__window-layer {
     position:       absolute;
     inset:          0;
     bottom:         var(--taskbar-height);
     z-index:        100;
     pointer-events: none;
+}
+
+.cid-desktop__window-layer .cid-window {
+    pointer-events: auto;
 }
 
 /* ── Taskbar ──────────────────────────────────────────────────── */

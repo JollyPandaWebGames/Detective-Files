@@ -145,7 +145,6 @@ class WindowManagerClass {
         // Mount into the window layer.
         const layer = DesktopManager.getWindowLayer();
         if ( layer ) {
-            layer.style.pointerEvents = 'auto';
             layer.appendChild( win.element );
         }
         else {

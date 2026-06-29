@@ -2,7 +2,7 @@
     {
         "id": "case-management",
         "title": "Case Management",
-        "icon": "case.png",
+        "icon": "icons/Case Management.png",
         "emoji": "🗂️",
         "version": "1.0.0",
         "singleton": true,
@@ -15,7 +15,7 @@
     {
         "id": "police-mail",
         "title": "Police Mail",
-        "icon": "mail.png",
+        "icon": "icons/Police Mail.png",
         "emoji": "✉️",
         "version": "1.0.0",
         "singleton": true,
@@ -28,7 +28,7 @@
     {
         "id": "messenger",
         "title": "Messenger",
-        "icon": "chat.png",
+        "icon": "icons/Messenger.png",
         "emoji": "💬",
         "version": "1.0.0",
         "singleton": true,
@@ -41,7 +41,7 @@
     {
         "id": "evidence",
         "title": "Evidence Database",
-        "icon": "evidence.png",
+        "icon": "icons/Evidence Database.png",
         "emoji": "🔍",
         "version": "1.0.0",
         "singleton": true,
@@ -54,7 +54,7 @@
     {
         "id": "forensics",
         "title": "Forensics Lab",
-        "icon": "forensics.png",
+        "icon": "icons/Forensics Lab.png",
         "emoji": "🧪",
         "version": "1.0.0",
         "singleton": true,
@@ -67,7 +67,7 @@
     {
         "id": "cctv",
         "title": "CCTV Viewer",
-        "icon": "cctv.png",
+        "icon": "icons/CCTV Viewer.png",
         "emoji": "📹",
         "version": "1.0.0",
         "singleton": true,
@@ -80,7 +80,7 @@
     {
         "id": "city-map",
         "title": "City Map",
-        "icon": "map.png",
+        "icon": "icons/City Map.png",
         "emoji": "🗺️",
         "version": "1.0.0",
         "singleton": true,
@@ -93,7 +93,7 @@
     {
         "id": "board",
         "title": "Investigation Board",
-        "icon": "board.png",
+        "icon": "icons/Investigation Board.png",
         "emoji": "📌",
         "version": "1.0.0",
         "singleton": true,
@@ -106,7 +106,7 @@
     {
         "id": "criminal-database",
         "title": "Criminal Database",
-        "icon": "database.png",
+        "icon": "icons/Criminal Database.png",
         "emoji": "🗃️",
         "version": "1.0.0",
         "singleton": true,
@@ -119,7 +119,7 @@
     {
         "id": "settings",
         "title": "Settings",
-        "icon": "settings.png",
+        "icon": "icons/Settings.png",
         "emoji": "⚙️",
         "version": "1.0.0",
         "singleton": true,

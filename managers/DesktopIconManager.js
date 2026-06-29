@@ -31,9 +31,6 @@ const ICON_COLUMN_WIDTH = 80;
 const ICON_ROW_HEIGHT   = 88;
 const GRID_MARGIN       = 16;
 
-// Double-click detection window in milliseconds.
-const DOUBLE_CLICK_DELAY = 300;
-
 class DesktopIconManagerClass {
 
     constructor() {
@@ -57,22 +54,31 @@ class DesktopIconManagerClass {
         this._selectedId = null;
 
         /**
-         * Tracks last click time per icon for double-click detection.
-         * @type {Map<string, number>}
+         * Bound delegated click handler on the container.
+         * Handles icon selection and blank-area deselection.
+         * @type {Function|null}
          */
-        this._lastClick = new Map();
+        this._clickHandler = null;
+
+        /**
+         * Bound delegated dblclick handler on the container.
+         * Handles application launch on double-click.
+         * @type {Function|null}
+         */
+        this._dblClickHandler = null;
+
+        /**
+         * Bound delegated keydown handler on the container.
+         * Handles Enter/Space activation for keyboard users.
+         * @type {Function|null}
+         */
+        this._keydownHandler = null;
 
         /**
          * Bound resize handler reference for cleanup.
          * @type {Function|null}
          */
         this._resizeHandler = null;
-
-        /**
-         * Bound deselect handler for clicks on the icon area itself.
-         * @type {Function|null}
-         */
-        this._deselectHandler = null;
 
     }
 
@@ -123,6 +129,8 @@ class DesktopIconManagerClass {
 
     /**
      * Create a single icon element for an application.
+     * No event listeners are attached here — all interaction is handled
+     * via delegated listeners on the container in _bindEvents().
      *
      * @param {Object} app - App config object.
      * @returns {HTMLElement}
@@ -147,20 +155,6 @@ class DesktopIconManagerClass {
         icon.appendChild( imageArea );
         icon.appendChild( label );
 
-        // Click: select + double-click detection.
-        icon.addEventListener( 'click', ( e ) => {
-            e.stopPropagation();
-            this._handleIconClick( app.id );
-        } );
-
-        // Keyboard: Enter or Space activates.
-        icon.addEventListener( 'keydown', ( e ) => {
-            if ( e.key === 'Enter' || e.key === ' ' ) {
-                e.preventDefault();
-                this._requestLaunch( app.id );
-            }
-        } );
-
         return icon;
 
     }
@@ -169,38 +163,34 @@ class DesktopIconManagerClass {
      * Build the icon image area for an application.
      *
      * Rendering priority:
-     *   1. PNG image from the app's "icon" field path.
-     *   2. Emoji from the app's "emoji" field if the PNG fails or is absent.
-     *   3. Default folder emoji (📁) if neither field exists.
+     *   1. PNG from "icon" field — resolved relative to assets/ folder.
+     *   2. Emoji from "emoji" field if the PNG fails to load.
+     *   3. Default folder emoji (📁) if neither field is defined.
      *
-     * The fallback is wired via the <img> onerror event — no external
-     * configuration or manual intervention is ever needed.
+     * Icons live in the shared assets/ folder, not inside each app folder.
+     * Example path: assets/icons/Case Management.png
      *
      * @param {Object} app - App config object.
-     * @returns {HTMLElement} - The wrapper div containing either an <img> or <span>.
+     * @returns {HTMLElement} - The wrapper div.
      */
     _buildIconImage( app ) {
 
         const DEFAULT_EMOJI = '📁';
+        const fallbackEmoji = app.emoji ?? DEFAULT_EMOJI;
 
         const wrapper = document.createElement( 'div' );
         wrapper.className = 'desktop-icon__image';
         wrapper.setAttribute( 'aria-hidden', 'true' );
 
-        // Resolve the emoji fallback — app's emoji or the hardcoded default.
-        const fallbackEmoji = app.emoji ?? DEFAULT_EMOJI;
-
         if ( app.icon ) {
 
-            // Attempt to load the PNG icon.
             const img = document.createElement( 'img' );
             img.className = 'desktop-icon__image-png';
-            img.alt       = '';                  // Decorative — label carries the name.
-            img.src       = `apps/${ app.id }/assets/${ app.icon }`;
+            img.alt       = '';
+            img.src       = `assets/${ app.icon }`;
 
             img.addEventListener( 'error', () => {
 
-                // PNG missing or failed — replace with emoji fallback.
                 img.remove();
                 wrapper.appendChild( this._buildEmojiSpan( fallbackEmoji ) );
                 wrapper.classList.add( 'desktop-icon__image--emoji' );
@@ -212,7 +202,6 @@ class DesktopIconManagerClass {
         }
         else {
 
-            // No icon field at all — go straight to emoji.
             wrapper.appendChild( this._buildEmojiSpan( fallbackEmoji ) );
             wrapper.classList.add( 'desktop-icon__image--emoji' );
 
@@ -280,25 +269,13 @@ class DesktopIconManagerClass {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Handle a click on an icon — select it and detect double-click.
+     * Handle a single click on an icon — select it.
      *
      * @param {string} appId - The clicked application id.
      * @returns {void}
      */
-    _handleIconClick( appId ) {
+    _handleIconSingleClick( appId ) {
 
-        const now      = Date.now();
-        const lastTime = this._lastClick.get( appId ) ?? 0;
-
-        this._lastClick.set( appId, now );
-
-        if ( now - lastTime < DOUBLE_CLICK_DELAY ) {
-            // Double-click detected.
-            this._requestLaunch( appId );
-            return;
-        }
-
-        // Single click — select.
         this._selectIcon( appId );
 
     }
@@ -370,17 +347,72 @@ class DesktopIconManagerClass {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Bind resize and deselect handlers.
+     * Bind all container-level delegated event listeners.
+     *
+     * Three listeners, all on the container — never on individual icons:
+     *
+     *   click    → select the icon, or deselect all if blank area was clicked
+     *   dblclick → launch the application (native browser event, always reliable)
+     *   keydown  → Enter/Space on a focused icon launches the application
+     *
+     * Because listeners live on the container (which never changes), they
+     * survive icon DOM re-renders, window open/close cycles, and anything
+     * else that touches individual icon elements.
      *
      * @returns {void}
      */
     _bindEvents() {
 
-        // Deselect when clicking blank desktop area.
-        this._deselectHandler = () => this._deselectAll();
-        this._container.addEventListener( 'click', this._deselectHandler );
+        // ── Delegated single click — selection ────────────────────
+        this._clickHandler = ( e ) => {
 
-        // Reflow grid on resize.
+            const icon = e.target.closest( '.desktop-icon' );
+
+            if ( !icon ) {
+                // Clicked blank desktop area — deselect everything.
+                this._deselectAll();
+                return;
+            }
+
+            const appId = icon.dataset.appId;
+            if ( appId ) this._handleIconSingleClick( appId );
+
+        };
+
+        this._container.addEventListener( 'click', this._clickHandler );
+
+        // ── Delegated double-click — launch ───────────────────────
+        this._dblClickHandler = ( e ) => {
+
+            const icon = e.target.closest( '.desktop-icon' );
+            if ( !icon ) return;
+
+            const appId = icon.dataset.appId;
+            if ( appId ) this._requestLaunch( appId );
+
+        };
+
+        this._container.addEventListener( 'dblclick', this._dblClickHandler );
+
+        // ── Delegated keydown — keyboard activation ───────────────
+        this._keydownHandler = ( e ) => {
+
+            if ( e.key !== 'Enter' && e.key !== ' ' ) return;
+
+            const icon = e.target.closest( '.desktop-icon' );
+            if ( !icon ) return;
+
+            const appId = icon.dataset.appId;
+            if ( !appId ) return;
+
+            e.preventDefault();
+            this._requestLaunch( appId );
+
+        };
+
+        this._container.addEventListener( 'keydown', this._keydownHandler );
+
+        // ── Resize — reflow icon grid ─────────────────────────────
         this._resizeHandler = debounce( () => this._positionAll(), 150 );
         window.addEventListener( 'resize', this._resizeHandler );
 
@@ -393,12 +425,24 @@ class DesktopIconManagerClass {
      */
     destroy() {
 
-        if ( this._resizeHandler ) {
-            window.removeEventListener( 'resize', this._resizeHandler );
+        if ( this._container ) {
+
+            if ( this._clickHandler ) {
+                this._container.removeEventListener( 'click', this._clickHandler );
+            }
+
+            if ( this._dblClickHandler ) {
+                this._container.removeEventListener( 'dblclick', this._dblClickHandler );
+            }
+
+            if ( this._keydownHandler ) {
+                this._container.removeEventListener( 'keydown', this._keydownHandler );
+            }
+
         }
 
-        if ( this._deselectHandler && this._container ) {
-            this._container.removeEventListener( 'click', this._deselectHandler );
+        if ( this._resizeHandler ) {
+            window.removeEventListener( 'resize', this._resizeHandler );
         }
 
     }

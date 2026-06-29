@@ -81,6 +81,7 @@ class Window {
         this._onMouseMove    = this._handleDragMove.bind( this );
         this._onMouseUp      = this._handleDragEnd.bind( this );
         this._onModeChange   = this._handleModeChange.bind( this );
+        this._onMouseDown    = () => this._callbacks.onFocus( this.id );
 
         this._build();
 
@@ -205,6 +206,11 @@ class Window {
         // Stop listening for mode changes.
         EventBus.off( 'responsive:changed', this._onModeChange );
 
+        // Remove the focus listener from the window element itself.
+        if ( this.element ) {
+            this.element.removeEventListener( 'mousedown', this._onMouseDown );
+        }
+
         if ( this.element && this.element.parentNode ) {
             this.element.parentNode.removeChild( this.element );
         }
@@ -213,6 +219,7 @@ class Window {
         this.contentEl   = null;
         this.statusbarEl = null;
         this._titleBar   = null;
+        this._callbacks  = null;
 
     }
 
@@ -267,9 +274,7 @@ class Window {
         this.element.appendChild( this.statusbarEl );
 
         // ── Focus on any mousedown ────────────────────────────────
-        this.element.addEventListener( 'mousedown', () => {
-            this._callbacks.onFocus( this.id );
-        } );
+        this.element.addEventListener( 'mousedown', this._onMouseDown );
 
         // ── Apply initial responsive mode ─────────────────────────
         this._applyMode( ResponsiveMode.get() );
