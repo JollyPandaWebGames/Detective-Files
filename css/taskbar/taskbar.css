@@ -84,7 +84,59 @@
     letter-spacing: 1px;
 }
 
-/* ── Start Menu ───────────────────────────────────────────────── */
+/* ── Running App Buttons ──────────────────────────────────────── */
+.taskbar__app-btn {
+    display:     inline-flex;
+    align-items: center;
+    gap:         var(--space-1);
+    height:      26px;
+    max-width:   140px;
+    padding:     0 var(--space-2);
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-secondary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    cursor:      pointer;
+    outline:     none;
+    overflow:    hidden;
+    flex-shrink: 0;
+    transition:  background var(--duration-fast) linear;
+}
+
+.taskbar__app-btn:hover {
+    background:  var(--color-titlebar);
+    color:       var(--color-text-primary);
+}
+
+.taskbar__app-btn--active {
+    background:   var(--color-titlebar-active);
+    border-color: var(--color-highlight);
+    color:        var(--color-text-primary);
+}
+
+.taskbar__app-btn--minimized {
+    opacity:     0.6;
+    border-style: dashed;
+}
+
+.taskbar__app-btn:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: 1px;
+}
+
+.taskbar__app-btn-emoji {
+    font-size:       12px;
+    line-height:     1;
+    image-rendering: auto;
+    flex-shrink:     0;
+}
+
+.taskbar__app-btn-label {
+    overflow:     hidden;
+    text-overflow: ellipsis;
+    white-space:  nowrap;
+}
 .start-menu {
     position:   absolute;
     bottom:     calc( var(--taskbar-height) + 2px );

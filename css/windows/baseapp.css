@@ -1,0 +1,45 @@
+/*
+ * CID OS
+ * BaseApp Placeholder Stylesheet
+ *
+ * Scoped to: .baseapp-placeholder
+ * Loaded by: ApplicationManager when a BaseApp subclass is launched.
+ *
+ * Used by every application that has not yet implemented its real UI.
+ * Mission 05+ replaces this with application-specific content.
+ */
+
+.baseapp-placeholder {
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    height:          100%;
+    gap:             var(--space-3);
+    color:           var(--color-text-secondary);
+    text-align:      center;
+    padding:         var(--space-4);
+    user-select:     none;
+}
+
+.baseapp-placeholder__emoji {
+    font-size:       48px;
+    line-height:     1;
+    image-rendering: auto;
+    opacity:         0.5;
+}
+
+.baseapp-placeholder__title {
+    font-family:    var(--font-ui), monospace;
+    font-size:      var(--font-size-md);
+    color:          var(--color-text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.baseapp-placeholder__sub {
+    font-size:   var(--font-size-xs);
+    color:       var(--color-disabled);
+    max-width:   260px;
+    line-height: var(--line-height-normal);
+}

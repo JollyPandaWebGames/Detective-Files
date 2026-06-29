@@ -2,25 +2,41 @@
  * ApplicationManager
  *
  * Purpose:
- *   Manages the complete lifecycle of all installed workstation applications.
- *   Acts as the intermediary between the workstation shell and application plugins.
+ *   The sole authority for launching and managing application lifecycle.
+ *   Bridges AppLoader → BaseApp → WindowManager.
  *
  * Responsibilities:
- *   - Load applications via AppLoader
- *   - Track all installed and running applications
- *   - Launch, focus, minimize, restore, and terminate applications
- *   - Enforce singleton rules (only one instance per app when configured)
- *   - Notify EventBus of application state changes
+ *   - Discover and preload all applications via AppLoader at boot
+ *   - Launch applications on request (open window + call lifecycle)
+ *   - Enforce singleton: focus existing window instead of opening twice
+ *   - Track running state per app
+ *   - Handle close events from WindowManager and update state
+ *   - Emit EventBus events on all lifecycle changes
+ *
+ * Application launch flow:
+ *   launch(appId)
+ *     → if singleton + already running → WindowManager.focus()
+ *     → else → WindowManager.create() → get contentEl
+ *             → app.create(contentEl)
+ *             → app.open()
+ *             → emit app:opened
+ *
+ * Close flow (triggered by window X button or WindowManager):
+ *   _onWindowClosed(windowId)
+ *     → app.close()
+ *     → app.destroy()
+ *     → remove from _running
+ *     → emit app:closed
  *
  * Rules:
- *   ApplicationManager never knows what an application does.
- *   It only manages their lifecycle.
- *   Never hardcode application names or ids.
+ *   Only ApplicationManager calls app lifecycle methods.
+ *   Only ApplicationManager calls WindowManager.create() for real apps.
+ *   Applications never call WindowManager directly.
  *
  * Dependencies:
- *   AppLoader      — to discover and instantiate application plugins
- *   WindowManager  — to create and manage windows
- *   EventBus       — to broadcast application state changes
+ *   AppLoader     — discovers and instantiates app classes
+ *   WindowManager — creates and manages windows
+ *   EventBus      — lifecycle events
  */
 
 import AppLoader     from '../core/AppLoader.js';
@@ -32,23 +48,43 @@ class ApplicationManagerClass {
     constructor() {
 
         /**
-         * All loaded application instances, keyed by app id.
-         * @type {Map<string, BaseApp>}
+         * Loaded application instances, keyed by app id.
+         * An entry exists here if the JS module loaded successfully.
+         * @type {Map<string, import('../core/BaseApp.js').default>}
          */
         this._apps = new Map();
 
         /**
-         * Registry configs loaded from apps.json, keyed by app id.
-         * Used by UI components that need metadata without instantiating apps.
+         * All registry configs from apps.json, keyed by app id.
+         * Always populated — even when the JS module failed to load.
+         * Used by TaskbarManager and DesktopIconManager for metadata.
          * @type {Map<string, Object>}
          */
         this._registry = new Map();
 
         /**
-         * Set of app ids that are currently running (window is open).
+         * App ids that currently have an open window.
          * @type {Set<string>}
          */
         this._running = new Set();
+
+        /**
+         * Bound handler for window:closed events from WindowManager.
+         * @type {Function}
+         */
+        this._onWindowClosed = this._handleWindowClosed.bind( this );
+
+        /**
+         * Bound handler for window:minimized events.
+         * @type {Function}
+         */
+        this._onWindowMinimized = this._handleWindowMinimized.bind( this );
+
+        /**
+         * Bound handler for window:restored events.
+         * @type {Function}
+         */
+        this._onWindowRestored = this._handleWindowRestored.bind( this );
 
     }
 
@@ -57,9 +93,8 @@ class ApplicationManagerClass {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Discover all installed applications and load their metadata.
-     * Stores registry configs for UI use regardless of whether the
-     * JS module loads successfully.
+     * Discover all installed applications and preload their modules.
+     * Called once by Workstation during boot.
      *
      * @returns {Promise<void>}
      */
@@ -72,162 +107,164 @@ class ApplicationManagerClass {
 
             const appId = registryConfig.id;
 
-            // Always store registry config — UI needs it even if the module fails.
+            // Always store registry config — UI needs it even if JS module fails.
             this._registry.set( appId, registryConfig );
 
             const app = await AppLoader.load( registryConfig );
 
             if ( !app ) {
-                console.warn( `ApplicationManager: Module for "${ appId }" unavailable — metadata available only.` );
+                console.warn( `ApplicationManager: Module unavailable for "${ appId }" — metadata only.` );
                 continue;
             }
 
             this._apps.set( appId, app );
-            console.info( `ApplicationManager: Loaded "${ appId }".` );
 
         }
 
+        // Subscribe to WindowManager events so we can keep app state in sync
+        // when windows are closed/minimized via their UI controls.
+        EventBus.on( 'window:closed',    this._onWindowClosed    );
+        EventBus.on( 'window:minimized', this._onWindowMinimized );
+        EventBus.on( 'window:restored',  this._onWindowRestored  );
+
         EventBus.emit( 'applications:ready', { count: this._registry.size } );
+        console.info( `ApplicationManager: Ready. ${ this._apps.size } module(s) loaded.` );
 
     }
 
     // ─────────────────────────────────────────────────────────────
-    // Application Lifecycle
+    // Public API
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Launch an application by id.
-     * If the application is a singleton and already running, focus it instead.
+     * Launch an application.
      *
-     * @param {string} appId - The application identifier.
+     * Singleton apps: if already running, focus the existing window.
+     * Closed apps: create window → inject content → call create() + open().
+     *
+     * @param {string} appId
      * @returns {void}
      */
     launch( appId ) {
 
+        const config = this._registry.get( appId );
+
+        if ( !config ) {
+            console.error( `ApplicationManager: Unknown application "${ appId }".` );
+            return;
+        }
+
+        // ── Singleton already running → focus ─────────────────────
+        if ( config.singleton && this._running.has( appId ) ) {
+
+            if ( WindowManager.isMinimized( appId ) ) {
+                WindowManager.restore( appId );
+            }
+            else {
+                WindowManager.focus( appId );
+            }
+
+            return;
+
+        }
+
+        // ── No JS module available → show error window ────────────
         const app = this._apps.get( appId );
 
         if ( !app ) {
-            // Mission 02: log only — window system not implemented yet.
-            console.info( `Opening: ${ appId }` );
-            EventBus.emit( 'application:requested', { appId } );
+            this._openErrorWindow( appId, config );
             return;
         }
 
-        // Singleton enforcement — bring to front if already open.
-        if ( app.config.singleton && this._running.has( appId ) ) {
-            WindowManager.focus( appId );
+        // ── Launch ────────────────────────────────────────────────
+        const win = WindowManager.create( appId, {
+            title:  config.title,
+            emoji:  config.emoji,
+            icon:   config.icon,
+            width:  config.width  ?? 640,
+            height: config.height ?? 480,
+        } );
+
+        if ( !win ) {
+            console.error( `ApplicationManager: WindowManager failed to create window for "${ appId }".` );
             return;
         }
 
-        // First launch — initialize the application.
-        if ( !app.isCreated ) {
-            app.create();
-            app.isCreated = true;
+        // Wire the app to its window.
+        app._window    = win;
+        app._contentEl = win.contentEl;
+
+        // Lifecycle: create → open.
+        // Clear placeholder content before handing off contentEl.
+        if ( win.contentEl ) {
+            win.contentEl.innerHTML = '';
         }
 
-        WindowManager.create( appId, app.config );
+        app.create( win.contentEl );
+        app.isCreated = true;
+
         app.open();
         app.isOpen = true;
 
         this._running.add( appId );
 
-        EventBus.emit( 'application:launched', { appId } );
+        EventBus.emit( 'app:opened', { appId, title: config.title, emoji: config.emoji } );
+        console.info( `ApplicationManager: "${ appId }" launched.` );
 
     }
 
     /**
-     * Minimize a running application.
-     *
-     * @param {string} appId
-     * @returns {void}
-     */
-    minimize( appId ) {
-
-        const app = this._apps.get( appId );
-        if ( !app || !this._running.has( appId ) ) return;
-
-        WindowManager.minimize( appId );
-        app.minimize();
-
-        EventBus.emit( 'application:minimized', { appId } );
-
-    }
-
-    /**
-     * Restore a minimized application.
-     *
-     * @param {string} appId
-     * @returns {void}
-     */
-    restore( appId ) {
-
-        const app = this._apps.get( appId );
-        if ( !app ) return;
-
-        WindowManager.restore( appId );
-        app.restore();
-        app.isOpen = true;
-
-        EventBus.emit( 'application:restored', { appId } );
-
-    }
-
-    /**
-     * Close a running application.
+     * Programmatically close a running application.
+     * Also called internally when the window X button is pressed.
      *
      * @param {string} appId
      * @returns {void}
      */
     close( appId ) {
 
-        const app = this._apps.get( appId );
-        if ( !app || !this._running.has( appId ) ) return;
+        if ( !this._running.has( appId ) ) return;
 
-        app.close();
-        app.isOpen = false;
-        WindowManager.close( appId );
+        const app = this._apps.get( appId );
+
+        if ( app ) {
+            app.close();
+            app.isOpen     = false;
+            app.isMinimized = false;
+            app.isCreated  = false;
+            app._window    = null;
+            app._contentEl = null;
+            app.destroy();
+        }
+
+        // WindowManager.close() destroys the DOM.
+        // Guard: window may already be destroyed if close came from WindowManager.
+        if ( WindowManager.isOpen( appId ) ) {
+            WindowManager.close( appId );
+        }
 
         this._running.delete( appId );
 
-        EventBus.emit( 'application:closed', { appId } );
+        EventBus.emit( 'app:closed', { appId } );
 
     }
-
-    /**
-     * Fully unload an application from memory.
-     *
-     * @param {string} appId
-     * @returns {void}
-     */
-    destroy( appId ) {
-
-        const app = this._apps.get( appId );
-        if ( !app ) return;
-
-        if ( this._running.has( appId ) ) {
-            this.close( appId );
-        }
-
-        app.destroy();
-        this._apps.delete( appId );
-
-        EventBus.emit( 'application:destroyed', { appId } );
-
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // Queries
-    // ─────────────────────────────────────────────────────────────
 
     /**
      * Return metadata for all installed applications.
-     * Uses registry configs — available even if module failed to load.
-     * Used by TaskbarManager and DesktopIconManager to render UI.
+     * Used by TaskbarManager and DesktopIconManager.
      *
-     * @returns {Object[]} - Array of app config objects.
+     * @returns {Object[]}
      */
     getInstalledApps() {
         return Array.from( this._registry.values() );
+    }
+
+    /**
+     * Return ids of all currently running applications.
+     *
+     * @returns {string[]}
+     */
+    getRunningAppIds() {
+        return Array.from( this._running );
     }
 
     /**
@@ -238,6 +275,122 @@ class ApplicationManagerClass {
      */
     isRunning( appId ) {
         return this._running.has( appId );
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // EventBus Handlers
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Called when WindowManager emits 'window:closed'.
+     * This happens when the user clicks the window's X button.
+     * We must clean up the app state to match.
+     *
+     * @param {{ windowId: string }} payload
+     * @returns {void}
+     */
+    _handleWindowClosed( { windowId } ) {
+
+        if ( !this._running.has( windowId ) ) return;
+
+        const app = this._apps.get( windowId );
+
+        if ( app ) {
+            app.close();
+            app.isOpen     = false;
+            app.isMinimized = false;
+            app.isCreated  = false;
+            app._window    = null;
+            app._contentEl = null;
+            app.destroy();
+        }
+
+        this._running.delete( windowId );
+
+        EventBus.emit( 'app:closed', { appId: windowId } );
+
+    }
+
+    /**
+     * Called when WindowManager emits 'window:minimized'.
+     *
+     * @param {{ windowId: string }} payload
+     * @returns {void}
+     */
+    _handleWindowMinimized( { windowId } ) {
+
+        const app = this._apps.get( windowId );
+        if ( !app || !this._running.has( windowId ) ) return;
+
+        app.minimize();
+        app.isMinimized = true;
+
+        EventBus.emit( 'app:minimized', { appId: windowId } );
+
+    }
+
+    /**
+     * Called when WindowManager emits 'window:restored'.
+     *
+     * @param {{ windowId: string }} payload
+     * @returns {void}
+     */
+    _handleWindowRestored( { windowId } ) {
+
+        const app = this._apps.get( windowId );
+        if ( !app ) return;
+
+        app.restore();
+        app.isMinimized = false;
+        app.isOpen      = true;
+
+        EventBus.emit( 'app:restored', { appId: windowId } );
+
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Error Handling
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Open a generic error window when an application module could not load.
+     * Does not crash CID OS.
+     *
+     * @param {string} appId
+     * @param {Object} config
+     * @returns {void}
+     */
+    _openErrorWindow( appId, config ) {
+
+        const errorId = `error-${ appId }`;
+
+        if ( WindowManager.isOpen( errorId ) ) {
+            WindowManager.focus( errorId );
+            return;
+        }
+
+        const win = WindowManager.create( errorId, {
+            title: `Error — ${ config.title ?? appId }`,
+            emoji: '⚠️',
+            width: 400,
+            height: 240,
+        } );
+
+        if ( win && win.contentEl ) {
+            win.contentEl.innerHTML = `
+                <div class="baseapp-placeholder">
+                    <div class="baseapp-placeholder__emoji">⚠️</div>
+                    <div class="baseapp-placeholder__title">${ config.title ?? appId }</div>
+                    <div class="baseapp-placeholder__sub">
+                        This application could not be loaded.<br>
+                        The module may be missing or contain errors.
+                    </div>
+                </div>
+            `;
+        }
+
+        console.error( `ApplicationManager: Could not launch "${ appId }" — module unavailable.` );
+
     }
 
 }

@@ -74,6 +74,18 @@ class TaskbarManagerClass {
          */
         this._keydownHandler = null;
 
+        /**
+         * The running applications area element.
+         * @type {HTMLElement|null}
+         */
+        this._runningAppsEl = null;
+
+        /**
+         * Map of appId → taskbar button element for running apps.
+         * @type {Map<string, HTMLElement>}
+         */
+        this._runningBtns = new Map();
+
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -171,6 +183,8 @@ class TaskbarManagerClass {
         runningArea.setAttribute( 'aria-label', 'Running applications' );
         runningArea.setAttribute( 'id', 'taskbar-running-apps' );
 
+        this._runningAppsEl = runningArea;
+
         // ── Clock ─────────────────────────────────────────────────
         this._clockEl = document.createElement( 'div' );
         this._clockEl.className = 'taskbar__clock';
@@ -189,6 +203,124 @@ class TaskbarManagerClass {
 
         // Keep reference to start button for aria updates.
         this._startBtn = startBtn;
+
+        // ── Subscribe to app lifecycle events ─────────────────────
+        EventBus.on( 'app:opened',    ( p ) => this._addRunningApp( p )    );
+        EventBus.on( 'app:closed',    ( p ) => this._removeRunningApp( p ) );
+        EventBus.on( 'app:minimized', ( p ) => this._setAppMinimized( p )  );
+        EventBus.on( 'app:restored',  ( p ) => this._setAppActive( p )     );
+        EventBus.on( 'window:focused', ( p ) => this._setWindowFocused( p ) );
+
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Running Applications Area
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Add a button to the running apps area when an app opens.
+     *
+     * @param {{ appId: string, title: string, emoji: string }} payload
+     * @returns {void}
+     */
+    _addRunningApp( { appId, title, emoji } ) {
+
+        if ( this._runningBtns.has( appId ) ) return;
+
+        const btn = document.createElement( 'button' );
+        btn.className = 'taskbar__app-btn';
+        btn.dataset.appId = appId;
+        btn.setAttribute( 'title', title );
+        btn.setAttribute( 'aria-label', title );
+        btn.setAttribute( 'type', 'button' );
+
+        const emojiEl = document.createElement( 'span' );
+        emojiEl.className   = 'taskbar__app-btn-emoji';
+        emojiEl.textContent = emoji ?? '🖥️';
+
+        const labelEl = document.createElement( 'span' );
+        labelEl.className   = 'taskbar__app-btn-label';
+        labelEl.textContent = title;
+
+        btn.appendChild( emojiEl );
+        btn.appendChild( labelEl );
+
+        btn.addEventListener( 'click', ( e ) => {
+            e.stopPropagation();
+            EventBus.emit( 'application:requested', { appId } );
+        } );
+
+        this._runningAppsEl.appendChild( btn );
+        this._runningBtns.set( appId, btn );
+
+    }
+
+    /**
+     * Remove the running app button when an app closes.
+     *
+     * @param {{ appId: string }} payload
+     * @returns {void}
+     */
+    _removeRunningApp( { appId } ) {
+
+        const btn = this._runningBtns.get( appId );
+        if ( !btn ) return;
+
+        btn.remove();
+        this._runningBtns.delete( appId );
+
+    }
+
+    /**
+     * Mark a running app button as minimized.
+     *
+     * @param {{ appId: string }} payload
+     * @returns {void}
+     */
+    _setAppMinimized( { appId } ) {
+
+        const btn = this._runningBtns.get( appId );
+        if ( !btn ) return;
+
+        btn.classList.remove( 'taskbar__app-btn--active' );
+        btn.classList.add( 'taskbar__app-btn--minimized' );
+
+    }
+
+    /**
+     * Mark a running app button as active (restored/focused).
+     *
+     * @param {{ appId: string }} payload
+     * @returns {void}
+     */
+    _setAppActive( { appId } ) {
+
+        const btn = this._runningBtns.get( appId );
+        if ( !btn ) return;
+
+        btn.classList.remove( 'taskbar__app-btn--minimized' );
+        btn.classList.add( 'taskbar__app-btn--active' );
+
+    }
+
+    /**
+     * Update focused state across all running app buttons.
+     * Only the focused window's button gets the active style.
+     *
+     * @param {{ windowId: string }} payload
+     * @returns {void}
+     */
+    _setWindowFocused( { windowId } ) {
+
+        for ( const [ id, btn ] of this._runningBtns ) {
+            if ( id === windowId ) {
+                btn.classList.add( 'taskbar__app-btn--active' );
+                btn.classList.remove( 'taskbar__app-btn--minimized' );
+            }
+            else {
+                btn.classList.remove( 'taskbar__app-btn--active' );
+            }
+        }
 
     }
 

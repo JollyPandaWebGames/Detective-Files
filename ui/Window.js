@@ -261,7 +261,7 @@ class Window {
         // ── Content area ─────────────────────────────────────────
         this.contentEl = document.createElement( 'div' );
         this.contentEl.className = 'cid-window__content';
-        this.contentEl.appendChild( this._buildPlaceholder() );
+        // Content is populated by BaseApp.create(contentEl) after window creation.
 
         // ── Status bar ───────────────────────────────────────────
         this.statusbarEl = document.createElement( 'div' );
