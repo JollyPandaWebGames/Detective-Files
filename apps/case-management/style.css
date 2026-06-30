@@ -2,17 +2,563 @@
  * Case Management
  * Application Stylesheet
  *
- * All classes must be scoped with the .case-management- prefix.
- * Never use generic class names such as .container or .button.
+ * Scoped to: .casemgmt
+ * All classes prefixed with .casemgmt__ or .case-
  * Never modify global styles from this file.
+ *
+ * Layout:
+ *   Desktop/Tablet — grid: sidebar | list | detail (3 columns)
+ *   Phone          — stacked single column with view toggling
  */
 
-/* ── Root Container ──────────────────────────────────────────── */
-.case-management-window {
-    width:      100%;
-    height:     100%;
+/* ── Root ─────────────────────────────────────────────────────── */
+.casemgmt {
+    display:               grid;
+    grid-template-columns: 150px 300px 1fr;
+    width:                 100%;
+    height:                100%;
+    overflow:              hidden;
+    font-family:           var(--font-ui), monospace;
+    font-size:             var(--font-size-sm);
+    color:                 var(--color-text-primary);
+    background:            var(--color-bg-window);
+}
+
+/* ── Sidebar (Folders) ────────────────────────────────────────── */
+.casemgmt__sidebar {
+    display:        flex;
+    flex-direction: column;
+    background:     var(--color-bg-secondary);
+    border-right:   1px solid var(--color-border-window);
+    overflow-y:     auto;
+    padding:        var(--space-2) 0;
+}
+
+.casemgmt__folder-btn {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    width:       100%;
+    padding:     var(--space-2) var(--space-3);
+    background:  none;
+    border:      none;
+    border-left: 3px solid transparent;
+    color:       var(--color-text-secondary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    text-align:  left;
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-fast) linear, color var(--duration-fast) linear;
+}
+
+.casemgmt__folder-btn:hover {
     background: var(--color-bg-window);
     color:      var(--color-text-primary);
+}
+
+.casemgmt__folder-btn--active {
+    background:   var(--color-bg-window);
+    border-color: var(--color-highlight);
+    color:        var(--color-highlight);
+}
+
+.casemgmt__folder-btn:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+.casemgmt__folder-emoji {
+    font-size:       13px;
+    image-rendering: auto;
+    flex-shrink:     0;
+}
+
+.casemgmt__folder-label {
+    flex:          1;
+    overflow:      hidden;
+    text-overflow: ellipsis;
+    white-space:   nowrap;
+}
+
+.casemgmt__folder-count {
+    font-size:   var(--font-size-xs);
+    color:       var(--color-bg-primary);
+    background:  var(--color-highlight);
+    min-width:   16px;
+    height:      16px;
+    display:     flex;
+    align-items: center;
+    justify-content: center;
+    padding:     0 4px;
+    flex-shrink: 0;
+}
+
+.casemgmt__folder-count:empty {
+    display: none;
+}
+
+/* ── List Panel ───────────────────────────────────────────────── */
+.casemgmt__list-panel {
+    display:        flex;
+    flex-direction: column;
+    border-right:   1px solid var(--color-border-window);
+    overflow:       hidden;
+}
+
+.casemgmt__filter-bar {
+    display:        flex;
+    flex-direction: column;
+    gap:            var(--space-2);
+    padding:        var(--space-2);
+    border-bottom:  1px solid var(--color-border-window);
+    flex-shrink:    0;
+}
+
+.casemgmt__search-input,
+.casemgmt__difficulty-select {
+    width:       100%;
+    padding:     var(--space-2);
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
     font-family: var(--font-ui), monospace;
-    font-size:  var(--font-size-md);
+    font-size:   var(--font-size-xs);
+    outline:     none;
+}
+
+.casemgmt__difficulty-select {
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.casemgmt__search-input:focus,
+.casemgmt__difficulty-select:focus {
+    border-color: var(--color-highlight);
+}
+
+.casemgmt__search-input::placeholder {
+    color: var(--color-disabled);
+}
+
+.casemgmt__list {
+    flex:       1;
+    overflow-y: auto;
+}
+
+.casemgmt__list::-webkit-scrollbar       { width: 6px; }
+.casemgmt__list::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.casemgmt__list::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+.casemgmt__list-empty {
+    padding:    var(--space-4);
+    color:      var(--color-disabled);
+    font-size:  var(--font-size-xs);
+    text-align: center;
+}
+
+/* ── List Item ────────────────────────────────────────────────── */
+.casemgmt__list-item {
+    display:       flex;
+    gap:           var(--space-2);
+    padding:       var(--space-3);
+    border-bottom: 1px solid var(--color-border-window);
+    cursor:        pointer;
+    outline:       none;
+    transition:    background var(--duration-instant) linear;
+}
+
+.casemgmt__list-item:hover {
+    background: var(--color-bg-secondary);
+}
+
+.casemgmt__list-item--selected {
+    background: var(--color-titlebar-active);
+}
+
+.casemgmt__list-item:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+.casemgmt__list-item--locked {
+    opacity: 0.55;
+}
+
+.casemgmt__list-item-thumb {
+    width:           40px;
+    height:          40px;
+    flex-shrink:     0;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    font-size:       20px;
+    background:      var(--color-bg-secondary);
+    border:          1px solid var(--color-border-window);
+    image-rendering: auto;
+}
+
+.casemgmt__list-item-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.casemgmt__list-item-title {
+    font-size:     var(--font-size-sm);
+    color:         var(--color-text-primary);
+    margin-bottom: var(--space-1);
+    overflow:      hidden;
+    text-overflow: ellipsis;
+    white-space:   nowrap;
+}
+
+.casemgmt__list-item-meta {
+    display:       flex;
+    gap:           var(--space-1);
+    margin-bottom: var(--space-1);
+    flex-wrap:     wrap;
+}
+
+.casemgmt__list-item-sub {
+    font-size: 10px;
+    color:     var(--color-text-secondary);
+}
+
+.casemgmt__list-item-progress {
+    margin-top: var(--space-1);
+    height:     4px;
+    background: var(--color-bg-primary);
+    border:     1px solid var(--color-border-window);
+}
+
+.casemgmt__list-item-progress-fill {
+    height:     100%;
+    background: var(--color-highlight);
+}
+
+/* ── Badges ───────────────────────────────────────────────────── */
+.case-difficulty-badge,
+.case-status-badge {
+    font-size:      9px;
+    padding:        1px 5px;
+    border:         1px solid var(--color-border-window);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color:          var(--color-text-secondary);
+}
+
+.case-difficulty--easy   { border-color: var(--color-success); color: var(--color-success); }
+.case-difficulty--medium { border-color: var(--color-warning); color: var(--color-warning); }
+.case-difficulty--hard   { border-color: var(--color-danger);  color: var(--color-danger);  }
+
+.case-status--unlocked    { border-color: var(--color-highlight); color: var(--color-highlight); }
+.case-status--in-progress { border-color: var(--color-warning);   color: var(--color-warning);   }
+.case-status--solved      { border-color: var(--color-success);   color: var(--color-success);   }
+.case-status--locked      { border-color: var(--color-disabled);  color: var(--color-disabled);  }
+.case-status--archived    { border-color: var(--color-disabled);  color: var(--color-disabled);  }
+
+/* ── Detail Panel ─────────────────────────────────────────────── */
+.casemgmt__detail {
+    display:        flex;
+    flex-direction: column;
+    overflow-y:     auto;
+    padding:        var(--space-4) var(--space-5);
+}
+
+.casemgmt__detail::-webkit-scrollbar       { width: 6px; }
+.casemgmt__detail::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.casemgmt__detail::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+.casemgmt__detail-empty {
+    flex:            1;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    gap:             var(--space-2);
+    color:           var(--color-disabled);
+}
+
+.casemgmt__detail-empty-emoji {
+    font-size:       40px;
+    opacity:         0.4;
+    image-rendering: auto;
+}
+
+.casemgmt__detail-empty-text {
+    font-size: var(--font-size-xs);
+}
+
+/* ── Detail Toolbar (phone only) ──────────────────────────────── */
+.casemgmt__detail-toolbar {
+    display: none;
+    margin-bottom: var(--space-3);
+}
+
+.casemgmt__detail-back {
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    padding:     var(--space-1) var(--space-2);
+    cursor:      pointer;
+}
+
+/* ── Detail Header ────────────────────────────────────────────── */
+.casemgmt__detail-thumb {
+    font-size:       40px;
+    text-align:      center;
+    image-rendering: auto;
+    margin-bottom:   var(--space-2);
+}
+
+.casemgmt__detail-title {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-md);
+    color:          var(--color-text-primary);
+    text-align:     center;
+    margin-bottom:  var(--space-3);
+    line-height:    var(--line-height-normal);
+}
+
+.casemgmt__detail-badges {
+    display:         flex;
+    justify-content: center;
+    gap:             var(--space-2);
+    margin-bottom:   var(--space-4);
+}
+
+/* ── Detail Stats ─────────────────────────────────────────────── */
+.casemgmt__detail-stats {
+    display:        grid;
+    grid-template-columns: 1fr 1fr;
+    gap:            var(--space-2);
+    margin-bottom:  var(--space-4);
+}
+
+.casemgmt__detail-stat {
+    display:        flex;
+    flex-direction: column;
+    gap:            2px;
+    padding:        var(--space-2) var(--space-3);
+    background:     var(--color-bg-secondary);
+    border:         1px solid var(--color-border-window);
+    text-align:     center;
+}
+
+.casemgmt__detail-stat-label {
+    font-size:      10px;
+    color:          var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.casemgmt__detail-stat-value {
+    font-size: var(--font-size-sm);
+    color:     var(--color-text-primary);
+}
+
+/* ── Detail Progress ──────────────────────────────────────────── */
+.casemgmt__detail-progress-wrap {
+    margin-bottom: var(--space-4);
+}
+
+.casemgmt__detail-progress-label {
+    font-size:     var(--font-size-xs);
+    color:         var(--color-text-secondary);
+    margin-bottom: var(--space-1);
+}
+
+.casemgmt__detail-progress-track {
+    height:     8px;
+    background: var(--color-bg-secondary);
+    border:     1px solid var(--color-border-window);
+}
+
+.casemgmt__detail-progress-fill {
+    height:     100%;
+    background: var(--color-highlight);
+}
+
+/* ── Detail Sections ──────────────────────────────────────────── */
+.casemgmt__detail-section-label {
+    font-size:      var(--font-size-xs);
+    color:          var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom:  var(--space-2);
+    padding-bottom: var(--space-1);
+    border-bottom:  1px solid var(--color-border-window);
+}
+
+.casemgmt__detail-description {
+    font-size:     var(--font-size-sm);
+    line-height:   var(--line-height-loose);
+    color:         var(--color-text-primary);
+    margin-bottom: var(--space-4);
+    white-space:   pre-wrap;
+}
+
+/* ── Objectives ───────────────────────────────────────────────── */
+.casemgmt__detail-objectives {
+    display:        flex;
+    flex-direction: column;
+    gap:            var(--space-2);
+    margin-bottom:  var(--space-4);
+}
+
+.casemgmt__objective {
+    display:     flex;
+    align-items: flex-start;
+    gap:         var(--space-2);
+    font-size:   var(--font-size-sm);
+    color:       var(--color-text-primary);
+}
+
+.casemgmt__objective-box {
+    flex-shrink: 0;
+    color:       var(--color-text-secondary);
+}
+
+/* ── Action Area ──────────────────────────────────────────────── */
+.casemgmt__detail-action-wrap {
+    margin-top: auto;
+    padding-top: var(--space-3);
+}
+
+.casemgmt__start-btn {
+    width:       100%;
+    padding:     var(--space-3);
+    background:  var(--color-titlebar-active);
+    border:      1px solid var(--color-highlight);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-sm);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-fast) linear;
+}
+
+.casemgmt__start-btn:hover {
+    background: var(--color-highlight);
+    color:      var(--color-bg-primary);
+}
+
+.casemgmt__start-btn:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: 2px;
+}
+
+.casemgmt__start-btn--continue {
+    background:   var(--color-bg-secondary);
+    border-color: var(--color-warning);
+    color:        var(--color-warning);
+}
+
+.casemgmt__start-btn--continue:hover {
+    background: var(--color-warning);
+    color:      var(--color-bg-primary);
+}
+
+.casemgmt__locked-message {
+    padding:    var(--space-3);
+    background: rgba( 90, 101, 115, 0.15 );
+    border:     1px solid var(--color-disabled);
+    color:      var(--color-disabled);
+    font-size:  var(--font-size-xs);
+    text-align: center;
+}
+
+.casemgmt__solved-message {
+    padding:    var(--space-3);
+    background: rgba( 55, 214, 122, 0.1 );
+    border:     1px solid var(--color-success);
+    color:      var(--color-success);
+    font-size:  var(--font-size-xs);
+    text-align: center;
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Tablet — collapsible sidebar                         */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( min-width: 640px ) and ( max-width: 1023px ) {
+
+    .casemgmt {
+        grid-template-columns: 110px 260px 1fr;
+    }
+
+    .casemgmt__folder-label {
+        font-size: 10px;
+    }
+
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Phone — stacked single column                        */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( max-width: 639px ) {
+
+    .casemgmt {
+        display:        flex;
+        flex-direction: column;
+    }
+
+    .casemgmt__sidebar {
+        flex-direction: row;
+        overflow-x:     auto;
+        overflow-y:     hidden;
+        border-right:   none;
+        border-bottom:  1px solid var(--color-border-window);
+        flex-shrink:    0;
+        padding:        var(--space-1) 0;
+    }
+
+    .casemgmt__folder-btn {
+        flex-direction: column;
+        gap:            2px;
+        border-left:    none;
+        border-bottom:  3px solid transparent;
+        padding:        var(--space-2);
+        white-space:    nowrap;
+    }
+
+    .casemgmt__folder-btn--active {
+        border-bottom-color: var(--color-highlight);
+        border-left-color:   transparent;
+    }
+
+    .casemgmt__list-panel {
+        flex:         1;
+        border-right: none;
+        min-height:   0;
+    }
+
+    .casemgmt__filter-bar {
+        flex-direction: row;
+    }
+
+    /* Detail panel becomes an overlay that slides in on selection */
+    .casemgmt__detail {
+        position:   fixed;
+        inset:      0;
+        top:        auto;
+        background: var(--color-bg-window);
+        transform:  translateX( 100% );
+        transition: transform var(--duration-normal) var(--ease-out);
+        z-index:    10;
+        padding:    var(--space-3) var(--space-4);
+    }
+
+    .casemgmt__detail--phone-active {
+        transform: translateX( 0 );
+    }
+
+    .casemgmt__detail-toolbar {
+        display: block;
+    }
+
 }

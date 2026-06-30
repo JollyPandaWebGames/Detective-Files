@@ -1,0 +1,16 @@
+{
+    "id": "case-001",
+    "title": "The Missing Scientist",
+    "difficulty": "Medium",
+    "status": "Unlocked",
+    "description": "Dr. Emil Rask, a senior researcher at Valcourt BioLabs, vanished from his locked laboratory without a trace. Security footage shows he never left the building. Review the case brief, examine the evidence, and uncover what really happened that night.",
+    "thumbnail": "case-001.png",
+    "estimatedTime": "30 minutes",
+    "reward": 150,
+    "objectives": [
+        "Read initial report",
+        "Review CCTV footage",
+        "Interview witness",
+        "Inspect evidence"
+    ]
+}

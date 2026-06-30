@@ -1,0 +1,16 @@
+{
+    "id": "case-003",
+    "title": "Shadows Over Ravenwood",
+    "difficulty": "Hard",
+    "status": "Locked",
+    "description": "A series of unexplained disappearances near Ravenwood Street has the precinct on edge. This case will only become available once earlier investigations have been completed.",
+    "thumbnail": "case-003.png",
+    "estimatedTime": "45 minutes",
+    "reward": 250,
+    "objectives": [
+        "Read initial report",
+        "Canvass the neighborhood",
+        "Review forensic findings",
+        "Identify the pattern"
+    ]
+}

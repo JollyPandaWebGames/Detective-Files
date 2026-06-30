@@ -1,0 +1,16 @@
+{
+    "id": "case-002",
+    "title": "The Missing Necklace",
+    "difficulty": "Easy",
+    "status": "Unlocked",
+    "description": "A valuable necklace disappeared during a charity gala at the Ashcroft estate. Dozens of guests had access to the room. Question the staff, examine the safe, and find out who took it.",
+    "thumbnail": "case-002.png",
+    "estimatedTime": "20 minutes",
+    "reward": 100,
+    "objectives": [
+        "Read initial report",
+        "Interview the host",
+        "Inspect the safe",
+        "Review the guest list"
+    ]
+}

@@ -15,6 +15,7 @@
  *   6.  Desktop icons  — DesktopIconManager renders icon grid
  *   7.  Window system  — WindowManager initializes
  *   7b. Mail data      — MailManager loads mail JSON + persisted state
+ *   7c. Case data      — CaseManager loads case JSON + persisted progress
  *   8.  Event bridge   — application:requested → ApplicationManager.launch()
  *   9.  Show desktop   — fade-in
  *   10. Wallpaper      — apply persisted wallpaper after desktop is visible
@@ -33,6 +34,7 @@ import ApplicationManager from '../managers/ApplicationManager.js';
 import WindowManager      from '../managers/WindowManager.js';
 import SettingsManager    from '../managers/SettingsManager.js';
 import MailManager        from '../managers/MailManager.js';
+import CaseManager        from '../managers/CaseManager.js';
 
 class Workstation {
 
@@ -91,6 +93,10 @@ class Workstation {
         // Load mail JSON + persisted read/starred/archived state.
         // Runs in the background — does not block desktop visibility.
         MailManager.initialize();
+
+        // ── 7c. Case Data ─────────────────────────────────────────
+        // Load case JSON + persisted progress state.
+        CaseManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit
