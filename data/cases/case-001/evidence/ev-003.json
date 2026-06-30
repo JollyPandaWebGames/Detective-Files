@@ -1,0 +1,21 @@
+{
+    "id": "ev-003",
+    "caseId": "case-001",
+    "title": "Fingerprint Analysis Report",
+    "category": "Fingerprints",
+    "type": "fingerprint",
+    "status": "Analyzed",
+    "location": "Forensics Lab",
+    "collectedBy": "Dr. Lena Marsh",
+    "date": "2026-06-29",
+    "description": "Forensic analysis of latent fingerprints lifted from the laboratory door handle and the overturned chair. Partial prints recovered are inconsistent with Dr. Rask's known prints on file.",
+    "thumbnail": "ev-003-thumb.png",
+    "preview": "ev-003-preview.png",
+    "tags": [ "fingerprint", "forensics", "lab-report" ],
+    "related": [ "ev-002" ],
+    "sourceAttachmentId": "att-003",
+    "chainOfCustody": [
+        { "stage": "Collected",  "by": "Dr. Lena Marsh", "date": "2026-06-29 11:00" },
+        { "stage": "Analyzed",   "by": "Dr. Lena Marsh", "date": "2026-06-29 14:15" }
+    ]
+}

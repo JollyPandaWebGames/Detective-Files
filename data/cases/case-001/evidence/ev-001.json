@@ -1,0 +1,21 @@
+{
+    "id": "ev-001",
+    "caseId": "case-001",
+    "title": "Case Brief",
+    "category": "Documents",
+    "type": "document",
+    "status": "Collected",
+    "location": "Captain Morgan's Office",
+    "collectedBy": "Captain Morgan",
+    "date": "2026-06-29",
+    "description": "The official case brief outlining the disappearance of Dr. Emil Rask, including initial findings from the responding officers and a summary of the security anomalies discovered at Valcourt BioLabs.",
+    "thumbnail": "ev-001-thumb.png",
+    "preview": "ev-001-preview.png",
+    "tags": [ "briefing", "official", "case-001" ],
+    "related": [ "ev-002" ],
+    "sourceAttachmentId": "att-001",
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Captain Morgan", "date": "2026-06-29 08:30" },
+        { "stage": "Transferred", "by": "Records Office",  "date": "2026-06-29 08:45" }
+    ]
+}

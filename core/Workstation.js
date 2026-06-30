@@ -35,6 +35,7 @@ import WindowManager      from '../managers/WindowManager.js';
 import SettingsManager    from '../managers/SettingsManager.js';
 import MailManager        from '../managers/MailManager.js';
 import CaseManager        from '../managers/CaseManager.js';
+import EvidenceManager    from '../managers/EvidenceManager.js';
 
 class Workstation {
 
@@ -97,6 +98,11 @@ class Workstation {
         // ── 7c. Case Data ─────────────────────────────────────────
         // Load case JSON + persisted progress state.
         CaseManager.initialize();
+
+        // ── 7d. Evidence Data ──────────────────────────────────────
+        // Load persisted evidence state (pinned/notes/lastViewed).
+        // Per-case evidence is loaded lazily when a case is selected.
+        EvidenceManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit

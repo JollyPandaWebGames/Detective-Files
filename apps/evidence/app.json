@@ -1,11 +1,12 @@
 {
     "id": "evidence",
     "title": "Evidence Database",
-    "icon": "evidence.png",
+    "icon": "icons/Evidence Database.png",
+    "emoji": "🔍",
     "version": "1.0.0",
     "singleton": true,
     "resizable": false,
-    "width": 900,
+    "width": 960,
     "height": 680,
     "minimumWidth": 600,
     "minimumHeight": 400

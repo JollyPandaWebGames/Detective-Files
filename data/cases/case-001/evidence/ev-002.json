@@ -1,0 +1,21 @@
+{
+    "id": "ev-002",
+    "caseId": "case-001",
+    "title": "Laboratory Scene Photographs",
+    "category": "Photographs",
+    "type": "image",
+    "status": "Collected",
+    "location": "Valcourt BioLabs — Private Laboratory",
+    "collectedBy": "Officer Reyes",
+    "date": "2026-06-29",
+    "description": "A set of photographs documenting the state of Dr. Rask's private laboratory as found by the responding officers. Notable details include an overturned chair and a shattered glass beaker near the workbench.",
+    "thumbnail": "ev-002-thumb.png",
+    "preview": "ev-002-preview.png",
+    "tags": [ "photo", "crime-scene", "laboratory" ],
+    "related": [ "ev-001", "ev-004" ],
+    "sourceAttachmentId": "att-002",
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Officer Reyes",  "date": "2026-06-29 09:10" },
+        { "stage": "Transferred", "by": "Evidence Locker", "date": "2026-06-29 10:00" }
+    ]
+}

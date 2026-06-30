@@ -1,0 +1,21 @@
+{
+    "id": "ev-004",
+    "caseId": "case-001",
+    "title": "Shattered Glass Beaker",
+    "category": "Physical Evidence",
+    "type": "object",
+    "status": "Collected",
+    "location": "Valcourt BioLabs — Private Laboratory",
+    "collectedBy": "Officer Reyes",
+    "date": "2026-06-29",
+    "description": "Fragments of a 500ml laboratory beaker found shattered near the workbench. Residue analysis is pending. May indicate a struggle or accidental disturbance.",
+    "thumbnail": "ev-004-thumb.png",
+    "preview": "ev-004-preview.png",
+    "tags": [ "physical", "glass", "laboratory", "struggle" ],
+    "related": [ "ev-002" ],
+    "sourceAttachmentId": null,
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Officer Reyes",   "date": "2026-06-29 09:25" },
+        { "stage": "Transferred", "by": "Evidence Locker", "date": "2026-06-29 10:05" }
+    ]
+}

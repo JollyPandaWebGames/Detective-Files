@@ -530,18 +530,28 @@ class PoliceMail extends BaseApp {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Open a placeholder preview window for an attachment.
-     * Mission 06 scope: view-only placeholder, no real file content.
+     * Handle an attachment chip click.
+     *
+     * Mission 08+: If an evidence item in the Evidence Database is linked
+     * to this attachment via sourceAttachmentId, open Evidence Database and
+     * focus that item (via 'mail:attachment-opened' event).
+     *
+     * Fallback: open a standalone placeholder preview window.
      *
      * @param {Object} attachment - { id, name, type }
      * @returns {void}
      */
     _openAttachmentPreview( attachment ) {
 
-        // Lazy import to avoid a hard dependency at module load time —
-        // applications should not import WindowManager at the top level
-        // per APP_SDK rules; this is a self-contained preview, not a
-        // window owned by this application's lifecycle.
+        // Notify Evidence Database so it can focus the linked evidence item.
+        // Evidence Database listens to 'mail:attachment-opened' and cross-
+        // references by sourceAttachmentId.  If no match exists the event
+        // is a no-op for Evidence Database but we still open the preview.
+        EventBus.emit( 'mail:attachment-opened', { attachmentId: attachment.id } );
+
+        // If Evidence Database is open it handled the event above.
+        // Always also open the standalone preview so the attachment is
+        // viewable even without navigating away from Police Mail.
         import( '../../managers/WindowManager.js' ).then( ( { default: WindowManager } ) => {
 
             const winId = `attachment-${ attachment.id }`;

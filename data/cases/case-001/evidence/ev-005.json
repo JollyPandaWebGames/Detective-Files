@@ -1,0 +1,21 @@
+{
+    "id": "ev-005",
+    "caseId": "case-001",
+    "title": "Laboratory Access Log",
+    "category": "Digital Files",
+    "type": "document",
+    "status": "Collected",
+    "location": "Valcourt BioLabs — Security Office",
+    "collectedBy": "IT Security",
+    "date": "2026-06-29",
+    "description": "Digital export of keycard access logs for the private laboratory covering the 48 hours prior to the disappearance. Shows Dr. Rask's badge entering at 21:40 with no corresponding exit recorded.",
+    "thumbnail": "ev-005-thumb.png",
+    "preview": "ev-005-preview.png",
+    "tags": [ "digital", "access-log", "security" ],
+    "related": [],
+    "sourceAttachmentId": null,
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "IT Security",    "date": "2026-06-29 12:00" },
+        { "stage": "Transferred", "by": "Evidence Locker", "date": "2026-06-29 13:30" }
+    ]
+}
