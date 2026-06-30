@@ -1,11 +1,12 @@
 {
     "id": "police-mail",
     "title": "Police Mail",
-    "icon": "mail.png",
+    "icon": "icons/Police Mail.png",
+    "emoji": "✉️",
     "version": "1.0.0",
     "singleton": true,
     "resizable": false,
-    "width": 820,
+    "width": 920,
     "height": 620,
     "minimumWidth": 600,
     "minimumHeight": 400

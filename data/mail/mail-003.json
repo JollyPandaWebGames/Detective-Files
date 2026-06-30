@@ -1,0 +1,14 @@
+{
+    "id": "mail-003",
+    "caseId": null,
+    "from": "CID Headquarters",
+    "fromTitle": "Automated System",
+    "subject": "Daily Briefing — June 29, 2026",
+    "date": "2026-06-29 07:00",
+    "priority": "Low",
+    "read": false,
+    "starred": false,
+    "folder": "inbox",
+    "attachments": [],
+    "body": "Good morning, Detective.\n\nHere is your daily briefing for June 29, 2026.\n\nDEPARTMENT STATUS\n- Active cases: 3\n- Pending forensics: 2\n- Awaiting witness statements: 1\n\nCID NEWS\n- The department will undergo a security audit on July 5th. All workstations must be locked when unattended.\n- Reminder: All evidence submissions must include a chain-of-custody form.\n- The new digital case management system has been fully deployed across all divisions.\n\nRANK & PERFORMANCE\nYour current rank: Rookie Detective\nCases solved this month: 0\nAccuracy rating: —\n\nStay sharp.\n\n— CID Automated Briefing System"
+}

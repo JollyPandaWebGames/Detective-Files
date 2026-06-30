@@ -1,0 +1,14 @@
+{
+    "id": "mail-005",
+    "caseId": "case-001",
+    "from": "You",
+    "fromTitle": "Detective",
+    "subject": "Re: New Case Assignment — Missing Scientist",
+    "date": "2026-06-29 09:05",
+    "priority": "Medium",
+    "read": true,
+    "starred": false,
+    "folder": "sent",
+    "attachments": [],
+    "body": "Captain Morgan,\n\nAcknowledged. Reviewing the case brief now and heading to Valcourt BioLabs within the hour.\n\nWill report back once I've assessed the scene.\n\n— Detective"
+}

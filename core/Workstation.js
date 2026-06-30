@@ -14,6 +14,7 @@
  *   5.  Taskbar        — TaskbarManager renders start menu + clock
  *   6.  Desktop icons  — DesktopIconManager renders icon grid
  *   7.  Window system  — WindowManager initializes
+ *   7b. Mail data      — MailManager loads mail JSON + persisted state
  *   8.  Event bridge   — application:requested → ApplicationManager.launch()
  *   9.  Show desktop   — fade-in
  *   10. Wallpaper      — apply persisted wallpaper after desktop is visible
@@ -31,6 +32,7 @@ import TaskbarManager     from '../managers/TaskbarManager.js';
 import ApplicationManager from '../managers/ApplicationManager.js';
 import WindowManager      from '../managers/WindowManager.js';
 import SettingsManager    from '../managers/SettingsManager.js';
+import MailManager        from '../managers/MailManager.js';
 
 class Workstation {
 
@@ -85,11 +87,23 @@ class Workstation {
         // ── 7. Window System ──────────────────────────────────────
         WindowManager.initialize();
 
+        // ── 7b. Mail Data ──────────────────────────────────────────
+        // Load mail JSON + persisted read/starred/archived state.
+        // Runs in the background — does not block desktop visibility.
+        MailManager.initialize();
+
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit
         // 'application:requested'. This bridge routes them to ApplicationManager.
         EventBus.on( 'application:requested', ( { appId } ) => {
             ApplicationManager.launch( appId );
+        } );
+
+        // Case Management starting a case with unread mail → auto-open Police Mail.
+        // MailManager emits this after detecting unread mail for the case.
+        EventBus.on( 'mail:case-mail-available', ( { firstMailId } ) => {
+            ApplicationManager.launch( 'police-mail' );
+            EventBus.emit( 'mail:focus-request', { mailId: firstMailId } );
         } );
 
         // ── 9. Show Desktop ───────────────────────────────────────

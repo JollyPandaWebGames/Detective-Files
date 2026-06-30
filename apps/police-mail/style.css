@@ -2,17 +2,530 @@
  * Police Mail
  * Application Stylesheet
  *
- * All classes must be scoped with the .police-mail- prefix.
- * Never use generic class names such as .container or .button.
+ * Scoped to: .mail
+ * All classes prefixed with .mail__ or .mail-
  * Never modify global styles from this file.
+ *
+ * Layout:
+ *   Desktop/Tablet — grid: sidebar | list | content (3 columns)
+ *   Phone          — stacked single column with view toggling
  */
 
-/* ── Root Container ──────────────────────────────────────────── */
-.police-mail-window {
-    width:      100%;
-    height:     100%;
+/* ── Root ─────────────────────────────────────────────────────── */
+.mail {
+    display:               grid;
+    grid-template-columns: 140px 280px 1fr;
+    width:                 100%;
+    height:                100%;
+    overflow:              hidden;
+    font-family:           var(--font-ui), monospace;
+    font-size:             var(--font-size-sm);
+    color:                 var(--color-text-primary);
+    background:            var(--color-bg-window);
+}
+
+/* ── Sidebar (Folders) ────────────────────────────────────────── */
+.mail__sidebar {
+    display:        flex;
+    flex-direction: column;
+    background:     var(--color-bg-secondary);
+    border-right:   1px solid var(--color-border-window);
+    overflow-y:     auto;
+    padding:        var(--space-2) 0;
+}
+
+.mail__folder-btn {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    width:       100%;
+    padding:     var(--space-2) var(--space-3);
+    background:  none;
+    border:      none;
+    border-left: 3px solid transparent;
+    color:       var(--color-text-secondary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    text-align:  left;
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-fast) linear, color var(--duration-fast) linear;
+}
+
+.mail__folder-btn:hover {
     background: var(--color-bg-window);
     color:      var(--color-text-primary);
+}
+
+.mail__folder-btn--active {
+    background:   var(--color-bg-window);
+    border-color: var(--color-highlight);
+    color:        var(--color-highlight);
+}
+
+.mail__folder-btn:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+.mail__folder-emoji {
+    font-size:       13px;
+    image-rendering: auto;
+    flex-shrink:     0;
+}
+
+.mail__folder-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mail__folder-count {
+    font-size:   var(--font-size-xs);
+    color:       var(--color-bg-primary);
+    background:  var(--color-highlight);
+    min-width:   16px;
+    height:      16px;
+    display:     flex;
+    align-items: center;
+    justify-content: center;
+    padding:     0 4px;
+    flex-shrink: 0;
+}
+
+.mail__folder-count:empty {
+    display: none;
+}
+
+/* ── List Panel ───────────────────────────────────────────────── */
+.mail__list-panel {
+    display:        flex;
+    flex-direction: column;
+    border-right:   1px solid var(--color-border-window);
+    overflow:       hidden;
+}
+
+.mail__search-wrap {
+    padding:       var(--space-2);
+    border-bottom: 1px solid var(--color-border-window);
+    flex-shrink:   0;
+}
+
+.mail__search-input {
+    width:       100%;
+    padding:     var(--space-2) var(--space-2);
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
     font-family: var(--font-ui), monospace;
-    font-size:  var(--font-size-md);
+    font-size:   var(--font-size-xs);
+    outline:     none;
+}
+
+.mail__search-input:focus {
+    border-color: var(--color-highlight);
+}
+
+.mail__search-input::placeholder {
+    color: var(--color-disabled);
+}
+
+.mail__list {
+    flex:       1;
+    overflow-y: auto;
+}
+
+.mail__list::-webkit-scrollbar       { width: 6px; }
+.mail__list::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.mail__list::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+.mail__list-empty {
+    padding:    var(--space-4);
+    color:      var(--color-disabled);
+    font-size:  var(--font-size-xs);
+    text-align: center;
+}
+
+/* ── List Item ────────────────────────────────────────────────── */
+.mail__list-item {
+    padding:       var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border-window);
+    cursor:        pointer;
+    outline:       none;
+    transition:    background var(--duration-instant) linear;
+}
+
+.mail__list-item:hover {
+    background: var(--color-bg-secondary);
+}
+
+.mail__list-item--selected {
+    background:    var(--color-titlebar-active);
+}
+
+.mail__list-item--unread {
+    background: rgba( 45, 168, 255, 0.06 );
+}
+
+.mail__list-item--unread.mail__list-item--selected {
+    background: var(--color-titlebar-active);
+}
+
+.mail__list-item:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+@keyframes mail-highlight-flash {
+    0%, 100% { background: var(--color-titlebar-active); }
+    50%      { background: rgba( 45, 168, 255, 0.35 );    }
+}
+
+.mail__list-item--highlight-flash {
+    animation: mail-highlight-flash 0.4s ease-in-out 2;
+}
+
+.mail__list-item-row1 {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-1);
+    margin-bottom: 2px;
+}
+
+.mail__list-item-dot {
+    width:        6px;
+    height:       6px;
+    border-radius: 0; /* square per pixel style */
+    background:   var(--color-highlight);
+    flex-shrink:  0;
+    visibility:   hidden;
+}
+
+.mail__list-item--unread .mail__list-item-dot {
+    visibility: visible;
+}
+
+.mail__list-item-from {
+    flex:        1;
+    font-size:   var(--font-size-xs);
+    color:       var(--color-text-secondary);
+    overflow:    hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mail__list-item--unread .mail__list-item-from {
+    color: var(--color-text-primary);
+}
+
+.mail__list-item-date {
+    font-size:   10px;
+    color:       var(--color-disabled);
+    flex-shrink: 0;
+}
+
+.mail__list-item-row2 {
+    margin-bottom: 4px;
+}
+
+.mail__list-item-subject {
+    font-size:   var(--font-size-xs);
+    color:       var(--color-text-primary);
+    overflow:    hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display:     block;
+}
+
+.mail__list-item--unread .mail__list-item-subject {
+    font-weight: bold;
+}
+
+.mail__list-item-row3 {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-1);
+}
+
+.mail__list-item-star,
+.mail__list-item-attach {
+    font-size:       10px;
+    image-rendering: auto;
+}
+
+/* ── Priority Badge ───────────────────────────────────────────── */
+.mail-priority-badge {
+    font-size:      9px;
+    padding:        1px 5px;
+    border:         1px solid var(--color-border-window);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color:          var(--color-text-secondary);
+}
+
+.mail-priority--high {
+    border-color: var(--color-danger);
+    color:        var(--color-danger);
+}
+
+.mail-priority--medium {
+    border-color: var(--color-warning);
+    color:        var(--color-warning);
+}
+
+.mail-priority--low {
+    border-color: var(--color-border-window);
+    color:        var(--color-text-secondary);
+}
+
+/* ── Content Panel ────────────────────────────────────────────── */
+.mail__content {
+    display:        flex;
+    flex-direction: column;
+    overflow-y:     auto;
+    padding:        var(--space-4);
+}
+
+.mail__content::-webkit-scrollbar       { width: 6px; }
+.mail__content::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.mail__content::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+.mail__content-empty {
+    flex:            1;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    gap:             var(--space-2);
+    color:           var(--color-disabled);
+}
+
+.mail__content-empty-emoji {
+    font-size:       40px;
+    opacity:         0.4;
+    image-rendering: auto;
+}
+
+.mail__content-empty-text {
+    font-size: var(--font-size-xs);
+}
+
+/* ── Content Toolbar ──────────────────────────────────────────── */
+.mail__content-toolbar {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+    margin-bottom:   var(--space-3);
+}
+
+.mail__content-back {
+    display:     none; /* shown only on phone */
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    padding:     var(--space-1) var(--space-2);
+    cursor:      pointer;
+}
+
+.mail__content-actions {
+    display: flex;
+    gap:     var(--space-2);
+    flex-wrap: wrap;
+}
+
+.mail__action-btn {
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    padding:     var(--space-1) var(--space-2);
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-fast) linear;
+}
+
+.mail__action-btn:hover {
+    background:   var(--color-titlebar);
+    border-color: var(--color-highlight);
+}
+
+.mail__action-btn:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: 1px;
+}
+
+/* ── Content Header ───────────────────────────────────────────── */
+.mail__content-header {
+    padding-bottom: var(--space-3);
+    border-bottom:  1px solid var(--color-border-window);
+    margin-bottom:  var(--space-3);
+}
+
+.mail__content-subject {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-sm);
+    color:          var(--color-text-primary);
+    margin-bottom:  var(--space-2);
+    line-height:    var(--line-height-normal);
+}
+
+.mail__content-meta {
+    display:         flex;
+    justify-content: space-between;
+    align-items:     baseline;
+    margin-bottom:   var(--space-2);
+    flex-wrap:       wrap;
+    gap:             var(--space-2);
+}
+
+.mail__content-from {
+    font-size: var(--font-size-xs);
+    color:     var(--color-text-primary);
+}
+
+.mail__content-from-title {
+    color:      var(--color-text-secondary);
+    margin-left: var(--space-1);
+}
+
+.mail__content-date {
+    font-size: var(--font-size-xs);
+    color:     var(--color-disabled);
+}
+
+/* ── Content Body ─────────────────────────────────────────────── */
+.mail__content-body {
+    white-space:  pre-wrap;
+    line-height:  var(--line-height-loose);
+    color:        var(--color-text-primary);
+    font-size:    var(--font-size-sm);
+    margin-bottom: var(--space-4);
+}
+
+/* ── Attachments ──────────────────────────────────────────────── */
+.mail__attachments-heading {
+    font-size:      var(--font-size-xs);
+    color:          var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom:  var(--space-2);
+    padding-top:    var(--space-2);
+    border-top:     1px solid var(--color-border-window);
+}
+
+.mail__attachments-list {
+    display:  flex;
+    flex-wrap: wrap;
+    gap:      var(--space-2);
+}
+
+.mail__attachment-chip {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    padding:     var(--space-2) var(--space-3);
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-fast) linear;
+}
+
+.mail__attachment-chip:hover {
+    background:   var(--color-titlebar);
+    border-color: var(--color-highlight);
+}
+
+.mail__attachment-chip:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: 1px;
+}
+
+.mail__attachment-emoji {
+    font-size:       14px;
+    image-rendering: auto;
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Tablet — collapsible sidebar                         */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( min-width: 640px ) and ( max-width: 1023px ) {
+
+    .mail {
+        grid-template-columns: 110px 240px 1fr;
+    }
+
+    .mail__folder-label {
+        font-size: 10px;
+    }
+
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Phone — stacked single column                        */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( max-width: 639px ) {
+
+    .mail {
+        display:        flex;
+        flex-direction: column;
+    }
+
+    .mail__sidebar {
+        flex-direction: row;
+        overflow-x:     auto;
+        overflow-y:     hidden;
+        border-right:   none;
+        border-bottom:  1px solid var(--color-border-window);
+        flex-shrink:    0;
+        padding:        var(--space-1) 0;
+    }
+
+    .mail__folder-btn {
+        flex-direction: column;
+        gap:            2px;
+        border-left:    none;
+        border-bottom:  3px solid transparent;
+        padding:        var(--space-2);
+        white-space:    nowrap;
+    }
+
+    .mail__folder-btn--active {
+        border-bottom-color: var(--color-highlight);
+        border-left-color:   transparent;
+    }
+
+    .mail__list-panel {
+        flex:         1;
+        border-right: none;
+        min-height:   0;
+    }
+
+    /* Content panel becomes an overlay that slides in on selection */
+    .mail__content {
+        position:   fixed;
+        inset:      0;
+        top:        auto;
+        background: var(--color-bg-window);
+        transform:  translateX( 100% );
+        transition: transform var(--duration-normal) var(--ease-out);
+        z-index:    10;
+        padding:    var(--space-3);
+    }
+
+    .mail__content--phone-active {
+        transform: translateX( 0 );
+    }
+
+    .mail__content-back {
+        display: inline-flex;
+    }
+
 }

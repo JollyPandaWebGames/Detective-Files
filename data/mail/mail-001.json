@@ -1,0 +1,17 @@
+{
+    "id": "mail-001",
+    "caseId": "case-001",
+    "from": "Captain Morgan",
+    "fromTitle": "Chief of Detectives",
+    "subject": "New Case Assignment — Missing Scientist",
+    "date": "2026-06-29 08:30",
+    "priority": "High",
+    "read": false,
+    "starred": false,
+    "folder": "inbox",
+    "attachments": [
+        { "id": "att-001", "name": "Case Brief.pdf", "type": "pdf" },
+        { "id": "att-002", "name": "Scene Photos.jpg", "type": "image" }
+    ],
+    "body": "Detective,\n\nA new case has been assigned to you effective immediately.\n\nDr. Emil Rask, a senior researcher at Valcourt BioLabs, was reported missing by his assistant on the morning of June 28th. He was last seen entering his private laboratory at 21:40 the previous evening. Security footage shows he never left the building — yet no trace of him can be found inside.\n\nThis is a high-priority investigation. The victim's research was classified and his disappearance may have national security implications.\n\nYour first priority is to review the attached case brief and proceed to the scene.\n\nDo not discuss this case with anyone outside the department.\n\nGood luck, Detective.\n\n— Captain Morgan\nChief of Detectives, CID"
+}

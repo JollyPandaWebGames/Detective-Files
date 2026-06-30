@@ -1,0 +1,16 @@
+{
+    "id": "mail-002",
+    "caseId": "case-001",
+    "from": "Dr. Lena Marsh",
+    "fromTitle": "Head of Forensics Lab",
+    "subject": "Forensics Results — Fingerprint Analysis",
+    "date": "2026-06-29 14:15",
+    "priority": "Medium",
+    "read": false,
+    "starred": false,
+    "folder": "inbox",
+    "attachments": [
+        { "id": "att-003", "name": "Fingerprint Report.pdf", "type": "pdf" }
+    ],
+    "body": "Detective,\n\nThe fingerprint analysis from the Valcourt BioLabs scene is complete.\n\nWe recovered three distinct fingerprint samples from the laboratory door handle. Two samples match Dr. Rask himself. The third remains unidentified and is not currently in our database.\n\nThe third print shows partial smearing consistent with the use of latex gloves — suggesting deliberate precaution.\n\nFull report is attached. Please cross-reference with the suspect database.\n\nLet me know if you require further analysis.\n\n— Dr. Lena Marsh\nHead of Forensics, CID Laboratory"
+}
