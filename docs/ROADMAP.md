@@ -1,510 +1,333 @@
-# Detective Files
-# Development Roadmap
+# Detective Files - Development Roadmap
+
+Version: 1.0
 
 ---
 
-# Mission 00
+# Phase 0 - Foundation
 
-Project Foundation
+## Mission 00 - Project Bootstrap
+Status: ✅ Completed
 
-Architecture Rules
-
-Coding Standards
-
-Folder Structure
-
-Project Documentation
-
-Status:
-
-⬜ Not Started
+- Initialize project
+- Configure build system
+- Create project structure
+- Create documentation
+- Configure development environment
 
 ---
 
-# Mission 01
+## Mission 01 - Core Architecture
+Status: ✅ Completed
 
-Workstation Core
-
-Boot Screen
-
-Desktop
-
-Wallpaper
-
-Pixel Theme
-
-Responsive Layout
-
-Status:
-
-⬜
+- Core managers
+- EventBus
+- Service Locator
+- Utilities
+- Base architecture
 
 ---
 
-# Mission 02
+## Mission 02 - Desktop Environment
+Status: ✅ Completed
 
-Desktop Environment
-
-Desktop Icons
-
-Taskbar
-
-Clock
-
-Start Menu
-
-Responsive Icon Placement
-
-Status:
-
-⬜
+- CID OS desktop
+- Desktop icons
+- Start menu
+- Taskbar
+- Responsive desktop
+- Desktop context menu
 
 ---
 
-# Mission 03
+## Mission 03 - Window Framework
+Status: ✅ Completed
 
-Window System
-
-Window Manager
-
-Dragging
-
-Z-Index
-
-Minimize
-
-Restore
-
-Multiple Windows
-
-Status:
-
-⬜
+- WindowManager
+- Window component
+- Window lifecycle
+- Focus management
+- Z-index
+- Dragging
+- Mobile fullscreen mode
 
 ---
 
-# Mission 04
+## Mission 04 - Application Framework
+Status: ✅ Completed
 
-Plugin Architecture
-
-Application Loader
-
-Application Manager
-
-BaseApp
-
-Dynamic Applications
-
-Plugin Discovery
-
-Status:
-
-⬜
+- BaseApp
+- AppManager
+- AppLoader
+- Dynamic applications
+- Running applications
+- Singleton support
+- Taskbar integration
 
 ---
 
-# Mission 05
+# Phase 1 - Core Applications
 
-Placeholder Applications
+## Mission 05 - Case Management
+Status: ✅ Completed
 
-Case Management
-
-Police Mail
-
-Messenger
-
-Evidence
-
-Forensics
-
-CCTV
-
-City Map
-
-Board
-
-Criminal Database
-
-Settings
-
-Recycle Bin
-
-Status:
-
-⬜
+- Case browser
+- Case details
+- Progress
+- Search
+- Filtering
+- Local save
 
 ---
 
-# Mission 06
+## Mission 06 - Police Mail
+Status: ✅ Completed
 
-Storage System
-
-Storage Manager
-
-Desktop State
-
-Window State
-
-Theme
-
-Wallpaper
-
-Status:
-
-⬜
+- Inbox
+- Email viewer
+- Attachments
+- Search
+- Archive
+- Local persistence
 
 ---
 
-# Mission 07
+## Mission 07 - Settings
+Status: ✅ Completed
 
-Event System
-
-Global Event Bus
-
-Publish
-
-Subscribe
-
-Once
-
-Remove Listener
-
-Status:
-
-⬜
+- Appearance
+- Accessibility
+- Local settings
+- Wallpaper
+- UI Scale
+- StorageManager
 
 ---
 
-# Mission 08
+## Mission 08 - Evidence Database
 
-Desktop Polish
-
-Pixel Cursor
-
-Context Menu
-
-Desktop Selection
-
-Window Focus
-
-UI Improvements
-
-Status:
-
-⬜
+- Evidence browser
+- Categories
+- Evidence details
+- Notes
+- Favorites
+- Search
+- Filters
+- Mail integration
 
 ---
 
-# Mission 09
+## Mission 09 - CCTV Viewer
 
-Architecture Review
-
-Refactoring
-
-Cleanup
-
-Performance
-
-Documentation
-
-Status:
-
-⬜
+- Video browser
+- Timeline
+- Play / Pause
+- Frame stepping
+- Zoom
+- Camera selection
+- Bookmark timestamps
+- Link timestamps to evidence
 
 ---
 
-# Phase 2
+## Mission 10 - City Map
 
-Case Engine
-
-Case Loader
-
-Case JSON
-
-Case Manager
-
-Case Progress
-
-Status:
-
-⬜
+- Interactive city
+- Crime scene markers
+- Travel locations
+- Districts
+- Building information
+- Investigation markers
 
 ---
 
-# Phase 3
+## Mission 11 - Messenger
 
-Evidence Engine
-
-Evidence Types
-
-Evidence Database
-
-Evidence Viewer
-
-Status:
-
-⬜
+- Detective conversations
+- Witness chats
+- Police communications
+- Branching dialogue
+- Unread messages
+- Case integration
 
 ---
 
-# Phase 4
+## Mission 12 - Criminal Database
 
-Messenger
-
-Dialogue System
-
-NPC Messages
-
-Branching Conversations
-
-Status:
-
-⬜
+- Suspect profiles
+- Criminal history
+- Known associates
+- Mugshots
+- Search
+- Cross references
 
 ---
 
-# Phase 5
+## Mission 13 - Forensics Lab
 
-Police Mail
-
-Inbox
-
-Attachments
-
-Mission Assignment
-
-Lab Results
-
-Status:
-
-⬜
+- DNA reports
+- Fingerprints
+- Toxicology
+- Ballistics
+- Analysis queue
+- Timed report completion
 
 ---
 
-# Phase 6
+## Mission 14 - Investigation Board
 
-Forensics Lab
-
-DNA
-
-Fingerprints
-
-Toxicology
-
-Weapon Analysis
-
-Waiting Queue
-
-Status:
-
-⬜
+- Evidence nodes
+- Suspect nodes
+- Place nodes
+- Timeline nodes
+- Connections
+- Notes
+- Player hypotheses
+- Validation system
 
 ---
 
-# Phase 7
+# Phase 2 - Gameplay
 
-CCTV Viewer
+## Mission 15 - Investigation Flow
 
-Video Timeline
-
-Playback
-
-Zoom
-
-Bookmarks
-
-Snapshots
-
-Status:
-
-⬜
+- Objective system
+- Case progression
+- Unlock conditions
+- Active objectives
+- Failure states
 
 ---
 
-# Phase 8
+## Mission 16 - Save System
 
-City Map
-
-Interactive Map
-
-Locations
-
-Travel
-
-Case Markers
-
-Status:
-
-⬜
+- Auto save
+- Manual save
+- Multiple save slots
+- Backup saves
+- Import / Export
 
 ---
 
-# Phase 9
+## Mission 17 - Daily Cases
 
-Investigation Board
-
-Evidence Nodes
-
-Connections
-
-Theories
-
-Deduction
-
-Status:
-
-⬜
+- Daily investigations
+- Daily emails
+- Daily rewards
+- Time-limited challenges
 
 ---
 
-# Phase 10
+## Mission 18 - Player Profile
 
-Investigation Report
-
-Suspect Selection
-
-Evidence Selection
-
-Final Report
-
-Scoring
-
-Status:
-
-⬜
+- Detective rank
+- Experience
+- Statistics
+- Completed cases
+- Achievements
+- Unlockables
 
 ---
 
-# Phase 11
+## Mission 19 - Customization
 
-Progression
-
-XP
-
-Ranks
-
-Achievements
-
-Unlock System
-
-Status:
-
-⬜
+- Desktop themes
+- Wallpapers
+- Window colors
+- Profile avatar
+- Nameplate
+- Accessibility improvements
 
 ---
 
-# Phase 12
+## Mission 20 - Audio
 
-Save System
-
-Case Progress
-
-Player Progress
-
-Cloud Ready
-
-Status:
-
-⬜
+- UI sounds
+- Notifications
+- Ambient office sounds
+- Music system
+- Volume settings
 
 ---
 
-# Phase 13
+# Phase 3 - Content
 
-Backend Integration
+## Mission 21 - Tutorial Case
 
-Authentication
-
-Accounts
-
-Cloud Save
-
-API
-
-Status:
-
-⬜
+- Interactive tutorial
+- Guided investigation
+- Introduction to every application
 
 ---
 
-# Phase 14
+## Mission 22 - Story Cases
 
-Online Features
-
-Leaderboards
-
-Daily Cases
-
-Seasonal Events
-
-Community Cases
-
-Status:
-
-⬜
+- Main campaign
+- Progressive difficulty
+- Multiple endings
 
 ---
 
-# Phase 15
+## Mission 23 - Bonus Cases
 
-Release Preparation
-
-Optimization
-
-Testing
-
-Bug Fixes
-
-Accessibility
-
-Documentation
-
-Release Candidate
-
-Status:
-
-⬜
+- Optional investigations
+- Hidden cases
+- Challenge cases
 
 ---
 
-# Version Goals
+# Phase 4 - Polish
 
-v0.1
+## Mission 24 - Animations
 
-Workstation Prototype
+- Window animations
+- Loading transitions
+- UI polish
+- Cursor animations
 
-v0.2
+---
 
-Window System
+## Mission 25 - Optimization
 
-v0.3
+- Performance
+- Memory usage
+- Asset loading
+- Lazy loading
 
-Plugin Architecture
+---
 
-v0.4
+## Mission 26 - Accessibility
 
-First Playable Case
+- Keyboard navigation
+- High contrast
+- Screen scaling
+- Localization support
 
-v0.5
+---
 
-Core Gameplay
+## Mission 27 - Release Candidate
 
-v0.6
+- Bug fixing
+- QA
+- Balance
+- Final polish
 
-Full Investigation
+---
 
-v0.7
+# Future Expansion
 
-Progression
+## Multiplayer Case Sharing
 
-v0.8
+## Community Cases
 
-Backend
+## Steam Workshop Support
 
-v0.9
+## Cloud Saves
 
-Beta
+## Steam Achievements
 
-v1.0
+## Mod Support
 
-Public Release
+## DLC Cases
+
+## Seasonal Events
