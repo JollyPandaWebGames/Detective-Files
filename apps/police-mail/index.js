@@ -48,6 +48,7 @@ const ATTACHMENT_EMOJI = {
     image:    '🖼️',
     document: '📋',
     lab:      '🧪',
+    cctv:     '📹',
 };
 
 class PoliceMail extends BaseApp {
@@ -543,15 +544,19 @@ class PoliceMail extends BaseApp {
      */
     _openAttachmentPreview( attachment ) {
 
+        // CCTV attachments open the CCTV Viewer at the specified camera/timestamp.
+        if ( attachment.type === 'cctv' ) {
+            EventBus.emit( 'mail:cctv-opened', {
+                cameraId:  attachment.cameraId,
+                timestamp: attachment.timestamp ?? 0,
+            } );
+            return;
+        }
+
         // Notify Evidence Database so it can focus the linked evidence item.
-        // Evidence Database listens to 'mail:attachment-opened' and cross-
-        // references by sourceAttachmentId.  If no match exists the event
-        // is a no-op for Evidence Database but we still open the preview.
         EventBus.emit( 'mail:attachment-opened', { attachmentId: attachment.id } );
 
-        // If Evidence Database is open it handled the event above.
-        // Always also open the standalone preview so the attachment is
-        // viewable even without navigating away from Police Mail.
+        // Open a standalone placeholder preview window.
         import( '../../managers/WindowManager.js' ).then( ( { default: WindowManager } ) => {
 
             const winId = `attachment-${ attachment.id }`;

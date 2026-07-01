@@ -36,6 +36,7 @@ import SettingsManager    from '../managers/SettingsManager.js';
 import MailManager        from '../managers/MailManager.js';
 import CaseManager        from '../managers/CaseManager.js';
 import EvidenceManager    from '../managers/EvidenceManager.js';
+import CctvManager        from '../managers/CctvManager.js';
 
 class Workstation {
 
@@ -104,6 +105,11 @@ class Workstation {
         // Per-case evidence is loaded lazily when a case is selected.
         EvidenceManager.initialize();
 
+        // ── 7e. CCTV Data ──────────────────────────────────────────
+        // Load persisted CCTV state (bookmarks/notes/positions).
+        // Per-case camera data is loaded lazily on case selection.
+        CctvManager.initialize();
+
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit
         // 'application:requested'. This bridge routes them to ApplicationManager.
@@ -112,10 +118,15 @@ class Workstation {
         } );
 
         // Case Management starting a case with unread mail → auto-open Police Mail.
-        // MailManager emits this after detecting unread mail for the case.
         EventBus.on( 'mail:case-mail-available', ( { firstMailId } ) => {
             ApplicationManager.launch( 'police-mail' );
             EventBus.emit( 'mail:focus-request', { mailId: firstMailId } );
+        } );
+
+        // Police Mail CCTV attachment → open CCTV Viewer at specific camera/timestamp.
+        EventBus.on( 'mail:cctv-opened', ( { cameraId, timestamp } ) => {
+            ApplicationManager.launch( 'cctv' );
+            EventBus.emit( 'cctv:focus-request', { cameraId, timestamp } );
         } );
 
         // ── 9. Show Desktop ───────────────────────────────────────

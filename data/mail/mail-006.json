@@ -1,0 +1,22 @@
+{
+    "id": "mail-006",
+    "caseId": "case-001",
+    "from": "Officer Reyes",
+    "fromTitle": "Scene Coordinator",
+    "subject": "CCTV Footage — Lobby Camera (21:30–22:00)",
+    "date": "2026-06-29 10:15",
+    "priority": "High",
+    "read": false,
+    "starred": false,
+    "folder": "inbox",
+    "attachments": [
+        {
+            "id": "att-cctv-01",
+            "name": "Lobby Entrance — 21:30",
+            "type": "cctv",
+            "cameraId": "camera-01",
+            "timestamp": 92
+        }
+    ],
+    "body": "Detective,\n\nI've flagged the key segment from the lobby camera. The footage shows Dr. Rask entering at approximately 21:40. Of note: a second individual enters approximately 2 minutes and 35 seconds later, partially obscured.\n\nI've bookmarked the relevant timestamp. Open the attachment to jump directly to that moment in the CCTV Viewer.\n\n— Officer Reyes"
+}

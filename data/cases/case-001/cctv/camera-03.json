@@ -1,0 +1,14 @@
+{
+    "id": "camera-03",
+    "caseId": "case-001",
+    "name": "Parking Level B",
+    "location": "Underground Parking — Level B",
+    "date": "2026-06-28",
+    "duration": 0,
+    "video": null,
+    "thumbnail": null,
+    "available": false,
+    "resolution": "480p",
+    "notes": "",
+    "importantTimestamps": []
+}

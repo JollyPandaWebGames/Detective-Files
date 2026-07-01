@@ -281,6 +281,48 @@ class EvidenceManagerClass {
 
     }
 
+    /**
+     * Dynamically register a new evidence item that was created at runtime
+     * (e.g. a frame captured by CCTV Viewer) without requiring a JSON file.
+     *
+     * The item is added to both the active in-memory map and the cache,
+     * then 'evidence:loaded' is re-emitted so Evidence Database refreshes.
+     *
+     * @param {Object} item - A complete evidence object following the schema.
+     * @returns {void}
+     */
+    registerItem( item ) {
+
+        if ( !item || !item.id ) {
+            console.warn( 'EvidenceManager.registerItem: item must have an id.' );
+            return;
+        }
+
+        // Merge with any existing persisted state for this id.
+        const saved = this._state[ item.id ] ?? {};
+        const merged = {
+            ...item,
+            favorite: saved.favorite ?? false,
+            notes:    saved.notes    ?? '',
+        };
+
+        this._items.set( merged.id, merged );
+
+        // Also update the cache for the active case so future loadForCase()
+        // calls (from cache) include this item.
+        if ( this._activeCaseId && this._cache.has( this._activeCaseId ) ) {
+            this._cache.get( this._activeCaseId ).set( merged.id, merged );
+        }
+
+        EventBus.emit( 'evidence:loaded', {
+            caseId: this._activeCaseId,
+            count:  this._items.size,
+        } );
+
+        console.info( `EvidenceManager: Dynamically registered "${ merged.id }".` );
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Actions
     // ─────────────────────────────────────────────────────────────

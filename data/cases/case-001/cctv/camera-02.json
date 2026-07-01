@@ -1,0 +1,16 @@
+{
+    "id": "camera-02",
+    "caseId": "case-001",
+    "name": "Laboratory Corridor",
+    "location": "Level 3 — Research Wing",
+    "date": "2026-06-28",
+    "duration": 318,
+    "video": null,
+    "thumbnail": null,
+    "available": true,
+    "resolution": "720p",
+    "notes": "",
+    "importantTimestamps": [
+        { "time": 118, "label": "Feed corrupted — signal lost" }
+    ]
+}

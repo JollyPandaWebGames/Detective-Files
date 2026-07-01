@@ -1,0 +1,17 @@
+{
+    "id": "camera-01",
+    "caseId": "case-001",
+    "name": "Lobby Entrance",
+    "location": "Main Entrance — Ground Floor",
+    "date": "2026-06-28",
+    "duration": 420,
+    "video": null,
+    "thumbnail": null,
+    "available": true,
+    "resolution": "1080p",
+    "notes": "Last known sighting of Dr. Rask at 21:40.",
+    "importantTimestamps": [
+        { "time": 92,  "label": "Dr. Rask enters building" },
+        { "time": 247, "label": "Unidentified person follows" }
+    ]
+}

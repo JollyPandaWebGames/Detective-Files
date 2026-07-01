@@ -2,17 +2,599 @@
  * CCTV Viewer
  * Application Stylesheet
  *
- * All classes must be scoped with the .cctv- prefix.
- * Never use generic class names such as .container or .button.
+ * Scoped to: .cctv
+ * All classes prefixed with .cctv__
  * Never modify global styles from this file.
+ *
+ * Layout:
+ *   Desktop  — three columns: left sidebar | center | right sidebar
+ *   Tablet   — collapsible sidebars
+ *   Phone    — stacked single column
  */
 
-/* ── Root Container ──────────────────────────────────────────── */
-.cctv-window {
+/* ── Root ─────────────────────────────────────────────────────── */
+.cctv {
+    display:               grid;
+    grid-template-columns: 170px 1fr 200px;
+    width:                 100%;
+    height:                100%;
+    overflow:              hidden;
+    font-family:           var(--font-ui), monospace;
+    font-size:             var(--font-size-sm);
+    color:                 var(--color-text-primary);
+    background:            var(--color-bg-window);
+}
+
+/* ── Left Sidebar ─────────────────────────────────────────────── */
+.cctv__left {
+    display:        flex;
+    flex-direction: column;
+    background:     var(--color-bg-secondary);
+    border-right:   1px solid var(--color-border-window);
+    overflow:       hidden;
+}
+
+/* ── Panel Header ─────────────────────────────────────────────── */
+.cctv__panel-header {
+    display:         flex;
+    align-items:     center;
+    justify-content: space-between;
+    padding:         var(--space-2) var(--space-3);
+    background:      var(--color-bg-primary);
+    border-bottom:   1px solid var(--color-border-window);
+    font-size:       var(--font-size-xs);
+    color:           var(--color-text-secondary);
+    text-transform:  uppercase;
+    letter-spacing:  1px;
+    flex-shrink:     0;
+}
+
+/* ── Camera List ──────────────────────────────────────────────── */
+.cctv__camera-list {
+    flex:       1;
+    overflow-y: auto;
+}
+
+.cctv__camera-list::-webkit-scrollbar       { width: 4px; }
+.cctv__camera-list::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.cctv__camera-list::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+.cctv__camera-item {
+    display:       flex;
+    gap:           var(--space-2);
+    align-items:   center;
+    padding:       var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border-window);
+    cursor:        pointer;
+    outline:       none;
+    transition:    background var(--duration-instant) linear;
+}
+
+.cctv__camera-item:hover                { background: var(--color-bg-window); }
+.cctv__camera-item--selected            { background: var(--color-titlebar-active); }
+.cctv__camera-item--unavailable         { opacity: 0.45; cursor: not-allowed; }
+
+.cctv__camera-item:focus-visible {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: -2px;
+}
+
+.cctv__camera-thumb {
+    font-size:       20px;
+    image-rendering: auto;
+    flex-shrink:     0;
+}
+
+.cctv__camera-info  { flex: 1; min-width: 0; }
+.cctv__camera-name  { font-size: var(--font-size-xs); color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cctv__camera-meta  { font-size: 10px; color: var(--color-text-secondary); }
+.cctv__camera-unavail { font-size: 9px; color: var(--color-danger); letter-spacing: 0.5px; }
+
+/* ── Center ───────────────────────────────────────────────────── */
+.cctv__center {
+    display:        flex;
+    flex-direction: column;
+    overflow:       hidden;
+    background:     var(--color-bg-primary);
+}
+
+/* ── Player Wrap ──────────────────────────────────────────────── */
+.cctv__player-wrap {
+    flex:       1;
+    overflow:   hidden;
+    position:   relative;
+    background: #000;
+    display:    flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cctv__player-screen {
     width:      100%;
     height:     100%;
+    position:   relative;
+    overflow:   hidden;
+    transition: transform 0.1s linear;
+}
+
+/* ── No Signal ────────────────────────────────────────────────── */
+.cctv__no-signal {
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    width:           100%;
+    height:          100%;
+    gap:             var(--space-2);
+    background:      #050a0f;
+}
+
+.cctv__no-signal-text {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-xl);
+    color:          #1a3a1a;
+    letter-spacing: 8px;
+}
+
+.cctv__no-signal-sub {
+    font-size: var(--font-size-xs);
+    color:     var(--color-disabled);
+}
+
+/* ── Mock Footage ─────────────────────────────────────────────── */
+.cctv__mock-footage {
+    width:      100%;
+    height:     100%;
+    position:   relative;
+    background: linear-gradient( 160deg, #0a1520 0%, #0d1e2e 50%, #080f18 100% );
+    display:    flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cctv__mock-overlay {
+    position:   absolute;
+    top:        0;
+    left:       0;
+    right:      0;
+    display:    flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding:    var(--space-2) var(--space-3);
+    background: rgba( 0, 0, 0, 0.45 );
+    font-size:  var(--font-size-xs);
+}
+
+.cctv__mock-cam-name { color: #00ff88; font-size: 10px; }
+.cctv__mock-date     { color: var(--color-text-secondary); font-size: 10px; }
+
+.cctv__mock-rec {
+    color:      var(--color-danger);
+    font-size:  10px;
+    animation:  cctv-blink 1.2s step-end infinite;
+}
+
+@keyframes cctv-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
+.cctv__mock-scanline {
+    position:   absolute;
+    inset:      0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba( 0, 0, 0, 0.06 ) 2px,
+        rgba( 0, 0, 0, 0.06 ) 4px
+    );
+    pointer-events: none;
+}
+
+.cctv__mock-content {
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    gap:             var(--space-2);
+}
+
+.cctv__mock-scene {
+    font-size:      var(--font-size-md);
+    color:          rgba( 255,255,255, 0.12 );
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.cctv__mock-res {
+    font-size: 10px;
+    color:     rgba( 255,255,255, 0.06 );
+}
+
+/* ── Capture Flash ────────────────────────────────────────────── */
+.cctv__capture-flash {
+    position:   absolute;
+    inset:      0;
+    background: white;
+    opacity:    0.7;
+    animation:  cctv-flash 0.4s ease-out forwards;
+    pointer-events: none;
+    z-index:    10;
+}
+
+@keyframes cctv-flash {
+    0%   { opacity: 0.7; }
+    100% { opacity: 0; }
+}
+
+/* ── Controls Bar ─────────────────────────────────────────────── */
+.cctv__controls {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    padding:     var(--space-2) var(--space-3);
+    background:  var(--color-bg-secondary);
+    border-top:  1px solid var(--color-border-window);
+    flex-shrink: 0;
+    flex-wrap:   wrap;
+}
+
+.cctv__ctrl-btn {
+    width:       28px;
+    height:      24px;
+    background:  var(--color-bg-window);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    cursor:      pointer;
+    outline:     none;
+    display:     flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition:  background var(--duration-instant) linear;
+}
+
+.cctv__ctrl-btn:hover { background: var(--color-titlebar); }
+.cctv__ctrl-btn:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 1px; }
+
+.cctv__ctrl-play {
+    width:       36px;
+    background:  var(--color-titlebar-active);
+    border-color: var(--color-highlight);
+}
+
+.cctv__ctrl-play:hover { background: var(--color-highlight); color: var(--color-bg-primary); }
+
+.cctv__timecode {
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    color:       var(--color-text-primary);
+    flex-shrink: 0;
+    margin:      0 var(--space-2);
+}
+
+.cctv__timecode-sep { color: var(--color-disabled); margin: 0 2px; }
+
+.cctv__ctrl-speed {
+    padding:     0 var(--space-2);
+    height:      24px;
+    background:  var(--color-bg-window);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-warning);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    cursor:      pointer;
+    outline:     none;
+    flex-shrink: 0;
+    transition:  background var(--duration-instant) linear;
+}
+
+.cctv__ctrl-speed:hover { background: var(--color-titlebar); }
+
+.cctv__ctrl-zoom {
+    height:     24px;
+    padding:    0 var(--space-2);
     background: var(--color-bg-window);
+    border:     1px solid var(--color-border-window);
     color:      var(--color-text-primary);
     font-family: var(--font-ui), monospace;
-    font-size:  var(--font-size-md);
+    font-size:  var(--font-size-xs);
+    cursor:     pointer;
+    outline:    none;
+    appearance: none;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+}
+
+.cctv__ctrl-zoom:focus { border-color: var(--color-highlight); }
+
+.cctv__ctrl-capture {
+    margin-left:  auto;
+    padding:      0 var(--space-3);
+    height:       24px;
+    background:   var(--color-bg-secondary);
+    border:       1px solid var(--color-border-window);
+    color:        var(--color-text-primary);
+    font-family:  var(--font-ui), monospace;
+    font-size:    var(--font-size-xs);
+    cursor:       pointer;
+    outline:      none;
+    flex-shrink:  0;
+    transition:   background var(--duration-fast) linear;
+}
+
+.cctv__ctrl-capture:hover { background: var(--color-titlebar); border-color: var(--color-highlight); color: var(--color-highlight); }
+.cctv__ctrl-capture:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 1px; }
+
+/* ── Timeline ─────────────────────────────────────────────────── */
+.cctv__timeline {
+    height:      36px;
+    background:  var(--color-bg-primary);
+    border-top:  1px solid var(--color-border-window);
+    flex-shrink: 0;
+    cursor:      pointer;
+    position:    relative;
+    user-select: none;
+}
+
+.cctv__timeline-track {
+    position:   absolute;
+    top:        50%;
+    left:       var(--space-3);
+    right:      var(--space-3);
+    height:     4px;
+    background: var(--color-border-window);
+    transform:  translateY( -50% );
+}
+
+.cctv__timeline-head {
+    position:    absolute;
+    top:         50%;
+    left:        0%;
+    width:       3px;
+    height:      16px;
+    background:  var(--color-highlight);
+    transform:   translate( -50%, -50% );
+    transition:  left 0.05s linear;
+}
+
+.cctv__timeline-head--flash {
+    background: var(--color-warning);
+    box-shadow: 0 0 8px var(--color-warning);
+}
+
+.cctv__timeline-bookmark {
+    position:    absolute;
+    top:         50%;
+    width:       8px;
+    height:      8px;
+    background:  var(--color-warning);
+    transform:   translate( -50%, -50% ) rotate( 45deg );
+    cursor:      pointer;
+    z-index:     2;
+}
+
+.cctv__timeline-bookmark:hover { background: var(--color-danger); }
+
+/* ── Right Sidebar ────────────────────────────────────────────── */
+.cctv__right {
+    display:        flex;
+    flex-direction: column;
+    border-left:    1px solid var(--color-border-window);
+    overflow-y:     auto;
+    background:     var(--color-bg-secondary);
+}
+
+.cctv__right::-webkit-scrollbar       { width: 4px; }
+.cctv__right::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.cctv__right::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+/* ── Camera Info ──────────────────────────────────────────────── */
+.cctv__info {
+    padding:       var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border-window);
+}
+
+.cctv__info-field {
+    display:         flex;
+    justify-content: space-between;
+    font-size:       10px;
+    padding:         2px 0;
+    border-bottom:   1px solid var(--color-border-window);
+    gap:             var(--space-2);
+}
+
+.cctv__info-field:last-child { border-bottom: none; }
+
+.cctv__info-label {
+    color:       var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.cctv__info-heading {
+    font-size:      10px;
+    color:          var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin:         var(--space-2) 0 var(--space-1);
+}
+
+.cctv__ts-row {
+    display:     flex;
+    align-items: baseline;
+    gap:         var(--space-2);
+    font-size:   10px;
+    padding:     var(--space-1) var(--space-2);
+    cursor:      pointer;
+    border:      1px solid transparent;
+    transition:  background var(--duration-instant) linear;
+}
+
+.cctv__ts-row:hover { background: var(--color-bg-window); border-color: var(--color-border-window); }
+
+.cctv__ts-time  { color: var(--color-highlight); flex-shrink: 0; font-size: 9px; }
+.cctv__ts-label { color: var(--color-text-secondary); }
+
+/* ── Add Bookmark Button ──────────────────────────────────────── */
+.cctv__add-bookmark-btn {
+    background:  var(--color-bg-secondary);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   10px;
+    padding:     1px 6px;
+    cursor:      pointer;
+    outline:     none;
+    transition:  background var(--duration-instant) linear;
+}
+
+.cctv__add-bookmark-btn:hover { background: var(--color-titlebar); border-color: var(--color-highlight); }
+.cctv__add-bookmark-btn:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 1px; }
+
+/* ── Bookmark List ────────────────────────────────────────────── */
+.cctv__bookmark-list {
+    padding:       var(--space-1) 0;
+    border-bottom: 1px solid var(--color-border-window);
+    flex-shrink:   0;
+}
+
+.cctv__bookmark-row {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-1);
+    padding:     var(--space-1) var(--space-3);
+    border-bottom: 1px solid var(--color-border-window);
+}
+
+.cctv__bookmark-row:last-child { border-bottom: none; }
+
+.cctv__bookmark-time {
+    background:  none;
+    border:      none;
+    color:       var(--color-highlight);
+    font-family: var(--font-ui), monospace;
+    font-size:   10px;
+    cursor:      pointer;
+    padding:     0;
+    flex-shrink: 0;
+    outline:     none;
+}
+
+.cctv__bookmark-time:hover { text-decoration: underline; }
+
+.cctv__bookmark-title {
+    flex:          1;
+    font-size:     10px;
+    color:         var(--color-text-secondary);
+    overflow:      hidden;
+    text-overflow: ellipsis;
+    white-space:   nowrap;
+}
+
+.cctv__bookmark-del {
+    background:  none;
+    border:      none;
+    color:       var(--color-disabled);
+    font-size:   14px;
+    cursor:      pointer;
+    padding:     0;
+    line-height: 1;
+    outline:     none;
+    flex-shrink: 0;
+}
+
+.cctv__bookmark-del:hover { color: var(--color-danger); }
+
+/* ── Notes ────────────────────────────────────────────────────── */
+.cctv__notes {
+    flex:        1;
+    width:       100%;
+    min-height:  80px;
+    padding:     var(--space-2) var(--space-3);
+    background:  var(--color-bg-secondary);
+    border:      none;
+    border-top:  1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-body), monospace;
+    font-size:   var(--font-size-xs);
+    line-height: var(--line-height-normal);
+    resize:      none;
+    outline:     none;
+}
+
+.cctv__notes:focus { border-color: var(--color-highlight); }
+.cctv__notes:disabled { opacity: 0.4; }
+.cctv__notes::placeholder { color: var(--color-disabled); }
+
+/* ── Empty Hint ───────────────────────────────────────────────── */
+.cctv__empty-hint {
+    padding:    var(--space-3);
+    font-size:  var(--font-size-xs);
+    color:      var(--color-disabled);
+    text-align: center;
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Tablet                                               */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( min-width: 640px ) and ( max-width: 1023px ) {
+
+    .cctv {
+        grid-template-columns: 140px 1fr 170px;
+    }
+
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Phone                                                */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( max-width: 639px ) {
+
+    .cctv {
+        display:        flex;
+        flex-direction: column;
+    }
+
+    .cctv__left {
+        border-right:   none;
+        border-bottom:  1px solid var(--color-border-window);
+        max-height:     120px;
+    }
+
+    .cctv__camera-list {
+        display:    flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .cctv__camera-item {
+        flex-direction: column;
+        min-width:      90px;
+        border-bottom:  none;
+        border-right:   1px solid var(--color-border-window);
+        text-align:     center;
+        padding:        var(--space-2);
+    }
+
+    .cctv__center {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .cctv__right {
+        border-left:  none;
+        border-top:   1px solid var(--color-border-window);
+        max-height:   200px;
+        flex-shrink:  0;
+    }
+
+    .cctv__controls {
+        gap:     var(--space-1);
+        padding: var(--space-1) var(--space-2);
+    }
+
+    .cctv__ctrl-capture { margin-left: 0; }
+
 }
