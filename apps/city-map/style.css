@@ -2,17 +2,319 @@
  * City Map
  * Application Stylesheet
  *
- * All classes must be scoped with the .city-map- prefix.
- * Never use generic class names such as .container or .button.
+ * Scoped to: .citymap
+ * All classes prefixed with .citymap__
  * Never modify global styles from this file.
+ *
+ * Layout:
+ *   Desktop  — grid: left sidebar | canvas | right sidebar
+ *   Tablet   — collapsible sidebars
+ *   Phone    — fullscreen canvas + bottom sheet for details
  */
 
-/* ── Root Container ──────────────────────────────────────────── */
-.city-map-window {
-    width:      100%;
-    height:     100%;
-    background: var(--color-bg-window);
-    color:      var(--color-text-primary);
+/* ── Root ─────────────────────────────────────────────────────── */
+.citymap {
+    display:               grid;
+    grid-template-columns: 180px 1fr 200px;
+    width:                 100%;
+    height:                100%;
+    overflow:              hidden;
+    font-family:           var(--font-ui), monospace;
+    font-size:             var(--font-size-sm);
+    color:                 var(--color-text-primary);
+    background:            var(--color-bg-primary);
+}
+
+/* ── Left Sidebar ─────────────────────────────────────────────── */
+.citymap__left {
+    display:        flex;
+    flex-direction: column;
+    background:     var(--color-bg-secondary);
+    border-right:   1px solid var(--color-border-window);
+    overflow-y:     auto;
+}
+
+.citymap__left::-webkit-scrollbar       { width: 4px; }
+.citymap__left::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.citymap__left::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+/* ── Panel Header ─────────────────────────────────────────────── */
+.citymap__panel-header {
+    padding:        var(--space-2) var(--space-3);
+    background:     var(--color-bg-primary);
+    border-bottom:  1px solid var(--color-border-window);
+    font-size:      var(--font-size-xs);
+    color:          var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    flex-shrink:    0;
+}
+
+/* ── Search ───────────────────────────────────────────────────── */
+.citymap__search-wrap {
+    padding:       var(--space-2);
+    border-bottom: 1px solid var(--color-border-window);
+    flex-shrink:   0;
+}
+
+.citymap__search-input {
+    width:       100%;
+    padding:     var(--space-2);
+    background:  var(--color-bg-window);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
     font-family: var(--font-ui), monospace;
-    font-size:  var(--font-size-md);
+    font-size:   var(--font-size-xs);
+    outline:     none;
+}
+
+.citymap__search-input:focus { border-color: var(--color-highlight); }
+.citymap__search-input::placeholder { color: var(--color-disabled); }
+
+/* ── Filter List ──────────────────────────────────────────────── */
+.citymap__filter-list {
+    padding:       var(--space-2) var(--space-1);
+    border-bottom: 1px solid var(--color-border-window);
+    display:       flex;
+    flex-direction: column;
+    gap:           2px;
+}
+
+.citymap__filter-row {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    padding:     var(--space-1) var(--space-2);
+    cursor:      pointer;
+    font-size:   var(--font-size-xs);
+    color:       var(--color-text-secondary);
+    transition:  background var(--duration-instant) linear;
+}
+
+.citymap__filter-row:hover { background: var(--color-bg-window); }
+
+.citymap__filter-cb {
+    accent-color: var(--color-highlight);
+    cursor:       pointer;
+    flex-shrink:  0;
+}
+
+.citymap__filter-emoji {
+    font-size:       13px;
+    image-rendering: auto;
+    flex-shrink:     0;
+}
+
+.citymap__filter-label { flex: 1; }
+
+/* ── Navigation Buttons ───────────────────────────────────────── */
+.citymap__nav-btns {
+    display:    flex;
+    gap:        var(--space-2);
+    padding:    var(--space-2) var(--space-3);
+    flex-shrink: 0;
+}
+
+.citymap__nav-btn {
+    flex:        1;
+    height:      28px;
+    background:  var(--color-bg-window);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-md);
+    cursor:      pointer;
+    outline:     none;
+    display:     flex;
+    align-items: center;
+    justify-content: center;
+    transition:  background var(--duration-instant) linear;
+}
+
+.citymap__nav-btn:hover { background: var(--color-titlebar); border-color: var(--color-highlight); }
+.citymap__nav-btn:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 1px; }
+
+/* ── Canvas ───────────────────────────────────────────────────── */
+.citymap__center {
+    position:   relative;
+    overflow:   hidden;
+    background: #08111a;
+}
+
+.citymap__canvas {
+    display:     block;
+    width:       100%;
+    height:      100%;
+    cursor:      grab;
+    user-select: none;
+    touch-action: none;
+}
+
+.citymap__canvas:active { cursor: grabbing; }
+
+/* ── Right Sidebar ────────────────────────────────────────────── */
+.citymap__right {
+    display:        flex;
+    flex-direction: column;
+    background:     var(--color-bg-secondary);
+    border-left:    1px solid var(--color-border-window);
+    overflow-y:     auto;
+}
+
+.citymap__right::-webkit-scrollbar       { width: 4px; }
+.citymap__right::-webkit-scrollbar-track { background: var(--color-bg-secondary); }
+.citymap__right::-webkit-scrollbar-thumb { background: var(--color-border-window); }
+
+/* ── Detail Panel ─────────────────────────────────────────────── */
+.citymap__detail {
+    padding:        var(--space-3);
+    display:        flex;
+    flex-direction: column;
+    gap:            var(--space-2);
+    flex:           1;
+}
+
+.citymap__detail-empty {
+    flex:            1;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    gap:             var(--space-2);
+    color:           var(--color-disabled);
+    text-align:      center;
+}
+
+.citymap__detail-empty-emoji { font-size: 36px; opacity: 0.4; image-rendering: auto; }
+.citymap__detail-empty-text  { font-size: var(--font-size-xs); max-width: 140px; line-height: var(--line-height-normal); }
+
+.citymap__detail-thumb {
+    font-size:       32px;
+    text-align:      center;
+    image-rendering: auto;
+}
+
+.citymap__detail-name {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-sm);
+    color:          var(--color-text-primary);
+    line-height:    var(--line-height-tight);
+}
+
+.citymap__detail-type {
+    font-size:   var(--font-size-xs);
+    color:       var(--color-highlight);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.citymap__detail-address {
+    font-size:   var(--font-size-xs);
+    color:       var(--color-text-secondary);
+    padding-bottom: var(--space-2);
+    border-bottom:  1px solid var(--color-border-window);
+}
+
+.citymap__detail-description {
+    font-size:   var(--font-size-xs);
+    color:       var(--color-text-primary);
+    line-height: var(--line-height-normal);
+    white-space: pre-wrap;
+}
+
+.citymap__detail-section {
+    font-size:      10px;
+    color:          var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-bottom: var(--space-1);
+    border-bottom:  1px solid var(--color-border-window);
+    margin-top:     var(--space-1);
+}
+
+.citymap__detail-links {
+    display:        flex;
+    flex-direction: column;
+    gap:            2px;
+}
+
+.citymap__action-link {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-2);
+    padding:     var(--space-1) var(--space-2);
+    background:  var(--color-bg-window);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-xs);
+    cursor:      pointer;
+    outline:     none;
+    text-align:  left;
+    width:       100%;
+    transition:  background var(--duration-instant) linear;
+}
+
+.citymap__action-link:hover { background: var(--color-titlebar); border-color: var(--color-highlight); color: var(--color-highlight); }
+.citymap__action-link:focus-visible { outline: 2px solid var(--color-highlight); outline-offset: 1px; }
+
+.citymap__empty-field {
+    font-size: 10px;
+    color:     var(--color-disabled);
+}
+
+.citymap__notes {
+    width:       100%;
+    min-height:  70px;
+    padding:     var(--space-2);
+    background:  var(--color-bg-window);
+    border:      1px solid var(--color-border-window);
+    color:       var(--color-text-primary);
+    font-family: var(--font-body), monospace;
+    font-size:   var(--font-size-xs);
+    line-height: var(--line-height-normal);
+    resize:      vertical;
+    outline:     none;
+    margin-top:  auto;
+}
+
+.citymap__notes:focus { border-color: var(--color-highlight); }
+.citymap__notes::placeholder { color: var(--color-disabled); }
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Tablet                                               */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( min-width: 640px ) and ( max-width: 1023px ) {
+
+    .citymap {
+        grid-template-columns: 150px 1fr 170px;
+    }
+
+}
+
+/* ──────────────────────────────────────────────────────────────── */
+/* Responsive: Phone — fullscreen map + bottom sheet                */
+/* ──────────────────────────────────────────────────────────────── */
+@media ( max-width: 639px ) {
+
+    .citymap {
+        display:        flex;
+        flex-direction: column;
+    }
+
+    /* Hide sidebars; access via overlay controls instead */
+    .citymap__left  { display: none; }
+
+    .citymap__center { flex: 1; }
+
+    .citymap__right {
+        border-left:  none;
+        border-top:   1px solid var(--color-border-window);
+        max-height:   220px;
+        flex-shrink:  0;
+        overflow-y:   auto;
+    }
+
+    .citymap__detail { padding: var(--space-2); }
+
 }

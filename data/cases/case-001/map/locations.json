@@ -1,0 +1,67 @@
+{
+    "version": "1.0",
+    "mapWidth": 1200,
+    "mapHeight": 800,
+    "locations": [
+        {
+            "id": "loc-001",
+            "name": "Valcourt BioLabs",
+            "type": "Crime Scene",
+            "address": "14 Ashcroft Street, Industrial District",
+            "x": 620,
+            "y": 300,
+            "description": "Primary crime scene. Dr. Emil Rask was last seen entering the private laboratory on Level 3. Security footage shows he never exited the building.",
+            "relatedEvidence": [ "ev-002", "ev-004", "ev-005" ],
+            "relatedCameras": [ "camera-01", "camera-02", "camera-03" ],
+            "relatedWitnesses": []
+        },
+        {
+            "id": "loc-002",
+            "name": "Police Headquarters",
+            "type": "Police Station",
+            "address": "1 Holloway Lane, City Centre",
+            "x": 280,
+            "y": 420,
+            "description": "Central Investigation Department. Case briefing and evidence processing are coordinated from here. Captain Morgan's office is on the 4th floor.",
+            "relatedEvidence": [ "ev-001" ],
+            "relatedCameras": [],
+            "relatedWitnesses": []
+        },
+        {
+            "id": "loc-003",
+            "name": "Forensics Laboratory",
+            "type": "Laboratory",
+            "address": "7 Fogwood Street, Research Quarter",
+            "x": 750,
+            "y": 500,
+            "description": "City forensics laboratory where the fingerprint analysis and DNA samples for this case are being processed. Dr. Lena Marsh leads the investigation.",
+            "relatedEvidence": [ "ev-003" ],
+            "relatedCameras": [],
+            "relatedWitnesses": []
+        },
+        {
+            "id": "loc-004",
+            "name": "Rask Residence",
+            "type": "Witness Location",
+            "address": "33 Ravenwood Street, Westside",
+            "x": 180,
+            "y": 240,
+            "description": "Home address of Dr. Emil Rask. His personal assistant reported him missing after he failed to return home following the evening shift.",
+            "relatedEvidence": [],
+            "relatedCameras": [],
+            "relatedWitnesses": [ "witness-001" ]
+        },
+        {
+            "id": "loc-005",
+            "name": "Suspect Apartment",
+            "type": "Suspect Location",
+            "address": "88 Ravenwood Street, Westside",
+            "x": 200,
+            "y": 190,
+            "description": "Apartment of a person of interest identified from the CCTV footage. The individual was seen following Dr. Rask into the building at 21:42. Identity unconfirmed.",
+            "relatedEvidence": [],
+            "relatedCameras": [ "camera-01" ],
+            "relatedWitnesses": []
+        }
+    ]
+}

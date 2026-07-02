@@ -37,6 +37,7 @@ import MailManager        from '../managers/MailManager.js';
 import CaseManager        from '../managers/CaseManager.js';
 import EvidenceManager    from '../managers/EvidenceManager.js';
 import CctvManager        from '../managers/CctvManager.js';
+import MapManager         from '../managers/MapManager.js';
 
 class Workstation {
 
@@ -110,6 +111,11 @@ class Workstation {
         // Per-case camera data is loaded lazily on case selection.
         CctvManager.initialize();
 
+        // ── 7f. Map Data ───────────────────────────────────────────
+        // Load persisted map state (notes, zoom, center).
+        // Per-case location data is loaded lazily on case selection.
+        MapManager.initialize();
+
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit
         // 'application:requested'. This bridge routes them to ApplicationManager.
@@ -117,7 +123,18 @@ class Workstation {
             ApplicationManager.launch( appId );
         } );
 
-        // Case Management starting a case with unread mail → auto-open Police Mail.
+        // Evidence selected with a known location → open City Map and focus.
+        EventBus.on( 'evidence:selected', ( { evidence } ) => {
+            const loc = MapManager.getLocationByEvidence( evidence.id );
+            if ( loc ) EventBus.emit( 'map:focus-request', { locationId: loc.id } );
+        } );
+
+        // CCTV camera selected → highlight its map marker.
+        EventBus.on( 'cctv:opened', ( { cameraId } ) => {
+            if ( !cameraId ) return;
+            const loc = MapManager.getLocationByCamera( cameraId );
+            if ( loc ) EventBus.emit( 'map:focus-request', { locationId: loc.id } );
+        } );
         EventBus.on( 'mail:case-mail-available', ( { firstMailId } ) => {
             ApplicationManager.launch( 'police-mail' );
             EventBus.emit( 'mail:focus-request', { mailId: firstMailId } );

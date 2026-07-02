@@ -1,12 +1,13 @@
 {
     "id": "city-map",
     "title": "City Map",
-    "icon": "map.png",
+    "icon": "icons/City Map.png",
+    "emoji": "🗺️",
     "version": "1.0.0",
     "singleton": true,
     "resizable": false,
-    "width": 900,
+    "width": 1020,
     "height": 700,
-    "minimumWidth": 600,
-    "minimumHeight": 400
+    "minimumWidth": 700,
+    "minimumHeight": 500
 }
