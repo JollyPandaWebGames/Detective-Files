@@ -1,0 +1,111 @@
+{
+    "id": "conv-001",
+    "caseId": "case-001",
+    "contactId": "person-001",
+    "name": "Dr. Yara Osei",
+    "role": "Witness",
+    "avatar": null,
+    "avatarEmoji": "👩",
+    "online": false,
+    "unread": 2,
+    "messages": [
+        {
+            "id": "msg-001",
+            "type": "system",
+            "timestamp": "2026-06-29T08:00:00",
+            "text": "Conversation started. Dr. Yara Osei is Dr. Rask's personal research assistant.",
+            "sender": "system",
+            "attachments": []
+        },
+        {
+            "id": "msg-002",
+            "type": "npc",
+            "sender": "Dr. Yara Osei",
+            "timestamp": "2026-06-29T08:05:00",
+            "text": "Detective, thank you for reaching out. I'm still in shock. Emil — Dr. Rask — he would never just disappear. Something is very wrong.",
+            "attachments": []
+        },
+        {
+            "id": "msg-003",
+            "type": "npc",
+            "sender": "Dr. Yara Osei",
+            "timestamp": "2026-06-29T08:06:00",
+            "text": "He was working late on a confidential project. He told me not to disturb him after 9 PM. But when I arrived the next morning his office was empty and his coat was still on the chair.",
+            "attachments": [
+                {
+                    "type": "evidence",
+                    "id": "ev-001",
+                    "label": "Case Brief",
+                    "emoji": "📄"
+                }
+            ]
+        },
+        {
+            "id": "msg-004",
+            "type": "choice",
+            "timestamp": "2026-06-29T08:07:00",
+            "prompt": "How do you want to respond?",
+            "choices": [
+                {
+                    "id": "choice-001a",
+                    "text": "Do you know what the confidential project was about?",
+                    "nextMessageId": "msg-005a"
+                },
+                {
+                    "id": "choice-001b",
+                    "text": "Did you notice anyone unusual near the laboratory?",
+                    "nextMessageId": "msg-005b"
+                },
+                {
+                    "id": "choice-001c",
+                    "text": "When exactly did you last see him?",
+                    "nextMessageId": "msg-005c"
+                }
+            ]
+        }
+    ],
+    "branches": {
+        "msg-005a": {
+            "id": "msg-005a",
+            "type": "npc",
+            "sender": "Dr. Yara Osei",
+            "timestamp": "2026-06-29T08:09:00",
+            "text": "He never told me the details. But I know it involved a compound he'd been developing for two years. He was very protective of it. He kept the formula in a personal USB drive he wore around his neck.",
+            "attachments": [],
+            "nextMessageId": "msg-006"
+        },
+        "msg-005b": {
+            "id": "msg-005b",
+            "type": "npc",
+            "sender": "Dr. Yara Osei",
+            "timestamp": "2026-06-29T08:09:00",
+            "text": "Actually — yes. There was someone in the lobby when I left at 7 PM. A man in a dark jacket, sitting in the reception area. I assumed he was waiting for someone but the receptionist said he hadn't signed in.",
+            "attachments": [
+                {
+                    "type": "location",
+                    "locationId": "loc-001",
+                    "label": "Valcourt BioLabs Lobby",
+                    "emoji": "📍"
+                }
+            ],
+            "nextMessageId": "msg-006"
+        },
+        "msg-005c": {
+            "id": "msg-005c",
+            "type": "npc",
+            "sender": "Dr. Yara Osei",
+            "timestamp": "2026-06-29T08:09:00",
+            "text": "It was around 9:15 PM. I had gone back to retrieve my phone charger. He was at his desk reviewing data. He seemed distracted, almost agitated. He asked me to leave quickly. That was the last time I saw him.",
+            "attachments": [],
+            "nextMessageId": "msg-006"
+        },
+        "msg-006": {
+            "id": "msg-006",
+            "type": "npc",
+            "sender": "Dr. Yara Osei",
+            "timestamp": "2026-06-29T08:12:00",
+            "text": "I've told the police everything I know. Please find him, Detective. He's more than a colleague — he's been like a mentor to me.",
+            "attachments": []
+        }
+    }
+}

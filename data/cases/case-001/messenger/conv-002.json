@@ -1,0 +1,87 @@
+{
+    "id": "conv-002",
+    "caseId": "case-001",
+    "contactId": "person-002",
+    "name": "Dr. Lena Marsh",
+    "role": "Forensic Analyst",
+    "avatar": null,
+    "avatarEmoji": "🧑‍🔬",
+    "online": true,
+    "unread": 1,
+    "messages": [
+        {
+            "id": "msg-101",
+            "type": "system",
+            "timestamp": "2026-06-29T11:00:00",
+            "text": "Dr. Lena Marsh — Senior Forensic Analyst, City Forensics Laboratory.",
+            "sender": "system",
+            "attachments": []
+        },
+        {
+            "id": "msg-102",
+            "type": "npc",
+            "sender": "Dr. Lena Marsh",
+            "timestamp": "2026-06-29T14:20:00",
+            "text": "Detective. The fingerprint results from the laboratory door are back. The partial prints do not match Dr. Rask. We ran them against the CID database and found no direct match — whoever left them is either not on file or was wearing gloves and only one finger made contact.",
+            "attachments": [
+                {
+                    "type": "evidence",
+                    "id": "ev-003",
+                    "label": "Fingerprint Analysis Report",
+                    "emoji": "👆"
+                }
+            ]
+        },
+        {
+            "id": "msg-103",
+            "type": "npc",
+            "sender": "Dr. Lena Marsh",
+            "timestamp": "2026-06-29T14:22:00",
+            "text": "I'm also processing the residue from the shattered beaker. Results in approximately 6 hours. Come find me at the lab if you need anything.",
+            "attachments": [
+                {
+                    "type": "location",
+                    "locationId": "loc-003",
+                    "label": "Forensics Laboratory",
+                    "emoji": "📍"
+                }
+            ]
+        },
+        {
+            "id": "msg-104",
+            "type": "choice",
+            "timestamp": "2026-06-29T14:23:00",
+            "prompt": "Your response:",
+            "choices": [
+                {
+                    "id": "choice-102a",
+                    "text": "Can you expedite the beaker analysis?",
+                    "nextMessageId": "msg-105a"
+                },
+                {
+                    "id": "choice-102b",
+                    "text": "Understood. I'll check in later.",
+                    "nextMessageId": "msg-105b"
+                }
+            ]
+        }
+    ],
+    "branches": {
+        "msg-105a": {
+            "id": "msg-105a",
+            "type": "npc",
+            "sender": "Dr. Lena Marsh",
+            "timestamp": "2026-06-29T14:25:00",
+            "text": "I'll do what I can. No promises — the lab is backed up. You'll have it within 4 hours if you're lucky.",
+            "attachments": []
+        },
+        "msg-105b": {
+            "id": "msg-105b",
+            "type": "npc",
+            "sender": "Dr. Lena Marsh",
+            "timestamp": "2026-06-29T14:25:00",
+            "text": "Good. I'll message you the moment the results are ready. Stay sharp, Detective.",
+            "attachments": []
+        }
+    }
+}

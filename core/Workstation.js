@@ -38,6 +38,7 @@ import CaseManager        from '../managers/CaseManager.js';
 import EvidenceManager    from '../managers/EvidenceManager.js';
 import CctvManager        from '../managers/CctvManager.js';
 import MapManager         from '../managers/MapManager.js';
+import MessengerManager   from '../managers/MessengerManager.js';
 
 class Workstation {
 
@@ -115,6 +116,11 @@ class Workstation {
         // Load persisted map state (notes, zoom, center).
         // Per-case location data is loaded lazily on case selection.
         MapManager.initialize();
+
+        // ── 7g. Messenger Data ─────────────────────────────────────
+        // Load global conversations + persisted state.
+        // Case conversations are loaded lazily on case selection.
+        await MessengerManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit

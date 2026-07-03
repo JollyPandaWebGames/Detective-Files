@@ -1,12 +1,13 @@
 {
     "id": "messenger",
     "title": "Messenger",
-    "icon": "chat.png",
+    "icon": "icons/Messenger.png",
+    "emoji": "💬",
     "version": "1.0.0",
     "singleton": true,
     "resizable": false,
-    "width": 700,
-    "height": 560,
+    "width": 900,
+    "height": 620,
     "minimumWidth": 600,
     "minimumHeight": 400
 }
