@@ -1,0 +1,20 @@
+{
+    "id": "person-004",
+    "caseId": "case-001",
+    "name": "Dr. Lena Marsh",
+    "role": "Officer",
+    "age": 41,
+    "occupation": "Senior Forensic Analyst",
+    "employer": "City Forensics Laboratory",
+    "status": "Interviewed",
+    "avatarEmoji": "🧑‍🔬",
+    "description": "Senior forensic analyst leading the laboratory examination for case-001. Responsible for fingerprint analysis and beaker residue processing. Twenty years with the City Forensics division. Known for precise and thorough work.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "7 Fogwood Street, Research Quarter"
+    ],
+    "relatedEvidence": [ "ev-003" ],
+    "relatedLocations": [ "loc-003" ],
+    "relatedConversations": [ "conv-002" ],
+    "relationships": []
+}

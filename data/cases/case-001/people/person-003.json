@@ -1,0 +1,22 @@
+{
+    "id": "person-003",
+    "caseId": "case-001",
+    "name": "Unknown Male",
+    "role": "Person of Interest",
+    "age": null,
+    "occupation": "Unknown",
+    "employer": null,
+    "status": "Unknown",
+    "avatarEmoji": "🕵️",
+    "description": "Unidentified individual captured on CCTV at the Valcourt BioLabs lobby at 21:42 on the night of Dr. Rask's disappearance. Entered approximately two minutes after Dr. Rask. Partial fingerprint recovered does not match any CID database record. Description: dark jacket, medium build, approx. 180 cm.",
+    "knownAliases": [ "Dark Jacket Male" ],
+    "knownAddresses": [
+        "88 Ravenwood Street, Westside (unconfirmed)"
+    ],
+    "relatedEvidence": [ "ev-002", "ev-003" ],
+    "relatedLocations": [ "loc-001", "loc-005" ],
+    "relatedConversations": [],
+    "relationships": [
+        { "personId": "person-001", "type": "Unknown", "description": "Followed victim into building. Relationship undetermined." }
+    ]
+}

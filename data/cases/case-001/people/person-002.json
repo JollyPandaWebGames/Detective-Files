@@ -1,0 +1,23 @@
+{
+    "id": "person-002",
+    "caseId": "case-001",
+    "name": "Dr. Yara Osei",
+    "role": "Witness",
+    "age": 29,
+    "occupation": "Research Assistant",
+    "employer": "Valcourt BioLabs",
+    "status": "Interviewed",
+    "avatarEmoji": "👩",
+    "description": "Dr. Rask's personal research assistant for the past three years. She was among the last people to see him before his disappearance. Cooperative with investigators but visibly distressed.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "Westside District"
+    ],
+    "relatedEvidence": [],
+    "relatedLocations": [ "loc-001", "loc-004" ],
+    "relatedConversations": [ "conv-001" ],
+    "relationships": [
+        { "personId": "person-001", "type": "Colleague",  "description": "Research assistant to Dr. Rask for 3 years." },
+        { "personId": "person-003", "type": "Coworker",   "description": "Shared laboratory space." }
+    ]
+}

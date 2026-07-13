@@ -39,6 +39,7 @@ import EvidenceManager    from '../managers/EvidenceManager.js';
 import CctvManager        from '../managers/CctvManager.js';
 import MapManager         from '../managers/MapManager.js';
 import MessengerManager   from '../managers/MessengerManager.js';
+import PeopleManager      from '../managers/PeopleManager.js';
 
 class Workstation {
 
@@ -122,6 +123,11 @@ class Workstation {
         // Case conversations are loaded lazily on case selection.
         await MessengerManager.initialize();
 
+        // ── 7h. People Data ────────────────────────────────────────
+        // Load persisted people state (pinned, notes, lastViewed).
+        // Per-case data is loaded lazily on case selection.
+        PeopleManager.initialize();
+
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit
         // 'application:requested'. This bridge routes them to ApplicationManager.
@@ -129,10 +135,21 @@ class Workstation {
             ApplicationManager.launch( appId );
         } );
 
-        // Evidence selected with a known location → open City Map and focus.
+        // Messenger conversation opened → highlight contact's profile in Criminal Database.
+        EventBus.on( 'messenger:conversation-opened', ( { convId } ) => {
+            const person = PeopleManager.getByConversation( convId );
+            if ( person ) EventBus.emit( 'person:focus-request', { personId: person.id } );
+        } );
+
+        // Evidence selected → show related people in Criminal Database.
         EventBus.on( 'evidence:selected', ( { evidence } ) => {
             const loc = MapManager.getLocationByEvidence( evidence.id );
             if ( loc ) EventBus.emit( 'map:focus-request', { locationId: loc.id } );
+            // People bridge — fired separately so Criminal Database can react.
+            const people = PeopleManager.getByEvidence( evidence.id );
+            if ( people.length > 0 ) {
+                EventBus.emit( 'person:focus-request', { personId: people[ 0 ].id } );
+            }
         } );
 
         // CCTV camera selected → highlight its map marker.

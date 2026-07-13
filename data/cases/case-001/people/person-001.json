@@ -1,0 +1,24 @@
+{
+    "id": "person-001",
+    "caseId": "case-001",
+    "name": "Dr. Emil Rask",
+    "role": "Victim",
+    "age": 54,
+    "occupation": "Senior Research Scientist",
+    "employer": "Valcourt BioLabs",
+    "status": "Missing",
+    "avatarEmoji": "👨‍🔬",
+    "description": "Dr. Rask is a respected biochemist with 22 years at Valcourt BioLabs. He was working on an undisclosed proprietary compound before his disappearance. Known for obsessive focus on his work and secretive professional habits.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "33 Ravenwood Street, Westside",
+        "Valcourt BioLabs, 14 Ashcroft Street"
+    ],
+    "relatedEvidence": [ "ev-001", "ev-004", "ev-005" ],
+    "relatedLocations": [ "loc-001", "loc-004" ],
+    "relatedConversations": [],
+    "relationships": [
+        { "personId": "person-002", "type": "Colleague", "description": "Personal research assistant for 3 years." },
+        { "personId": "person-003", "type": "Coworker",  "description": "Worked in the same research division." }
+    ]
+}
