@@ -1,0 +1,12 @@
+{
+    "id": "analysis-001",
+    "caseId": "case-001",
+    "evidenceId": "ev-004",
+    "evidenceTitle": "Shattered Glass Beaker",
+    "type": "Fingerprint",
+    "description": "Latent fingerprint recovery and comparison from glass fragments. Cross-reference against CID database and known persons.",
+    "duration": 30,
+    "resultFile": "results/result-001.json",
+    "status": "Available",
+    "availableFor": [ "ev-004" ]
+}

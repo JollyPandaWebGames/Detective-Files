@@ -1,0 +1,13 @@
+{
+    "id": "result-002",
+    "analysisId": "analysis-002",
+    "summary": "Mitochondrial DNA profile extracted. Profile does not match Dr. Rask or any registered staff. Unknown individual — sample retained for comparison.",
+    "confidence": 94,
+    "details": "Biological material recovered from the laboratory door handle yielded a viable mitochondrial DNA profile. The profile was compared against CID records, Valcourt BioLabs employee database (obtained via warrant), and the national missing persons register. No match was identified. The profile is inconsistent with Dr. Emil Rask's known genetic markers. The sample has been preserved and catalogued for future comparison against any suspect detained in connection with this investigation.",
+    "newEvidence": [],
+    "relatedPeople": [ "person-003" ],
+    "recommendations": [
+        "Cross-reference DNA profile against regional forensic databases.",
+        "Request voluntary DNA samples from any persons of interest identified through CCTV footage."
+    ]
+}

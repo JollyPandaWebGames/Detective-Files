@@ -1,0 +1,12 @@
+{
+    "id": "analysis-003",
+    "caseId": "case-001",
+    "evidenceId": "ev-004",
+    "evidenceTitle": "Shattered Glass Beaker",
+    "type": "Toxicology",
+    "description": "Chemical compound identification from residue found in the shattered beaker. Spectroscopic analysis and molecular profiling.",
+    "duration": 60,
+    "resultFile": "results/result-003.json",
+    "status": "Available",
+    "availableFor": [ "ev-004" ]
+}

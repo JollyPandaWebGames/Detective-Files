@@ -1,12 +1,13 @@
 {
     "id": "forensics",
     "title": "Forensics Lab",
-    "icon": "forensics.png",
+    "icon": "icons/Forensics Lab.png",
+    "emoji": "🧪",
     "version": "1.0.0",
     "singleton": true,
     "resizable": false,
-    "width": 820,
-    "height": 620,
+    "width": 960,
+    "height": 680,
     "minimumWidth": 600,
     "minimumHeight": 400
 }

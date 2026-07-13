@@ -1,0 +1,12 @@
+{
+    "id": "analysis-002",
+    "caseId": "case-001",
+    "evidenceId": "ev-003",
+    "evidenceTitle": "Fingerprint Analysis Report",
+    "type": "DNA",
+    "description": "Full DNA sequencing of biological material recovered from the laboratory door handle. Mitochondrial profile extraction for comparison.",
+    "duration": 90,
+    "resultFile": "results/result-002.json",
+    "status": "Available",
+    "availableFor": [ "ev-003" ]
+}

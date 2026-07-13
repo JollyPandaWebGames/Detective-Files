@@ -229,6 +229,30 @@ class MailManagerClass {
 
     }
 
+    /**
+     * Dynamically inject a mail item created at runtime (e.g. from ForensicsManager).
+     * The item is added to the in-memory map and emits 'mail:loaded' so
+     * Police Mail refreshes its list automatically if open.
+     *
+     * @param {Object} mail - A complete mail object following the schema.
+     * @returns {void}
+     */
+    injectMail( mail ) {
+
+        if ( !mail || !mail.id ) {
+            console.warn( 'MailManager.injectMail: mail must have an id.' );
+            return;
+        }
+
+        // Merge with any persisted state for this id (edge case: re-injection).
+        this._mergeMail( mail );
+
+        EventBus.emit( 'mail:loaded', {} );
+
+        console.info( `MailManager: Injected mail "${ mail.id }".` );
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Actions
     // ─────────────────────────────────────────────────────────────

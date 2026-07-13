@@ -1,0 +1,14 @@
+{
+    "id": "result-003",
+    "analysisId": "analysis-003",
+    "summary": "Compound RX-7 identified — a proprietary neuro-sedative synthesised at Valcourt BioLabs. Concentration sufficient to incapacitate an adult within minutes of inhalation.",
+    "confidence": 99,
+    "details": "Spectroscopic analysis of the glass residue identified a compound designated RX-7 in internal Valcourt BioLabs documentation. This compound is a proprietary synthetic neuro-sedative developed by Dr. Rask's own research team over a 24-month period. The concentration present in the beaker residue (estimated 4.2 mg/mL) is consistent with a dosage sufficient to render an adult unconscious within 3–5 minutes of aerosol inhalation. The compound is not yet registered with any pharmaceutical regulatory body and is classified as experimental. Its presence in a shattered container at the scene strongly suggests it was deployed deliberately.",
+    "newEvidence": [],
+    "relatedPeople": [ "person-001" ],
+    "recommendations": [
+        "Treat Dr. Rask's disappearance as a deliberate abduction rather than a voluntary absence.",
+        "Investigate who within Valcourt BioLabs had access to RX-7 synthesis documentation.",
+        "Obtain Valcourt BioLabs internal access logs for all personnel who accessed RX-7 project files."
+    ]
+}

@@ -40,6 +40,7 @@ import CctvManager        from '../managers/CctvManager.js';
 import MapManager         from '../managers/MapManager.js';
 import MessengerManager   from '../managers/MessengerManager.js';
 import PeopleManager      from '../managers/PeopleManager.js';
+import ForensicsManager   from '../managers/ForensicsManager.js';
 
 class Workstation {
 
@@ -127,6 +128,11 @@ class Workstation {
         // Load persisted people state (pinned, notes, lastViewed).
         // Per-case data is loaded lazily on case selection.
         PeopleManager.initialize();
+
+        // ── 7i. Forensics Data ─────────────────────────────────────
+        // Load persisted queue state (submitted analyses, timestamps).
+        // Per-case analysis definitions are loaded lazily on case selection.
+        ForensicsManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit

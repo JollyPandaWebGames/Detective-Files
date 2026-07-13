@@ -1,0 +1,13 @@
+{
+    "id": "result-001",
+    "analysisId": "analysis-001",
+    "summary": "Partial fingerprint recovered. No match in CID database. Print is consistent with an adult male. Insufficient points of comparison for a definitive identification — minimum 12 required, 9 recovered.",
+    "confidence": 62,
+    "details": "Three latent fingerprints were recovered from the glass fragments. Two were degraded beyond usable quality. The third yielded a partial loop pattern with 9 identifiable ridge characteristics. Cross-referencing against the CID criminal database and all known persons associated with the case returned no match. The print profile has been flagged for comparison against any future suspects apprehended in connection with this investigation.",
+    "newEvidence": [],
+    "relatedPeople": [ "person-003" ],
+    "recommendations": [
+        "Obtain elimination prints from all Valcourt BioLabs staff with access to the laboratory.",
+        "Submit the partial print to the regional forensic bureau for extended comparison."
+    ]
+}
