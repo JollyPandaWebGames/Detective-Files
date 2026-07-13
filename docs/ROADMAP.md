@@ -1,6 +1,6 @@
 # Detective Files - Development Roadmap
 
-Version: 1.0
+Version: 2.0
 
 ---
 
@@ -105,6 +105,7 @@ Status: ✅ Completed
 ---
 
 ## Mission 08 - Evidence Database
+Status: ✅ Completed
 
 - Evidence browser
 - Categories
@@ -118,6 +119,7 @@ Status: ✅ Completed
 ---
 
 ## Mission 09 - CCTV Viewer
+Status: ✅ Completed
 
 - Video browser
 - Timeline
@@ -131,6 +133,7 @@ Status: ✅ Completed
 ---
 
 ## Mission 10 - City Map
+Status: ✅ Completed
 
 - Interactive city
 - Crime scene markers
@@ -142,6 +145,7 @@ Status: ✅ Completed
 ---
 
 ## Mission 11 - Messenger
+Status: ✅ Completed
 
 - Detective conversations
 - Witness chats
@@ -153,6 +157,7 @@ Status: ✅ Completed
 ---
 
 ## Mission 12 - Criminal Database
+Status: ✅ Completed
 
 - Suspect profiles
 - Criminal history
@@ -164,6 +169,7 @@ Status: ✅ Completed
 ---
 
 ## Mission 13 - Forensics Lab
+Status: ✅ Completed
 
 - DNA reports
 - Fingerprints
@@ -176,158 +182,334 @@ Status: ✅ Completed
 
 ## Mission 14 - Investigation Board
 
+- Infinite investigation canvas
 - Evidence nodes
-- Suspect nodes
-- Place nodes
-- Timeline nodes
+- Person nodes
+- Location nodes
+- CCTV nodes
+- Theory cards
 - Connections
-- Notes
-- Player hypotheses
-- Validation system
+- Groups
+- Detective notes
 
 ---
 
-# Phase 2 - Gameplay
+# Phase 1.5 - Architecture Refactor
+
+## EPIC 01 - CID OS Architecture 2.0
+
+Status: 🔄 Planned
+
+- ApplicationContext
+- SessionManager
+- Active Investigation System
+- Investigation Tracker Widget
+- Context lifecycle
+- Automatic application refresh
+- Global session state
+- Save / Resume architecture
+- Architecture freeze
+
+---
+
+# Phase 2 - Core Gameplay
 
 ## Mission 15 - Investigation Flow
 
-- Objective system
+- Investigation lifecycle
+- Objectives
 - Case progression
 - Unlock conditions
-- Active objectives
+- Active investigation
+- Current objectives
 - Failure states
 
 ---
 
-## Mission 16 - Save System
+## Mission 16 - Objective Engine
+
+- Objective graph
+- Dependencies
+- Hidden objectives
+- Optional objectives
+- Trigger system
+- Progress tracking
+
+---
+
+## Mission 17 - Case Resolution
+
+- Solve Investigation
+- Solution validation
+- Required evidence
+- Multiple endings
+- Success / Failure
+- Replay support
+
+---
+
+## Mission 18 - Investigation State Machine
+
+- Investigation states
+- Discovery flow
+- Dynamic progression
+- State transitions
+- Branching investigations
+
+---
+
+## Mission 19 - Dynamic Unlock System
+
+- Unlock evidence
+- Unlock witnesses
+- Unlock locations
+- Unlock emails
+- Unlock CCTV
+- Unlock forensic reports
+
+---
+
+# Phase 3 - Gameplay Validation
+
+Goal:
+Validate that the investigation loop is engaging before implementing meta systems.
+
+---
+
+## Mission 20 - Tutorial Case
+
+- Interactive onboarding
+- Guided investigation
+- Introduce every CID OS application
+
+---
+
+## Mission 21 - Case 001
+
+- First complete investigation
+- Beginner difficulty
+- Multiple evidence paths
+
+---
+
+## Mission 22 - Case 002
+
+- Medium difficulty
+- Multiple suspects
+- New investigation mechanics
+
+---
+
+## Mission 23 - Case 003
+
+- Advanced investigation
+- False leads
+- Optional objectives
+- Multiple conclusions
+
+---
+
+## Mission 24 - Investigation Balancing
+
+- Adjust pacing
+- Balance objectives
+- Improve clue distribution
+- Reduce dead ends
+- Improve difficulty curve
+- Playtesting
+- UX improvements
+
+---
+
+### 🎯 Vertical Slice Milestone (Version 0.5)
+
+At the end of Mission 24 the game should be fully playable.
+
+Deliverables:
+
+- Complete detective gameplay loop
+- Three fully playable investigations
+- Stable CID OS
+- Investigation engine
+- Active Investigation architecture
+- Cross-application workflow
+- Ready for closed playtesting
+- Ready for investor presentations
+
+No progression systems are required yet.
+
+---
+
+# Phase 4 - Meta Progression
+
+## Mission 25 - Save & Resume
 
 - Auto save
 - Manual save
 - Multiple save slots
-- Backup saves
+- Session restoration
 - Import / Export
 
 ---
 
-## Mission 17 - Daily Cases
+## Mission 26 - Player Profile
+
+- Detective profile
+- Statistics
+- Completed investigations
+- Career progression
+
+---
+
+## Mission 27 - XP & Rank System
+
+- Experience
+- Detective ranks
+- Skill progression
+- Unlock requirements
+
+---
+
+## Mission 28 - Rewards & Unlockables
+
+- Case rewards
+- Cosmetic unlocks
+- Badges
+- Titles
+- Wallpapers
+- Avatars
+
+---
+
+## Mission 29 - Daily Cases
 
 - Daily investigations
 - Daily emails
+- Rotating objectives
 - Daily rewards
-- Time-limited challenges
 
 ---
 
-## Mission 18 - Player Profile
-
-- Detective rank
-- Experience
-- Statistics
-- Completed cases
-- Achievements
-- Unlockables
-
----
-
-## Mission 19 - Customization
+## Mission 30 - Customization
 
 - Desktop themes
 - Wallpapers
 - Window colors
-- Profile avatar
-- Nameplate
-- Accessibility improvements
+- Accessibility
+- UI personalization
 
 ---
 
-## Mission 20 - Audio
+## Mission 31 - Statistics & Achievements
 
-- UI sounds
-- Notifications
-- Ambient office sounds
-- Music system
-- Volume settings
-
----
-
-# Phase 3 - Content
-
-## Mission 21 - Tutorial Case
-
-- Interactive tutorial
-- Guided investigation
-- Introduction to every application
+- Investigation statistics
+- Achievements
+- Completion tracking
+- Detective history
 
 ---
 
-## Mission 22 - Story Cases
+# Phase 5 - Content Platform
 
-- Main campaign
+## Mission 32 - Story Campaign
+
+- Main storyline
 - Progressive difficulty
-- Multiple endings
+- Narrative progression
 
 ---
 
-## Mission 23 - Bonus Cases
+## Mission 33 - Bonus Cases
 
 - Optional investigations
-- Hidden cases
+- Hidden investigations
 - Challenge cases
 
 ---
 
-# Phase 4 - Polish
+## Mission 34 - Community Case Framework
 
-## Mission 24 - Animations
-
-- Window animations
-- Loading transitions
-- UI polish
-- Cursor animations
+- JSON validation
+- External case loading
+- Case packaging
 
 ---
 
-## Mission 25 - Optimization
+## Mission 35 - Case Editor
+
+- Visual case editor
+- Dialogue editor
+- Evidence editor
+- Testing tools
+
+---
+
+## Mission 36 - Localization
+
+- Multi-language support
+- Localized case data
+- Font management
+
+---
+
+## Mission 37 - Audio System
+
+- UI sounds
+- Ambient office sounds
+- Music system
+- Investigation effects
+- Notification sounds
+
+---
+
+## Mission 38 - Optimization
 
 - Performance
 - Memory usage
-- Asset loading
 - Lazy loading
+- Asset optimization
 
 ---
 
-## Mission 26 - Accessibility
+## Mission 39 - Accessibility
 
 - Keyboard navigation
-- High contrast
-- Screen scaling
-- Localization support
+- High contrast mode
+- UI scaling
+- Accessibility improvements
 
 ---
 
-## Mission 27 - Release Candidate
+## Mission 40 - Release Candidate
 
-- Bug fixing
 - QA
-- Balance
-- Final polish
+- Bug fixing
+- Final balancing
+- Performance validation
+- Store preparation
 
 ---
 
 # Future Expansion
 
-## Multiplayer Case Sharing
+## Cloud Save
+
+## Steam Integration
+
+## Mobile Applications
 
 ## Community Cases
 
-## Steam Workshop Support
-
-## Cloud Saves
-
-## Steam Achievements
+## Steam Workshop
 
 ## Mod Support
 
-## DLC Cases
+## Multiplayer Investigations
+
+## Detective Clubs
+
+## AI Generated Cases
 
 ## Seasonal Events
+
+## DLC Case Packs
