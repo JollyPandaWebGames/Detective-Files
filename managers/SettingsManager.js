@@ -60,6 +60,11 @@ const WALLPAPER_PATHS = {
     'office':     'linear-gradient(160deg, #0d1b2a 0%, #1a2f45 50%, #0f2133 100%)',
     'evidence':   'linear-gradient(135deg, #1a0f0a 0%, #2d1810 40%, #1f2d1a 100%)',
     'city-night': 'linear-gradient(180deg, #050a14 0%, #0a1628 40%, #0d0f1a 70%, #1a0d24 100%)',
+    'ashcroft-street':   'assets/wallpapers/Ashcroft Street.png',
+    'fogwood-street':   'assets/wallpapers/Fogwood Street.png',
+    'ravenwood-street':   'assets/wallpapers/Ravenwood Street.png',
+    'holloway-lane':   'assets/wallpapers/Holloway Lane.png',
+    'police-headquarters':'assets/wallpapers/Police_headquarters.png'
 };
 
 class SettingsManagerClass {
@@ -162,6 +167,11 @@ class SettingsManagerClass {
             { id: 'office',     label: 'Police Office' },
             { id: 'evidence',   label: 'Evidence Room' },
             { id: 'city-night', label: 'City at Night' },
+            { id: 'ashcroft-street', label: 'Ashcroft Street' },
+            { id: 'fogwood-street', label: 'Fogwood Street' },
+            { id: 'ravenwood-street', label: 'Ravenwood Street' },
+            { id: 'holloway-lane', label: 'Holloway Lane' },
+            { id: 'police-headquarters', label: 'Police Headquarters'}
         ];
     }
 
