@@ -1,12 +1,12 @@
-# Detective Files - Development Roadmap
+Detective Files - Development Roadmap
 
-Version: 2.0
+Version: 2.1
 
----
+======================================================================
+PHASE 0 - FOUNDATION
+======================================================================
 
-# Phase 0 - Foundation
-
-## Mission 00 - Project Bootstrap
+Mission 00 - Project Bootstrap
 Status: ✅ Completed
 
 - Initialize project
@@ -15,9 +15,9 @@ Status: ✅ Completed
 - Create documentation
 - Configure development environment
 
----
+--------------------------------------------------
 
-## Mission 01 - Core Architecture
+Mission 01 - Core Architecture
 Status: ✅ Completed
 
 - Core managers
@@ -26,9 +26,9 @@ Status: ✅ Completed
 - Utilities
 - Base architecture
 
----
+--------------------------------------------------
 
-## Mission 02 - Desktop Environment
+Mission 02 - Desktop Environment
 Status: ✅ Completed
 
 - CID OS desktop
@@ -38,37 +38,36 @@ Status: ✅ Completed
 - Responsive desktop
 - Desktop context menu
 
----
+--------------------------------------------------
 
-## Mission 03 - Window Framework
+Mission 03 - Window Framework
 Status: ✅ Completed
 
 - WindowManager
-- Window component
 - Window lifecycle
 - Focus management
 - Z-index
 - Dragging
 - Mobile fullscreen mode
 
----
+--------------------------------------------------
 
-## Mission 04 - Application Framework
+Mission 04 - Application Framework
 Status: ✅ Completed
 
 - BaseApp
 - AppManager
-- AppLoader
 - Dynamic applications
 - Running applications
 - Singleton support
 - Taskbar integration
 
----
 
-# Phase 1 - Core Applications
+======================================================================
+PHASE 1 - CORE APPLICATIONS
+======================================================================
 
-## Mission 05 - Case Management
+Mission 05 - Case Management
 Status: ✅ Completed
 
 - Case browser
@@ -78,9 +77,9 @@ Status: ✅ Completed
 - Filtering
 - Local save
 
----
+--------------------------------------------------
 
-## Mission 06 - Police Mail
+Mission 06 - Police Mail
 Status: ✅ Completed
 
 - Inbox
@@ -90,9 +89,9 @@ Status: ✅ Completed
 - Archive
 - Local persistence
 
----
+--------------------------------------------------
 
-## Mission 07 - Settings
+Mission 07 - Settings
 Status: ✅ Completed
 
 - Appearance
@@ -100,11 +99,10 @@ Status: ✅ Completed
 - Local settings
 - Wallpaper
 - UI Scale
-- StorageManager
 
----
+--------------------------------------------------
 
-## Mission 08 - Evidence Database
+Mission 08 - Evidence Database
 Status: ✅ Completed
 
 - Evidence browser
@@ -114,11 +112,10 @@ Status: ✅ Completed
 - Favorites
 - Search
 - Filters
-- Mail integration
 
----
+--------------------------------------------------
 
-## Mission 09 - CCTV Viewer
+Mission 09 - CCTV Viewer
 Status: ✅ Completed
 
 - Video browser
@@ -128,35 +125,32 @@ Status: ✅ Completed
 - Zoom
 - Camera selection
 - Bookmark timestamps
-- Link timestamps to evidence
 
----
+--------------------------------------------------
 
-## Mission 10 - City Map
+Mission 10 - City Map
 Status: ✅ Completed
 
 - Interactive city
 - Crime scene markers
 - Travel locations
 - Districts
-- Building information
 - Investigation markers
 
----
+--------------------------------------------------
 
-## Mission 11 - Messenger
+Mission 11 - Messenger
 Status: ✅ Completed
 
 - Detective conversations
 - Witness chats
 - Police communications
 - Branching dialogue
-- Unread messages
-- Case integration
+- Notifications
 
----
+--------------------------------------------------
 
-## Mission 12 - Criminal Database
+Mission 12 - Criminal Database
 Status: ✅ Completed
 
 - Suspect profiles
@@ -166,21 +160,21 @@ Status: ✅ Completed
 - Search
 - Cross references
 
----
+--------------------------------------------------
 
-## Mission 13 - Forensics Lab
+Mission 13 - Forensics Lab
 Status: ✅ Completed
 
 - DNA reports
 - Fingerprints
 - Toxicology
 - Ballistics
-- Analysis queue
 - Timed report completion
 
----
+--------------------------------------------------
 
-## Mission 14 - Investigation Board
+Mission 14 - Investigation Board
+Status: ✅ Completed
 
 - Infinite investigation canvas
 - Evidence nodes
@@ -189,16 +183,16 @@ Status: ✅ Completed
 - CCTV nodes
 - Theory cards
 - Connections
-- Groups
 - Detective notes
 
----
 
-# Phase 1.5 - Architecture Refactor
+======================================================================
+PHASE 1.5 - ARCHITECTURE REFACTOR
+======================================================================
 
-## EPIC 01 - CID OS Architecture 2.0
+EPIC 01 - CID OS Architecture 2.0
 
-Status: 🔄 Planned
+Status: Planned
 
 - ApplicationContext
 - SessionManager
@@ -210,187 +204,210 @@ Status: 🔄 Planned
 - Save / Resume architecture
 - Architecture freeze
 
----
 
-# Phase 2 - Core Gameplay
+======================================================================
+PHASE 2 - CORE GAMEPLAY
+======================================================================
 
-## Mission 15 - Investigation Flow
+Mission 15 - Investigation Flow
 
 - Investigation lifecycle
 - Objectives
-- Case progression
-- Unlock conditions
 - Active investigation
-- Current objectives
-- Failure states
+- Progress tracking
+- Investigation phases
+- Locked content
+- Automatic objective completion
 
----
+--------------------------------------------------
 
-## Mission 16 - Objective Engine
+Mission 16 - Objective Engine
 
-- Objective graph
+- Data-driven objective graph
 - Dependencies
 - Hidden objectives
 - Optional objectives
 - Trigger system
-- Progress tracking
+- Objective actions
+- JSON-driven investigations
 
----
+--------------------------------------------------
 
-## Mission 17 - Case Resolution
+Mission 17 - Case Resolution Engine
 
 - Solve Investigation
+- Resolution wizard
+- Deduction engine
 - Solution validation
-- Required evidence
-- Multiple endings
-- Success / Failure
+- Investigation report
+- Headquarters feedback
+- Investigation scoring
 - Replay support
 
----
+--------------------------------------------------
 
-## Mission 18 - Investigation State Machine
+Mission 18 - Investigation State Machine
 
 - Investigation states
-- Discovery flow
 - Dynamic progression
+- Timed events
 - State transitions
+- World reactions
 - Branching investigations
 
----
+--------------------------------------------------
 
-## Mission 19 - Dynamic Unlock System
+Mission 19 - Dynamic Content Unlock Engine
 
+- Unlock Manager
 - Unlock evidence
 - Unlock witnesses
 - Unlock locations
 - Unlock emails
 - Unlock CCTV
 - Unlock forensic reports
+- Conditional unlock rules
+- Notifications
 
----
 
-# Phase 3 - Gameplay Validation
+======================================================================
+PHASE 3 - GAMEPLAY VALIDATION
+======================================================================
 
-Goal:
-Validate that the investigation loop is engaging before implementing meta systems.
+Goal
 
----
+Validate the complete detective gameplay loop before implementing meta progression.
 
-## Mission 20 - Tutorial Case
+--------------------------------------------------
+
+Mission 20 - Tutorial Investigation
+
+Operation Zero
 
 - Interactive onboarding
 - Guided investigation
-- Introduce every CID OS application
+- Teach every CID OS application
+- Teach every gameplay mechanic
 
----
+--------------------------------------------------
 
-## Mission 21 - Case 001
+Mission 21 - Case 001
 
-- First complete investigation
+The First Murder
+
+- First complete murder investigation
 - Beginner difficulty
+- Multiple suspects
 - Multiple evidence paths
+- 30–45 minutes gameplay
 
----
+--------------------------------------------------
 
-## Mission 22 - Case 002
+Mission 22 - Case 002
+
+Silent Witness
 
 - Medium difficulty
 - Multiple suspects
-- New investigation mechanics
+- Branching investigation
+- Contradictory witness statements
+- Optional objectives
 
----
+--------------------------------------------------
 
-## Mission 23 - Case 003
+Mission 23 - Case 003
+
+The Forgotten Room
 
 - Advanced investigation
 - False leads
-- Optional objectives
+- Hidden evidence
 - Multiple conclusions
+- Advanced deduction
 
----
+--------------------------------------------------
 
-## Mission 24 - Investigation Balancing
+Mission 24 - Investigation Balancing
 
-- Adjust pacing
+- Balance pacing
 - Balance objectives
 - Improve clue distribution
 - Reduce dead ends
-- Improve difficulty curve
-- Playtesting
 - UX improvements
+- Playtesting
+- Difficulty tuning
 
----
+--------------------------------------------------
 
-### 🎯 Vertical Slice Milestone (Version 0.5)
+VERTICAL SLICE MILESTONE (Version 0.5)
 
-At the end of Mission 24 the game should be fully playable.
-
-Deliverables:
+Deliverables
 
 - Complete detective gameplay loop
-- Three fully playable investigations
+- Three playable investigations
 - Stable CID OS
-- Investigation engine
+- Investigation Engine
 - Active Investigation architecture
 - Cross-application workflow
+- Ready for investor presentation
 - Ready for closed playtesting
-- Ready for investor presentations
 
-No progression systems are required yet.
+No progression systems yet.
 
----
 
-# Phase 4 - Meta Progression
+======================================================================
+PHASE 4 - META PROGRESSION
+======================================================================
 
-## Mission 25 - Save & Resume
+Mission 25 - Save & Resume
 
 - Auto save
 - Manual save
-- Multiple save slots
+- Save slots
 - Session restoration
 - Import / Export
 
----
+--------------------------------------------------
 
-## Mission 26 - Player Profile
+Mission 26 - Player Profile
 
 - Detective profile
 - Statistics
-- Completed investigations
 - Career progression
+- Completed investigations
 
----
+--------------------------------------------------
 
-## Mission 27 - XP & Rank System
+Mission 27 - XP & Rank System
 
 - Experience
-- Detective ranks
+- Detective rank
 - Skill progression
 - Unlock requirements
 
----
+--------------------------------------------------
 
-## Mission 28 - Rewards & Unlockables
+Mission 28 - Rewards & Unlockables
 
-- Case rewards
-- Cosmetic unlocks
+- Rewards
 - Badges
 - Titles
 - Wallpapers
 - Avatars
+- Cosmetic unlocks
 
----
+--------------------------------------------------
 
-## Mission 29 - Daily Cases
+Mission 29 - Daily Cases
 
 - Daily investigations
 - Daily emails
 - Rotating objectives
 - Daily rewards
 
----
+--------------------------------------------------
 
-## Mission 30 - Customization
+Mission 30 - Customization
 
 - Desktop themes
 - Wallpapers
@@ -398,118 +415,188 @@ No progression systems are required yet.
 - Accessibility
 - UI personalization
 
----
+--------------------------------------------------
 
-## Mission 31 - Statistics & Achievements
+Mission 31 - Statistics & Achievements
 
 - Investigation statistics
 - Achievements
-- Completion tracking
 - Detective history
+- Completion tracking
 
----
 
-# Phase 5 - Content Platform
+======================================================================
+PHASE 5 - Game Content & Release
+======================================================================
 
-## Mission 32 - Story Campaign
+Mission 32 - Story Campaign
 
 - Main storyline
 - Progressive difficulty
 - Narrative progression
+- HQ storyline
+- Campaign progression
+- Campaign unlock system
 
----
+--------------------------------------------------
 
-## Mission 33 - Bonus Cases
+Mission 33 - Bonus Cases
 
 - Optional investigations
 - Hidden investigations
 - Challenge cases
+- Seasonal case support
+- Time-limited investigations
 
----
+--------------------------------------------------
 
-## Mission 34 - Community Case Framework
+Mission 34 - DFCP Package Framework
 
-- JSON validation
+- DFCP specification
+- Package manifest
+- Package validation
+- Version compatibility
 - External case loading
-- Case packaging
+- Asset packaging
+- Import / Export pipeline
 
----
+--------------------------------------------------
 
-## Mission 35 - Case Editor
-
-- Visual case editor
-- Dialogue editor
-- Evidence editor
-- Testing tools
-
----
-
-## Mission 36 - Localization
+Mission 35 - Localization & Audio
 
 - Multi-language support
 - Localized case data
 - Font management
-
----
-
-## Mission 37 - Audio System
-
 - UI sounds
-- Ambient office sounds
+- Ambient office
 - Music system
-- Investigation effects
 - Notification sounds
 
----
+--------------------------------------------------
 
-## Mission 38 - Optimization
+Mission 36 - Optimization & Accessibility
 
 - Performance
-- Memory usage
+- Memory optimization
 - Lazy loading
 - Asset optimization
-
----
-
-## Mission 39 - Accessibility
-
+- Accessibility improvements
 - Keyboard navigation
 - High contrast mode
-- UI scaling
-- Accessibility improvements
+- Mobile optimization
 
----
+--------------------------------------------------
 
-## Mission 40 - Release Candidate
+Mission 37 - Release Candidate
 
 - QA
 - Bug fixing
 - Final balancing
 - Performance validation
 - Store preparation
+- Steam build
+- Documentation
+- Release checklist
 
----
 
-# Future Expansion
+======================================================================
+Phase 6 — Detective Files Studio
+======================================================================
 
-## Cloud Save
+Mission 38 - Detective Files Studio (MVP)
 
-## Steam Integration
+- Project Manager
+- Case Manager
+- Asset Browser
+- Validation Panel
+- Import DFCP
+- Export DFCP
 
-## Mobile Applications
+--------------------------------------------------
 
-## Community Cases
+Mission 39 - Detective Files Studio Pro
 
-## Steam Workshop
+- Story Editor
+- People Editor
+- Evidence Editor
+- Email Editor
+- Messenger Editor
+- CCTV Editor
+- Forensics Editor
+- Location Editor
+- Timeline Editor
 
-## Mod Support
+--------------------------------------------------
 
-## Multiplayer Investigations
+Mission 40 - Visual Investigation Designer
 
-## Detective Clubs
+- Objective Graph Editor
+- Unlock Graph Editor
+- Investigation State Machine Editor
+- Board Template Editor
+- Live Preview
+- Debug Inspector
 
-## AI Generated Cases
+--------------------------------------------------
 
-## Seasonal Events
+Mission 41 — Preview & Debug Tools
 
-## DLC Case Packs
+- Live Preview
+- Debug Overlay
+- Objective Inspector
+- Unlock Inspector
+- State Inspector
+
+--------------------------------------------------
+
+Mission 42 — Publishing Pipeline
+
+- Build DFCP
+- Validation
+- Asset Optimization
+- Package Signing
+- Community Package Export
+
+======================================================================
+FUTURE EXPANSION
+======================================================================
+
+Platform
+
+- Cloud Save
+- User Accounts
+- Cross-device Sync
+
+Community
+
+- Community Cases
+- Detective Files Marketplace
+- Community Ratings
+- Featured Cases
+- Steam Workshop
+
+Multiplayer
+
+- Cooperative Investigations
+- Detective Clubs
+- Shared Evidence
+
+AI
+
+- AI-generated Cases
+- AI Dialogue Assistant
+- AI Case Validator
+- Automatic Localization
+
+Mobile
+
+- Android
+- iOS
+- Cross-platform Save
+
+Online Services
+
+- Daily Events
+- Seasonal Events
+- DLC Case Packs
+- Live Operations
