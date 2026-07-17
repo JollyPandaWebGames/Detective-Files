@@ -41,6 +41,7 @@ import MapManager         from '../managers/MapManager.js';
 import MessengerManager   from '../managers/MessengerManager.js';
 import PeopleManager      from '../managers/PeopleManager.js';
 import ForensicsManager   from '../managers/ForensicsManager.js';
+import BoardManager       from '../managers/BoardManager.js';
 
 class Workstation {
 
@@ -133,6 +134,7 @@ class Workstation {
         // Load persisted queue state (submitted analyses, timestamps).
         // Per-case analysis definitions are loaded lazily on case selection.
         ForensicsManager.initialize();
+        BoardManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit
