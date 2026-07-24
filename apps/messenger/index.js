@@ -67,6 +67,7 @@ class Messenger extends BaseApp {
         this._onCaseSelected = ( { case: c } ) => this._handleCaseSelected( c );
         this._onLoaded       = ()               => this._renderConvList();
         this._onPinned       = ()               => this._renderConvList();
+        this._onFocusRequest = ( { convId } )   => this._openConversation( convId );
 
     }
 
@@ -83,6 +84,7 @@ class Messenger extends BaseApp {
         EventBus.on( 'case:selected',                  this._onCaseSelected );
         EventBus.on( 'messenger:loaded',               this._onLoaded       );
         EventBus.on( 'messenger:conversation-pinned',  this._onPinned       );
+        EventBus.on( 'messenger:focus-request',        this._onFocusRequest );
         this._renderConvList();
     }
 
@@ -90,6 +92,7 @@ class Messenger extends BaseApp {
         EventBus.off( 'case:selected',                 this._onCaseSelected );
         EventBus.off( 'messenger:loaded',              this._onLoaded       );
         EventBus.off( 'messenger:conversation-pinned', this._onPinned       );
+        EventBus.off( 'messenger:focus-request',       this._onFocusRequest );
         clearTimeout( this._notesTimer );
     }
 

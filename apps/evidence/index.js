@@ -95,6 +95,7 @@ class Evidence extends BaseApp {
         this._onEvidenceLoaded     = ()              => this._refreshList();
         this._onEvidencePinned     = ()              => this._refreshList();
         this._onAttachmentOpened   = ( { attachmentId } ) => this._focusByAttachment( attachmentId );
+        this._onFocusRequest       = ( { evidenceId }   ) => this._focusByAttachment( null, evidenceId );
 
     }
 
@@ -115,6 +116,7 @@ class Evidence extends BaseApp {
         EventBus.on( 'evidence:loaded',         this._onEvidenceLoaded   );
         EventBus.on( 'evidence:pinned',         this._onEvidencePinned   );
         EventBus.on( 'mail:attachment-opened',  this._onAttachmentOpened );
+        EventBus.on( 'evidence:focus-request',  this._onFocusRequest     );
 
         // Restore last active case and evidence if reopened.
         if ( this._activeCaseId ) {
@@ -132,6 +134,7 @@ class Evidence extends BaseApp {
         EventBus.off( 'evidence:loaded',        this._onEvidenceLoaded   );
         EventBus.off( 'evidence:pinned',        this._onEvidencePinned   );
         EventBus.off( 'mail:attachment-opened', this._onAttachmentOpened );
+        EventBus.off( 'evidence:focus-request', this._onFocusRequest     );
 
         clearTimeout( this._notesSaveTimer );
 
@@ -546,9 +549,12 @@ class Evidence extends BaseApp {
      * @param {string} attachmentId
      * @returns {void}
      */
-    _focusByAttachment( attachmentId ) {
+    _focusByAttachment( attachmentId, evidenceId ) {
 
-        const item = EvidenceManager.getByAttachmentId( attachmentId );
+        const item = evidenceId
+            ? EvidenceManager.getById( evidenceId )
+            : EvidenceManager.getByAttachmentId( attachmentId );
+
         if ( !item ) return;
 
         this._selectEvidence( item.id );
