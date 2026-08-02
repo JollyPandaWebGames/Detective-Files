@@ -1,0 +1,21 @@
+{
+    "id": "ev-006",
+    "caseId": "case-001",
+    "title": "Severed Lanyard Cord",
+    "category": "Physical Evidence",
+    "type": "object",
+    "status": "Collected",
+    "location": "Valcourt BioLabs — Private Laboratory",
+    "collectedBy": "Officer Reyes",
+    "date": "2026-06-29",
+    "description": "A short length of black nylon lanyard cord recovered from beneath the workbench, partially hidden by the overturned chair. No USB drive or pendant was attached. The cord end is clean-cut rather than torn or frayed.",
+    "thumbnail": "ev-006-thumb.png",
+    "preview": "ev-006-preview.png",
+    "tags": [ "physical", "lanyard", "laboratory", "usb", "struggle" ],
+    "related": [ "ev-002", "ev-004" ],
+    "sourceAttachmentId": null,
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Officer Reyes",   "date": "2026-06-29 09:30" },
+        { "stage": "Transferred", "by": "Evidence Locker", "date": "2026-06-29 10:10" }
+    ]
+}

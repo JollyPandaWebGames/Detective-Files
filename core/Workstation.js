@@ -42,6 +42,7 @@ import MessengerManager   from '../managers/MessengerManager.js';
 import PeopleManager      from '../managers/PeopleManager.js';
 import ForensicsManager   from '../managers/ForensicsManager.js';
 import BoardManager       from '../managers/BoardManager.js';
+import RecycleBinManager  from '../managers/RecycleBinManager.js';
 
 class Workstation {
 
@@ -135,6 +136,7 @@ class Workstation {
         // Per-case analysis definitions are loaded lazily on case selection.
         ForensicsManager.initialize();
         BoardManager.initialize();
+        RecycleBinManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit

@@ -26,7 +26,7 @@
     background-size:     cover;
     background-position: center;
     background-repeat:   no-repeat;
-    image-rendering:     pixelated;
+    image-rendering:     auto;
     z-index:             0;
 }
 

@@ -1,0 +1,97 @@
+{
+    "id": "conv-003",
+    "caseId": "case-001",
+    "contactId": "person-005",
+    "name": "Marcus Webb",
+    "role": "Night Security Guard",
+    "avatar": null,
+    "avatarEmoji": "🧑‍✈️",
+    "online": true,
+    "unread": 1,
+    "messages": [
+        {
+            "id": "msg-201",
+            "type": "system",
+            "timestamp": "2026-06-29T16:00:00",
+            "text": "Marcus Webb — Night Security Guard, Valcourt BioLabs. On duty the night Dr. Rask disappeared.",
+            "sender": "system",
+            "attachments": []
+        },
+        {
+            "id": "msg-202",
+            "type": "npc",
+            "sender": "Marcus Webb",
+            "timestamp": "2026-06-29T16:03:00",
+            "text": "Detective. Look, I already told the officer who came by — I didn't see anything wrong that night. Nothing on my end looked out of place.",
+            "attachments": []
+        },
+        {
+            "id": "msg-203",
+            "type": "npc",
+            "sender": "Marcus Webb",
+            "timestamp": "2026-06-29T16:04:00",
+            "text": "I know how it looks that the Level 3 corridor feed cut out right around then. I swear that camera's been glitchy for weeks. I put in two maintenance requests myself.",
+            "attachments": [
+                {
+                    "type": "location",
+                    "locationId": "loc-001",
+                    "label": "Valcourt BioLabs",
+                    "emoji": "📍"
+                }
+            ]
+        },
+        {
+            "id": "msg-204",
+            "type": "choice",
+            "timestamp": "2026-06-29T16:05:00",
+            "prompt": "Your response:",
+            "choices": [
+                {
+                    "id": "choice-201a",
+                    "text": "Walk me through exactly what you saw before the feed dropped.",
+                    "nextMessageId": "msg-205a"
+                },
+                {
+                    "id": "choice-201b",
+                    "text": "Did you notice anything unusual outside the building that night?",
+                    "nextMessageId": "msg-205b"
+                }
+            ]
+        }
+    ],
+    "branches": {
+        "msg-205a": {
+            "id": "msg-205a",
+            "type": "npc",
+            "sender": "Marcus Webb",
+            "timestamp": "2026-06-29T16:08:00",
+            "text": "Dr. Rask walked past my desk around 9:40, same as most nights. A couple minutes later someone else came through — didn't sign the visitor log, didn't stop at my desk either. Feed dropped not long after that. I figured it was just the camera again. I didn't think to flag it until the morning.",
+            "attachments": [
+                {
+                    "type": "evidence",
+                    "id": "ev-005",
+                    "label": "Laboratory Access Log",
+                    "emoji": "🗂️"
+                }
+            ],
+            "nextMessageId": "msg-206"
+        },
+        "msg-205b": {
+            "id": "msg-205b",
+            "type": "npc",
+            "sender": "Marcus Webb",
+            "timestamp": "2026-06-29T16:08:00",
+            "text": "Actually, yeah — there was a van idling in the service lane out back for a while. Unmarked, no plates I could see from my window. I almost called it in but it pulled out before I could get a good look.",
+            "attachments": [],
+            "nextMessageId": "msg-206"
+        },
+        "msg-206": {
+            "id": "msg-206",
+            "type": "npc",
+            "sender": "Marcus Webb",
+            "timestamp": "2026-06-29T16:10:00",
+            "text": "I should've said something sooner. I didn't want to lose my job over a busted camera. If that feed dropping is connected to whatever happened to him, I want to help however I can.",
+            "attachments": []
+        }
+    }
+}

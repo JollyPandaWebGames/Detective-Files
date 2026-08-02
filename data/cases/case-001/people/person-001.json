@@ -14,7 +14,7 @@
         "33 Ravenwood Street, Westside",
         "Valcourt BioLabs, 14 Ashcroft Street"
     ],
-    "relatedEvidence": [ "ev-001", "ev-004", "ev-005" ],
+    "relatedEvidence": [ "ev-001", "ev-004", "ev-005", "ev-006" ],
     "relatedLocations": [ "loc-001", "loc-004" ],
     "relatedConversations": [],
     "relationships": [

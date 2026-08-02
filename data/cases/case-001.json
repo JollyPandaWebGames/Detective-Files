@@ -11,6 +11,8 @@
         "Read initial report",
         "Review CCTV footage",
         "Interview witness",
-        "Inspect evidence"
+        "Inspect evidence",
+        "Interview night security guard",
+        "Submit lanyard for trace analysis"
     ]
 }

@@ -1,0 +1,16 @@
+{
+    "id": "mail-007",
+    "caseId": "case-001",
+    "from": "Officer Reyes",
+    "fromTitle": "Scene Coordinator",
+    "subject": "Follow-up — Night Security Staff",
+    "date": "2026-06-29 15:40",
+    "priority": "Medium",
+    "read": false,
+    "starred": false,
+    "folder": "inbox",
+    "attachments": [
+        { "id": "att-007", "name": "Staff Roster — Night Shift.pdf", "type": "pdf" }
+    ],
+    "body": "Detective,\n\nWe pulled the night shift roster for Valcourt BioLabs. Marcus Webb was the security guard on duty in the lobby booth the night Dr. Rask disappeared — he's the one monitoring the camera feeds, including the Level 3 corridor camera that dropped signal.\n\nHe was cooperative but seemed nervous when we spoke to him on scene. Might be worth reaching out directly through Messenger — sometimes people open up more once the uniforms have cleared out.\n\n— Officer Reyes"
+}

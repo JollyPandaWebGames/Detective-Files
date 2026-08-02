@@ -3,6 +3,7 @@
     "analyses": [
         "analysis-001.json",
         "analysis-002.json",
-        "analysis-003.json"
+        "analysis-003.json",
+        "analysis-004.json"
     ]
 }

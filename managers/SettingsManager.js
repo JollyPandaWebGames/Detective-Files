@@ -42,7 +42,7 @@ const STORAGE_KEY = 'settings';
 const DEFAULT_SETTINGS = {
     language:         'en',
     theme:            'cid-dark',
-    wallpaper:        'none',
+    wallpaper:        'headquarters',
     uiScale:          100,
     confirmClose:     true,
     animations:       true,
@@ -52,14 +52,17 @@ const DEFAULT_SETTINGS = {
 
 /**
  * Maps wallpaper ids to CSS background values.
- * Uses CSS gradients so no image files are required.
- * Replace values with url('assets/wallpapers/...') when real assets are added.
+ * Real location artwork lives in assets/wallpapers/. Each option corresponds
+ * to a location visited during an investigation. 'none' falls back to the
+ * flat CID OS background color.
  */
 const WALLPAPER_PATHS = {
-    'none':       null,
-    'office':     'linear-gradient(160deg, #0d1b2a 0%, #1a2f45 50%, #0f2133 100%)',
-    'evidence':   'linear-gradient(135deg, #1a0f0a 0%, #2d1810 40%, #1f2d1a 100%)',
-    'city-night': 'linear-gradient(180deg, #050a14 0%, #0a1628 40%, #0d0f1a 70%, #1a0d24 100%)',
+    'none':         null,
+    'headquarters': 'url("assets/wallpapers/Police_headquarters.png")',
+    'ashcroft':     'url("assets/wallpapers/Ashcroft Street.png")',
+    'fogwood':      'url("assets/wallpapers/Fogwood Street.png")',
+    'holloway':     'url("assets/wallpapers/Holloway Lane.png")',
+    'ravenwood':    'url("assets/wallpapers/Ravenwood Street.png")',
 };
 
 class SettingsManagerClass {
@@ -158,10 +161,12 @@ class SettingsManagerClass {
      */
     getWallpaperOptions() {
         return [
-            { id: 'none',       label: 'None'         },
-            { id: 'office',     label: 'Police Office' },
-            { id: 'evidence',   label: 'Evidence Room' },
-            { id: 'city-night', label: 'City at Night' },
+            { id: 'none',         label: 'None' },
+            { id: 'headquarters', label: 'Police Headquarters — Holloway Lane' },
+            { id: 'ashcroft',     label: 'Ashcroft Street — Industrial District' },
+            { id: 'fogwood',      label: 'Fogwood Street — Research Quarter' },
+            { id: 'holloway',     label: 'Holloway Lane — City Centre' },
+            { id: 'ravenwood',    label: 'Ravenwood Street — Westside' },
         ];
     }
 

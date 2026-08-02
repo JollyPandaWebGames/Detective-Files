@@ -2,6 +2,7 @@
     "version": "1.0",
     "files": [
         "conv-001.json",
-        "conv-002.json"
+        "conv-002.json",
+        "conv-003.json"
     ]
 }

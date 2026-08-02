@@ -1,0 +1,12 @@
+{
+    "id": "analysis-004",
+    "caseId": "case-001",
+    "evidenceId": "ev-006",
+    "evidenceTitle": "Severed Lanyard Cord",
+    "type": "Trace",
+    "description": "Tool-mark and cut-edge examination of the severed lanyard cord to determine whether the cord was cut, torn, or burned, and to identify any blade characteristics.",
+    "duration": 45,
+    "resultFile": "results/result-004.json",
+    "status": "Available",
+    "availableFor": [ "ev-006" ]
+}

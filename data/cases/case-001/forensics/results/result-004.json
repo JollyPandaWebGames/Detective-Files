@@ -1,0 +1,14 @@
+{
+    "id": "result-004",
+    "analysisId": "analysis-004",
+    "summary": "Cord was cleanly severed with a single-edge blade, not torn. Cut angle and pressure pattern are inconsistent with an accidental snag — this was a deliberate, controlled cut made in one motion.",
+    "confidence": 91,
+    "details": "Microscopic examination of the cut end shows a smooth, single-pass separation with no fraying, stretching, or crush marks that would indicate the cord caught on furniture or was pulled loose in a struggle. The cut face is consistent with a thin, single-edge blade — likely a utility knife or scalpel — drawn across the cord under light tension. No corresponding item was recovered at the scene. Combined with the absence of any USB drive or pendant near the body of evidence, this strongly suggests the lanyard was deliberately cut from Dr. Rask's neck and the attached drive removed and taken from the scene, rather than lost or damaged incidentally during a fall or struggle.",
+    "newEvidence": [],
+    "relatedPeople": [ "person-001", "person-003" ],
+    "recommendations": [
+        "Treat the missing USB drive as a targeted objective of the intrusion, not incidental loss.",
+        "Cross-reference blade type against any tools recovered from a suspect.",
+        "Revisit the theory that this was a spontaneous confrontation — the clean cut suggests planning."
+    ]
+}

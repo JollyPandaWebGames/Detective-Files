@@ -12,7 +12,7 @@
     "thumbnail": "ev-002-thumb.png",
     "preview": "ev-002-preview.png",
     "tags": [ "photo", "crime-scene", "laboratory" ],
-    "related": [ "ev-001", "ev-004" ],
+    "related": [ "ev-001", "ev-004", "ev-006" ],
     "sourceAttachmentId": "att-002",
     "chainOfCustody": [
         { "stage": "Collected",   "by": "Officer Reyes",  "date": "2026-06-29 09:10" },

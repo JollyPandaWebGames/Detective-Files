@@ -1,0 +1,23 @@
+{
+    "id": "person-005",
+    "caseId": "case-001",
+    "name": "Marcus Webb",
+    "role": "Witness",
+    "age": 47,
+    "occupation": "Night Security Guard",
+    "employer": "Valcourt BioLabs",
+    "status": "Interview Pending",
+    "avatarEmoji": "🧑‍✈️",
+    "description": "Overnight security guard on duty at Valcourt BioLabs the night Dr. Rask disappeared. Responsible for monitoring the lobby and corridor camera feeds from the ground-floor security office. Initially reluctant to speak with investigators — worried about losing his job over the corrupted Level 3 feed.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "Industrial District"
+    ],
+    "relatedEvidence": [ "ev-006" ],
+    "relatedLocations": [ "loc-001" ],
+    "relatedConversations": [ "conv-003" ],
+    "relationships": [
+        { "personId": "person-001", "type": "Coworker", "description": "Nodding acquaintance. Signed Dr. Rask in most evenings." },
+        { "personId": "person-003", "type": "Unknown",  "description": "Claims not to recognize the unidentified man from the lobby footage." }
+    ]
+}
