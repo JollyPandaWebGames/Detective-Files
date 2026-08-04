@@ -28,8 +28,8 @@
  *   evidence:note-updated  — player note saved             { evidenceId, notes }
  *
  * Events consumed:
- *   None directly — the application layer listens for case:selected
- *   and calls loadForCase() itself, keeping this manager UI-agnostic.
+ *   None directly — the application layer listens for 'investigationChanged'
+ *   (Epic 01.1) and calls loadForCase() itself, keeping this manager UI-agnostic.
  *
  * Rules:
  *   Never access localStorage directly — use StorageManager.

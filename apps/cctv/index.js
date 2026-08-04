@@ -17,7 +17,7 @@
  *   StorageManager through CctvManager.
  *
  * Events consumed:
- *   case:selected       — load cameras for the new case
+ *   investigationChanged — load cameras for the new investigation (Epic 01.1)
  *   cctv:loaded         — render camera list
  *   cctv:focus-request  — select camera + seek (from mail attachment)
  *   evidence:opened     — (no-op here; kept for future cross-highlight)
@@ -90,7 +90,7 @@ class CCTVViewer extends BaseApp {
         this._panOriginY = 0;
 
         // Bound EventBus handlers.
-        this._onCaseSelected   = ( { case: c } ) => this._handleCaseSelected( c );
+        this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onCctvLoaded     = ()               => this._renderCameraList();
         this._onFocusRequest   = ( p )            => this._handleFocusRequest( p );
 
@@ -131,18 +131,13 @@ class CCTVViewer extends BaseApp {
 
     open() {
 
-        EventBus.on( 'case:selected',      this._onCaseSelected );
+        EventBus.on( 'investigationChanged', this._onInvestigationChanged );
         EventBus.on( 'cctv:loaded',        this._onCctvLoaded   );
         EventBus.on( 'cctv:focus-request', this._onFocusRequest );
 
         EventBus.emit( 'cctv:opened', {} );
 
-        if ( this._activeCaseId ) {
-            this._renderCameraList();
-        }
-        else {
-            this._renderNoCaseMessage();
-        }
+        this._syncInvestigation( this.context.getActiveInvestigation() );
 
     }
 
@@ -151,7 +146,7 @@ class CCTVViewer extends BaseApp {
         this._stopPlayback();
         this._savePosition();
 
-        EventBus.off( 'case:selected',      this._onCaseSelected );
+        EventBus.off( 'investigationChanged', this._onInvestigationChanged );
         EventBus.off( 'cctv:loaded',        this._onCctvLoaded   );
         EventBus.off( 'cctv:focus-request', this._onFocusRequest );
 
@@ -392,12 +387,23 @@ class CCTVViewer extends BaseApp {
     // Case / Camera Selection
     // ─────────────────────────────────────────────────────────────
 
-    _handleCaseSelected( c ) {
+    _syncInvestigation( investigation ) {
+
+        if ( !investigation ) {
+            this._activeCaseId = null;
+            this._renderNoCaseMessage();
+            return;
+        }
+
+        if ( this._activeCaseId === investigation.caseId ) {
+            this._renderCameraList();
+            return;
+        }
 
         this._stopPlayback();
         this._savePosition();
 
-        this._activeCaseId   = c.id;
+        this._activeCaseId   = investigation.caseId;
         this._activeCameraId = null;
         this._position       = 0;
 
@@ -405,7 +411,7 @@ class CCTVViewer extends BaseApp {
         this._renderCameraList();
         this._updateTimeline();
 
-        CctvManager.loadForCase( c.id );
+        CctvManager.loadForCase( investigation.caseId );
 
     }
 
@@ -553,7 +559,8 @@ class CCTVViewer extends BaseApp {
     _renderNoCaseMessage() {
 
         if ( !this._cameraListEl ) return;
-        this._cameraListEl.innerHTML = `<div class="cctv__empty-hint">Select a case in Case Management.</div>`;
+        this._cameraListEl.innerHTML = `<div class="cctv__empty-hint">No active investigation.<br>Open Case Management and start an investigation.</div>`;
+        this._renderNoCameraSelected();
 
     }
 

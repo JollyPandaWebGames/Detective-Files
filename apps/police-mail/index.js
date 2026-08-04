@@ -12,6 +12,9 @@
  * Data:
  *   All mail loaded once at boot by MailManager (data/mail/*.json).
  *   Read/starred/archived state persisted via StorageManager.
+ *   Mail is scoped to the active investigation (Epic 01.1) — department-
+ *   wide mail (caseId: null in the JSON) always shows; case-specific
+ *   mail only shows while that case is the active investigation.
  *
  * Events consumed:
  *   mail:loaded            — refresh list once data arrives
@@ -19,10 +22,13 @@
  *                           — keep UI in sync with MailManager state
  *   mail:focus-request     — select and scroll to a specific mail
  *                             (fired by Workstation after case:started)
+ *   investigationChanged   — reload mail for the new investigation (Epic 01.1)
  *
  * Rules:
  *   Never access localStorage directly — use MailManager / StorageManager.
  *   Never call other applications directly — use EventBus.
+ *   Never depend on Case Management — obtain the active investigation
+ *   exclusively from ApplicationContext.getActiveInvestigation().
  */
 
 import BaseApp     from '../../core/BaseApp.js';
@@ -65,6 +71,9 @@ class PoliceMail extends BaseApp {
         /** Current search query. @type {string} */
         this._searchQuery = '';
 
+        /** Active investigation's case id, or null. @type {string|null} */
+        this._activeCaseId = null;
+
         // DOM refs.
         this._sidebarEl  = null;
         this._listEl     = null;
@@ -75,6 +84,7 @@ class PoliceMail extends BaseApp {
         this._onMailLoaded  = () => this._refreshList();
         this._onMailChanged = () => this._refreshList();
         this._onFocusRequest = ( { mailId } ) => this._focusMail( mailId );
+        this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
 
     }
 
@@ -99,8 +109,9 @@ class PoliceMail extends BaseApp {
         EventBus.on( 'mail:archived',    this._onMailChanged  );
         EventBus.on( 'mail:unarchived',  this._onMailChanged  );
         EventBus.on( 'mail:focus-request', this._onFocusRequest );
+        EventBus.on( 'investigationChanged', this._onInvestigationChanged );
 
-        this._refreshList();
+        this._syncInvestigation( this.context.getActiveInvestigation() );
 
     }
 
@@ -114,6 +125,7 @@ class PoliceMail extends BaseApp {
         EventBus.off( 'mail:archived',    this._onMailChanged  );
         EventBus.off( 'mail:unarchived',  this._onMailChanged  );
         EventBus.off( 'mail:focus-request', this._onFocusRequest );
+        EventBus.off( 'investigationChanged', this._onInvestigationChanged );
 
     }
 
@@ -254,6 +266,30 @@ class PoliceMail extends BaseApp {
     }
 
     /**
+     * Sync local state with the active investigation. Called on open()
+     * and every 'investigationChanged' event (Epic 01.1) — never assumes
+     * Case Management is the source, only ApplicationContext.
+     *
+     * @param {Object|null} investigation
+     * @returns {void}
+     */
+    _syncInvestigation( investigation ) {
+
+        const nextCaseId = investigation ? investigation.caseId : null;
+
+        if ( this._activeCaseId === nextCaseId ) {
+            this._refreshList();
+            return;
+        }
+
+        this._activeCaseId   = nextCaseId;
+        this._selectedMailId = null;
+        this._renderEmptyContent();
+        this._refreshList();
+
+    }
+
+    /**
      * Re-fetch the current folder/search results and re-render the list.
      *
      * @returns {void}
@@ -262,9 +298,19 @@ class PoliceMail extends BaseApp {
 
         if ( !this._listEl ) return;
 
+        if ( !this._activeCaseId ) {
+            const empty = document.createElement( 'div' );
+            empty.className   = 'mail__list-empty';
+            empty.innerHTML   = 'No active investigation.<br>Open Case Management and start an investigation.';
+            this._listEl.innerHTML = '';
+            this._listEl.appendChild( empty );
+            this._updateFolderActiveState();
+            return;
+        }
+
         const mails = this._searchQuery.trim()
-            ? MailManager.search( this._searchQuery )
-            : MailManager.getFolder( this._activeFolder );
+            ? MailManager.search( this._searchQuery, this._activeCaseId )
+            : MailManager.getFolder( this._activeFolder, this._activeCaseId );
 
         this._listEl.innerHTML = '';
 

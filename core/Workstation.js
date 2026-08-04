@@ -6,43 +6,64 @@
  *   Controls the startup sequence and wires the global event bridge.
  *
  * Boot Sequence:
- *   1.  Theme          — CSS variables before any rendering
- *   1b. Settings       — load persisted settings, apply UI scale + animations
- *   2.  Boot screen    — visual startup animation
- *   3.  Desktop DOM    — DesktopManager builds all layers
- *   4.  App registry   — ApplicationManager discovers all apps
- *   5.  Taskbar        — TaskbarManager renders start menu + clock
- *   6.  Desktop icons  — DesktopIconManager renders icon grid
- *   7.  Window system  — WindowManager initializes
- *   7b. Mail data      — MailManager loads mail JSON + persisted state
- *   7c. Case data      — CaseManager loads case JSON + persisted progress
- *   8.  Event bridge   — application:requested → ApplicationManager.launch()
- *   9.  Show desktop   — fade-in
- *   10. Wallpaper      — apply persisted wallpaper after desktop is visible
+ *   1.  Theme            — CSS variables before any rendering
+ *   1b. Settings         — load persisted settings, apply UI scale + animations
+ *   1c. Session          — load persisted session (Architecture 2.0)
+ *   2.  Boot screen      — visual startup animation
+ *   3.  Desktop DOM      — DesktopManager builds all layers
+ *   4.  App registry     — ApplicationManager discovers all apps
+ *   5.  Taskbar          — TaskbarManager renders start menu + clock
+ *   6.  Desktop icons    — DesktopIconManager renders icon grid
+ *   7.  Window system    — WindowManager initializes
+ *   7b. Mail data        — MailManager loads mail JSON + persisted state
+ *   7c. Case data        — CaseManager loads case JSON + persisted progress
+ *   7d. Active Investigation — resumes last session's active investigation
+ *   7e–7k. Gameplay managers — Evidence/CCTV/Map/Messenger/People/Forensics/Board/RecycleBin
+ *   7l. ApplicationContext   — wires the unified context:changed broadcast
+ *   8.  Event bridge     — application:requested → ApplicationManager.launch()
+ *   8b. Session restore  — reopen applications left open in the last session
+ *   9.  Show desktop     — fade-in
+ *   9b. Investigation widget — mount the permanent Active Investigation widget
+ *   10. Wallpaper        — apply persisted wallpaper after desktop is visible
+ *
+ * Architecture 2.0 / 1.1 (see ARCHITECTURE_2.md):
+ *   ApplicationContext, SessionManager, and ActiveInvestigationManager are
+ *   the foundational layer every application now depends on exclusively.
+ *   As of Epic 01.1, every application (Case Management, Police Mail,
+ *   Messenger, Evidence, CCTV, City Map, Criminal Database, Forensics,
+ *   Investigation Board) obtains investigation data through
+ *   ApplicationContext.getActiveInvestigation() and the
+ *   'investigationChanged' event only — none of them depend on Case
+ *   Management, and the original 'case:selected' compatibility event
+ *   has been retired.
  *
  * Rules:
  *   Workstation never contains gameplay or application logic.
  *   All behavior is delegated to managers and subsystems.
  */
 
-import EventBus           from './EventBus.js';
-import BootScreen         from './BootScreen.js';
-import ThemeManager       from '../managers/ThemeManager.js';
-import DesktopManager     from '../managers/DesktopManager.js';
-import TaskbarManager     from '../managers/TaskbarManager.js';
-import ApplicationManager from '../managers/ApplicationManager.js';
-import WindowManager      from '../managers/WindowManager.js';
-import SettingsManager    from '../managers/SettingsManager.js';
-import MailManager        from '../managers/MailManager.js';
-import CaseManager        from '../managers/CaseManager.js';
-import EvidenceManager    from '../managers/EvidenceManager.js';
-import CctvManager        from '../managers/CctvManager.js';
-import MapManager         from '../managers/MapManager.js';
-import MessengerManager   from '../managers/MessengerManager.js';
-import PeopleManager      from '../managers/PeopleManager.js';
-import ForensicsManager   from '../managers/ForensicsManager.js';
-import BoardManager       from '../managers/BoardManager.js';
-import RecycleBinManager  from '../managers/RecycleBinManager.js';
+import EventBus                    from './EventBus.js';
+import BootScreen                  from './BootScreen.js';
+import ApplicationContext          from './ApplicationContext.js';
+import ThemeManager                from '../managers/ThemeManager.js';
+import DesktopManager              from '../managers/DesktopManager.js';
+import TaskbarManager              from '../managers/TaskbarManager.js';
+import ApplicationManager          from '../managers/ApplicationManager.js';
+import WindowManager               from '../managers/WindowManager.js';
+import SettingsManager             from '../managers/SettingsManager.js';
+import SessionManager              from '../managers/SessionManager.js';
+import ActiveInvestigationManager  from '../managers/ActiveInvestigationManager.js';
+import InvestigationWidgetManager  from '../managers/InvestigationWidgetManager.js';
+import MailManager                 from '../managers/MailManager.js';
+import CaseManager                 from '../managers/CaseManager.js';
+import EvidenceManager             from '../managers/EvidenceManager.js';
+import CctvManager                 from '../managers/CctvManager.js';
+import MapManager                  from '../managers/MapManager.js';
+import MessengerManager            from '../managers/MessengerManager.js';
+import PeopleManager               from '../managers/PeopleManager.js';
+import ForensicsManager            from '../managers/ForensicsManager.js';
+import BoardManager                from '../managers/BoardManager.js';
+import RecycleBinManager           from '../managers/RecycleBinManager.js';
 
 class Workstation {
 
@@ -75,9 +96,16 @@ class Workstation {
         // are applied before any layout is painted.
         SettingsManager.initialize();
 
+        // ── 1c. Session ───────────────────────────────────────────
+        // Architecture 2.0 — load any persisted session pointer before
+        // anything else needs to know whether an investigation was
+        // previously active.
+        SessionManager.initialize();
+
         // ── 2. Boot Screen ────────────────────────────────────────
         this._injectStylesheet( './css/boot/boot.css' );
         this._injectStylesheet( './css/windows/baseapp.css' );
+        this._injectStylesheet( './css/widgets/investigation-widget.css' );
         const bootScreen = new BootScreen();
         await bootScreen.run( this._root );
 
@@ -106,37 +134,48 @@ class Workstation {
         // Load case JSON + persisted progress state.
         CaseManager.initialize();
 
-        // ── 7d. Evidence Data ──────────────────────────────────────
+        // ── 7d. Active Investigation ──────────────────────────────
+        // Re-affirm whatever investigation was active last session.
+        // Emits 'investigationChanged' so every application below
+        // reloads its data via ApplicationContext (Epic 01.1).
+        ActiveInvestigationManager.initialize();
+
+        // ── 7e. Evidence Data ──────────────────────────────────────
         // Load persisted evidence state (pinned/notes/lastViewed).
         // Per-case evidence is loaded lazily when a case is selected.
         EvidenceManager.initialize();
 
-        // ── 7e. CCTV Data ──────────────────────────────────────────
+        // ── 7f. CCTV Data ──────────────────────────────────────────
         // Load persisted CCTV state (bookmarks/notes/positions).
         // Per-case camera data is loaded lazily on case selection.
         CctvManager.initialize();
 
-        // ── 7f. Map Data ───────────────────────────────────────────
+        // ── 7g. Map Data ───────────────────────────────────────────
         // Load persisted map state (notes, zoom, center).
         // Per-case location data is loaded lazily on case selection.
         MapManager.initialize();
 
-        // ── 7g. Messenger Data ─────────────────────────────────────
+        // ── 7h. Messenger Data ─────────────────────────────────────
         // Load global conversations + persisted state.
         // Case conversations are loaded lazily on case selection.
         await MessengerManager.initialize();
 
-        // ── 7h. People Data ────────────────────────────────────────
+        // ── 7i. People Data ────────────────────────────────────────
         // Load persisted people state (pinned, notes, lastViewed).
         // Per-case data is loaded lazily on case selection.
         PeopleManager.initialize();
 
-        // ── 7i. Forensics Data ─────────────────────────────────────
+        // ── 7j. Forensics Data ─────────────────────────────────────
         // Load persisted queue state (submitted analyses, timestamps).
         // Per-case analysis definitions are loaded lazily on case selection.
         ForensicsManager.initialize();
         BoardManager.initialize();
         RecycleBinManager.initialize();
+
+        // ── 7l. Application Context ───────────────────────────────
+        // Architecture 2.0 — wires the unified 'context:changed' broadcast.
+        // Must run after every manager it aggregates has initialized.
+        ApplicationContext.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit
@@ -179,8 +218,22 @@ class Workstation {
             EventBus.emit( 'cctv:focus-request', { cameraId, timestamp } );
         } );
 
+        // ── 8b. Session Restore ───────────────────────────────────
+        // Reopen every application that was open in the last session so
+        // refreshing the page restores the complete detective workspace.
+        // Apps only subscribe to 'investigationChanged' inside their own
+        // open(), which just ran for the first time — rebroadcast so
+        // they receive the investigation that's already active rather
+        // than showing an empty state.
+        ApplicationManager.restoreSession();
+        ActiveInvestigationManager.rebroadcast();
+
         // ── 9. Show Desktop ───────────────────────────────────────
         DesktopManager.show();
+
+        // ── 9b. Investigation Widget ──────────────────────────────
+        // Architecture 2.0 — permanent, non-closable desktop widget.
+        InvestigationWidgetManager.initialize( DesktopManager.getDesktopElement() );
 
         // ── 10. Apply persisted wallpaper ─────────────────────────
         // Desktop must be visible before wallpaper is applied.

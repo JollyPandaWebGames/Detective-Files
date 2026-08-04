@@ -39,9 +39,10 @@
  *   EventBus      — lifecycle events
  */
 
-import AppLoader     from '../core/AppLoader.js';
-import WindowManager from './WindowManager.js';
-import EventBus      from '../core/EventBus.js';
+import AppLoader           from '../core/AppLoader.js';
+import WindowManager       from './WindowManager.js';
+import EventBus            from '../core/EventBus.js';
+import SessionManager      from './SessionManager.js';
 
 class ApplicationManagerClass {
 
@@ -206,7 +207,12 @@ class ApplicationManagerClass {
         app.open();
         app.isOpen = true;
 
+        // Architecture 2.0: additive lifecycle hook + live context subscription.
+        app.onOpen();
+        EventBus.on( 'context:changed', app._onContextChangedBound );
+
         this._running.add( appId );
+        SessionManager.trackAppOpened( appId );
 
         EventBus.emit( 'app:opened', { appId, title: config.title, emoji: config.emoji } );
         console.info( `ApplicationManager: "${ appId }" launched.` );
@@ -227,6 +233,7 @@ class ApplicationManagerClass {
         const app = this._apps.get( appId );
 
         if ( app ) {
+            app.onClose();
             app.close();
             app.isOpen     = false;
             app.isMinimized = false;
@@ -243,8 +250,43 @@ class ApplicationManagerClass {
         }
 
         this._running.delete( appId );
+        SessionManager.trackAppClosed( appId );
 
         EventBus.emit( 'app:closed', { appId } );
+
+    }
+
+    /**
+     * Re-open every application that was open in the last persisted
+     * session (Architecture 2.0 — "refreshing the page restores the
+     * complete detective workspace"). Called once by Workstation, after
+     * every manager (including SessionManager) has finished initializing.
+     *
+     * Window *positions* are not yet restored — only which apps were
+     * open and whether each was minimized. See ARCHITECTURE_2.md §6
+     * for the documented scope of this first pass.
+     *
+     * @returns {void}
+     */
+    restoreSession() {
+
+        const openApps = SessionManager.getOpenApps();
+
+        for ( const { appId, minimized } of openApps ) {
+
+            if ( !this._registry.has( appId ) ) continue;
+
+            this.launch( appId );
+
+            if ( minimized && WindowManager.isOpen( appId ) ) {
+                WindowManager.minimize( appId );
+            }
+
+        }
+
+        if ( openApps.length > 0 ) {
+            console.info( `ApplicationManager: Restored ${ openApps.length } app(s) from last session.` );
+        }
 
     }
 
@@ -296,6 +338,7 @@ class ApplicationManagerClass {
         const app = this._apps.get( windowId );
 
         if ( app ) {
+            app.onClose();
             app.close();
             app.isOpen     = false;
             app.isMinimized = false;
@@ -306,6 +349,7 @@ class ApplicationManagerClass {
         }
 
         this._running.delete( windowId );
+        SessionManager.trackAppClosed( windowId );
 
         EventBus.emit( 'app:closed', { appId: windowId } );
 
@@ -324,6 +368,9 @@ class ApplicationManagerClass {
 
         app.minimize();
         app.isMinimized = true;
+        app.onSuspend();
+
+        SessionManager.trackAppMinimized( windowId, true );
 
         EventBus.emit( 'app:minimized', { appId: windowId } );
 
@@ -343,6 +390,9 @@ class ApplicationManagerClass {
         app.restore();
         app.isMinimized = false;
         app.isOpen      = true;
+        app.onResume();
+
+        SessionManager.trackAppMinimized( windowId, false );
 
         EventBus.emit( 'app:restored', { appId: windowId } );
 

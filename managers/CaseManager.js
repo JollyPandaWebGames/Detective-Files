@@ -23,9 +23,13 @@
  *
  * Events emitted:
  *   case:loaded     — initial load complete    { count }
- *   case:selected   — user selected a case     { case }
  *   case:started     — investigation started    { caseId }
  *   case:progress   — progress value changed   { caseId, progress }
+ *
+ * Note (Epic 01.1): CaseManager is the case *data* authority only. Which
+ * investigation is active lives in ActiveInvestigationManager, exposed
+ * to applications via ApplicationContext.getActiveInvestigation() /
+ * the 'investigationChanged' event — not through this manager.
  *
  * Rules:
  *   Never access localStorage directly — use StorageManager.
@@ -232,6 +236,43 @@ class CaseManagerClass {
         this._saveProgress( caseId );
 
         EventBus.emit( 'case:progress', { caseId, progress: c.progress } );
+
+    }
+
+    /**
+     * Mark a case as Solved. Called by ActiveInvestigationManager when
+     * an investigation is completed — CaseManager remains the single
+     * source of truth for case data, ActiveInvestigationManager owns the
+     * "only one active investigation" rule on top of it.
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    completeCase( caseId ) {
+
+        const c = this._cases.get( caseId );
+        if ( !c ) return;
+
+        c.status   = 'Solved';
+        c.progress = 100;
+
+        this._saveProgress( caseId );
+
+    }
+
+    /**
+     * Move a case to the Archived folder.
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    archiveCase( caseId ) {
+
+        const c = this._cases.get( caseId );
+        if ( !c ) return;
+
+        c.status = 'Archived';
+        this._saveProgress( caseId );
 
     }
 

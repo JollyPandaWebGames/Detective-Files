@@ -35,7 +35,8 @@ class InvestigationBoard extends BaseApp {
         this._connecting=null; this._pinch=null;
         this._toolboxEl=null; this._inspEl=null; this._availEl=null; this._searchEl=null;
         this._rafId=null; this._dirty=true; this._saveT=null; this._mMapX=0; this._mMapY=0;
-        this._onCase=({case:c})=>this._loadCase(c);
+        this._activeCaseId=null;
+        this._onInvestigationChanged=({investigation})=>this._syncInvestigation(investigation);
         this._onEvidence=()=>this._refreshAvail();
         this._onForensics=()=>this._refreshAvail();
         this._onMD=(e)=>this._md(e); this._onMM=(e)=>this._mm(e); this._onMU=()=>this._mu();
@@ -47,16 +48,17 @@ class InvestigationBoard extends BaseApp {
     create(el) { el.classList.add('board'); this._buildLayout(el); }
 
     open() {
-        EventBus.on('case:selected',this._onCase);
+        EventBus.on('investigationChanged',this._onInvestigationChanged);
         EventBus.on('evidence:loaded',this._onEvidence);
         EventBus.on('forensics:collected',this._onForensics);
         window.addEventListener('resize',this._onResize);
         window.addEventListener('keydown',this._onKey);
-        this._resizeCanvas(); this._startLoop(); this._refreshAvail();
+        this._resizeCanvas(); this._startLoop();
+        this._syncInvestigation(this.context.getActiveInvestigation());
     }
 
     close() {
-        EventBus.off('case:selected',this._onCase);
+        EventBus.off('investigationChanged',this._onInvestigationChanged);
         EventBus.off('evidence:loaded',this._onEvidence);
         EventBus.off('forensics:collected',this._onForensics);
         window.removeEventListener('resize',this._onResize);
@@ -139,8 +141,20 @@ class InvestigationBoard extends BaseApp {
         if(!this._availEl.children.length) this._availEl.innerHTML='<div class="board__empty-hint">No items yet.</div>';
     }
 
-    _loadCase(c) {
-        BoardManager.loadForCase(c.id);
+    _syncInvestigation(investigation) {
+        if(!investigation){
+            this._activeCaseId=null;
+            this._selNodeId=null; this._connecting=null; this._emptyInsp();
+            this._availEl && (this._availEl.innerHTML='');
+            this._dirty=true;
+            return;
+        }
+        if(this._activeCaseId===investigation.caseId){
+            this._refreshAvail(); this._dirty=true;
+            return;
+        }
+        this._activeCaseId=investigation.caseId;
+        BoardManager.loadForCase(investigation.caseId);
         const cam=BoardManager.getCamera();
         this._zoom=cam.zoom??1; this._offsetX=cam.x??0; this._offsetY=cam.y??0;
         this._selNodeId=null; this._connecting=null; this._emptyInsp();
@@ -177,6 +191,14 @@ class InvestigationBoard extends BaseApp {
         const ctx=this._ctx, W=this._canvas.width, H=this._canvas.height;
         ctx.clearRect(0,0,W,H); ctx.fillStyle='#08111a'; ctx.fillRect(0,0,W,H);
         this._drawGrid(ctx,W,H);
+        if(!this._activeCaseId){
+            ctx.fillStyle='rgba(45,168,255,0.15)'; ctx.font='13px monospace';
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText('No active investigation.',W/2,H/2-10);
+            ctx.fillText('Open Case Management and start an investigation.',W/2,H/2+12);
+            ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+            return;
+        }
         ctx.save(); ctx.translate(this._offsetX,this._offsetY); ctx.scale(this._zoom,this._zoom);
         BoardManager.getGroups().forEach(g=>this._drawGroup(ctx,g));
         BoardManager.getConnections().forEach(c=>this._drawConn(ctx,c));

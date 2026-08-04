@@ -16,7 +16,7 @@
  *   Player state (pinned/notes/lastViewed) persists via StorageManager.
  *
  * Events consumed:
- *   case:selected        — load people for the new case
+ *   investigationChanged — load people for the new investigation (Epic 01.1)
  *   person:loaded        — refresh list
  *   person:pinned        — refresh list (re-sort)
  *   person:focus-request — select and highlight a profile (cross-app)
@@ -74,6 +74,8 @@ class CriminalDatabase extends BaseApp {
         this._activeRole   = 'All';
         /** @type {string|null} */
         this._selectedId   = null;
+        /** @type {string|null} */
+        this._activeCaseId = null;
         /** @type {string} */
         this._searchQuery  = '';
         /** @type {string} */
@@ -90,7 +92,7 @@ class CriminalDatabase extends BaseApp {
         this._notesTimer = null;
 
         // Bound EventBus handlers.
-        this._onCaseSelected  = ( { case: c } ) => this._handleCaseSelected( c );
+        this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onLoaded        = ()               => this._refreshList();
         this._onPinned        = ()               => this._refreshList();
         this._onFocusRequest  = ( { personId } ) => this._focusPerson( personId );
@@ -107,15 +109,15 @@ class CriminalDatabase extends BaseApp {
     }
 
     open() {
-        EventBus.on( 'case:selected',       this._onCaseSelected );
+        EventBus.on( 'investigationChanged', this._onInvestigationChanged );
         EventBus.on( 'person:loaded',       this._onLoaded       );
         EventBus.on( 'person:pinned',       this._onPinned       );
         EventBus.on( 'person:focus-request', this._onFocusRequest );
-        this._refreshList();
+        this._syncInvestigation( this.context.getActiveInvestigation() );
     }
 
     close() {
-        EventBus.off( 'case:selected',       this._onCaseSelected );
+        EventBus.off( 'investigationChanged', this._onInvestigationChanged );
         EventBus.off( 'person:loaded',       this._onLoaded       );
         EventBus.off( 'person:pinned',       this._onPinned       );
         EventBus.off( 'person:focus-request', this._onFocusRequest );
@@ -220,7 +222,21 @@ class CriminalDatabase extends BaseApp {
     // Category / List
     // ─────────────────────────────────────────────────────────────
 
-    _handleCaseSelected( c ) {
+    _syncInvestigation( investigation ) {
+
+        if ( !investigation ) {
+            this._activeCaseId = null;
+            this._renderEmptyDetail();
+            this._refreshList();
+            return;
+        }
+
+        if ( this._activeCaseId === investigation.caseId ) {
+            this._refreshList();
+            return;
+        }
+
+        this._activeCaseId = investigation.caseId;
         this._selectedId   = null;
         this._activeRole   = 'All';
         this._searchQuery  = '';
@@ -228,7 +244,7 @@ class CriminalDatabase extends BaseApp {
         if ( this._searchInput  ) this._searchInput.value    = '';
         if ( this._statusSelect ) this._statusSelect.value   = 'all';
         this._renderEmptyDetail();
-        PeopleManager.loadForCase( c.id );
+        PeopleManager.loadForCase( investigation.caseId );
     }
 
     _selectCategory( role ) {
@@ -261,6 +277,12 @@ class CriminalDatabase extends BaseApp {
     _refreshList() {
 
         if ( !this._listEl ) return;
+
+        if ( !this._activeCaseId ) {
+            this._listEl.innerHTML = `<div class="pdb__list-empty">No active investigation.<br>Open Case Management and start an investigation.</div>`;
+            this._updateSidebarCounts();
+            return;
+        }
 
         let people = this._searchQuery.trim()
             ? PeopleManager.search( this._searchQuery )

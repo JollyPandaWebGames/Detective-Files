@@ -464,6 +464,31 @@
     color:      var(--color-bg-primary);
 }
 
+.casemgmt__start-btn--stop {
+    margin-top:   var(--space-2);
+    background:   var(--color-bg-secondary);
+    border-color: var(--color-danger);
+    color:        var(--color-danger);
+}
+
+.casemgmt__start-btn--stop:hover {
+    background: var(--color-danger);
+    color:      var(--color-bg-primary);
+}
+
+.casemgmt__start-btn:disabled {
+    cursor:      not-allowed;
+    opacity:     0.45;
+    background:  var(--color-bg-secondary);
+    border-color: var(--color-text-secondary);
+    color:        var(--color-text-secondary);
+}
+
+.casemgmt__start-btn:disabled:hover {
+    background: var(--color-bg-secondary);
+    color:      var(--color-text-secondary);
+}
+
 .casemgmt__locked-message {
     padding:    var(--space-3);
     background: rgba( 90, 101, 115, 0.15 );

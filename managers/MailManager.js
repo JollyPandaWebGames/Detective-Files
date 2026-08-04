@@ -111,11 +111,17 @@ class MailManagerClass {
      * Return all mail in a given folder, sorted newest-first.
      *
      * @param {string} folder - 'inbox' | 'starred' | 'archived' | 'sent'
+     * @param {string} [caseId] - When provided (Epic 01.1), only mail
+     *   belonging to that case plus department-wide mail (caseId: null
+     *   in the JSON) is returned. Omit to get every mail regardless of
+     *   case — kept as the default for any future non-investigation
+     *   caller, though Police Mail itself always passes one now.
      * @returns {Object[]}
      */
-    getFolder( folder ) {
+    getFolder( folder, caseId ) {
 
-        const all = Array.from( this._mails.values() );
+        const all = Array.from( this._mails.values() )
+            .filter( m => caseId === undefined || m.caseId === caseId || m.caseId == null );
 
         let filtered;
 
@@ -178,13 +184,20 @@ class MailManagerClass {
      * @param {string} query
      * @returns {Object[]}
      */
-    search( query ) {
+    /**
+     * @param {string} query
+     * @param {string} [caseId] - Epic 01.1 — scope results to the active
+     *   investigation plus department-wide mail, same as getFolder().
+     * @returns {Object[]}
+     */
+    search( query, caseId ) {
 
-        if ( !query.trim() ) return this.getFolder( 'inbox' );
+        if ( !query.trim() ) return this.getFolder( 'inbox', caseId );
 
         const q = query.toLowerCase();
 
         return Array.from( this._mails.values() )
+            .filter( m => caseId === undefined || m.caseId === caseId || m.caseId == null )
             .filter( m =>
                 m.from.toLowerCase().includes( q ) ||
                 m.subject.toLowerCase().includes( q ) ||

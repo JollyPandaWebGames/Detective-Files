@@ -17,7 +17,7 @@
  *   Player state (read/pinned/notes/choices) persists via StorageManager.
  *
  * Events consumed:
- *   case:selected          — load case conversations
+ *   investigationChanged   — load case conversations (Epic 01.1)
  *   messenger:loaded       — re-render conversation list
  *   messenger:*            — keep UI in sync with manager state
  *
@@ -49,6 +49,8 @@ class Messenger extends BaseApp {
 
         /** @type {string|null} */
         this._activeConvId   = null;
+        /** @type {string|null} */
+        this._activeCaseId   = null;
         /** @type {string}      */
         this._searchQuery    = '';
 
@@ -64,7 +66,7 @@ class Messenger extends BaseApp {
         this._notesTimer = null;
 
         // Bound EventBus handlers.
-        this._onCaseSelected = ( { case: c } ) => this._handleCaseSelected( c );
+        this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onLoaded       = ()               => this._renderConvList();
         this._onPinned       = ()               => this._renderConvList();
         this._onFocusRequest = ( { convId } )   => this._openConversation( convId );
@@ -81,15 +83,15 @@ class Messenger extends BaseApp {
     }
 
     open() {
-        EventBus.on( 'case:selected',                  this._onCaseSelected );
+        EventBus.on( 'investigationChanged',            this._onInvestigationChanged );
         EventBus.on( 'messenger:loaded',               this._onLoaded       );
         EventBus.on( 'messenger:conversation-pinned',  this._onPinned       );
         EventBus.on( 'messenger:focus-request',        this._onFocusRequest );
-        this._renderConvList();
+        this._syncInvestigation( this.context.getActiveInvestigation() );
     }
 
     close() {
-        EventBus.off( 'case:selected',                 this._onCaseSelected );
+        EventBus.off( 'investigationChanged',           this._onInvestigationChanged );
         EventBus.off( 'messenger:loaded',              this._onLoaded       );
         EventBus.off( 'messenger:conversation-pinned', this._onPinned       );
         EventBus.off( 'messenger:focus-request',       this._onFocusRequest );
@@ -171,16 +173,36 @@ class Messenger extends BaseApp {
     // Conversation List
     // ─────────────────────────────────────────────────────────────
 
-    _handleCaseSelected( c ) {
+    _syncInvestigation( investigation ) {
+
+        if ( !investigation ) {
+            this._activeCaseId = null;
+            this._renderEmptyChat();
+            this._renderEmptyContact();
+            this._renderConvList();
+            return;
+        }
+
+        if ( this._activeCaseId === investigation.caseId ) {
+            this._renderConvList();
+            return;
+        }
+
+        this._activeCaseId = investigation.caseId;
         this._activeConvId = null;
         this._renderEmptyChat();
         this._renderEmptyContact();
-        MessengerManager.loadForCase( c.id );
+        MessengerManager.loadForCase( investigation.caseId );
     }
 
     _renderConvList() {
 
         if ( !this._convListEl ) return;
+
+        if ( !this._activeCaseId ) {
+            this._convListEl.innerHTML = `<div class="msng__empty-hint">No active investigation.<br>Open Case Management and start an investigation.</div>`;
+            return;
+        }
 
         const conversations = this._searchQuery.trim()
             ? MessengerManager.search( this._searchQuery )

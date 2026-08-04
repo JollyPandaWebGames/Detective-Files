@@ -14,7 +14,7 @@
  *   Player state (pins, notes, lastViewed) persists via StorageManager.
  *
  * Events consumed:
- *   case:selected          — reload evidence for the new case
+ *   investigationChanged   — reload evidence for the new investigation (Epic 01.1)
  *   evidence:loaded        — re-render list after load completes
  *   evidence:pinned        — refresh list to re-sort pinned items
  *   evidence:note-updated  — (no-op — notes autosave locally in app)
@@ -91,7 +91,7 @@ class Evidence extends BaseApp {
         this._notesSaveTimer = null;
 
         // Bound EventBus handlers.
-        this._onCaseSelected       = ( { case: c } ) => this._handleCaseSelected( c );
+        this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onEvidenceLoaded     = ()              => this._refreshList();
         this._onEvidencePinned     = ()              => this._refreshList();
         this._onAttachmentOpened   = ( { attachmentId } ) => this._focusByAttachment( attachmentId );
@@ -112,25 +112,22 @@ class Evidence extends BaseApp {
 
     open() {
 
-        EventBus.on( 'case:selected',          this._onCaseSelected     );
+        EventBus.on( 'investigationChanged',    this._onInvestigationChanged );
         EventBus.on( 'evidence:loaded',         this._onEvidenceLoaded   );
         EventBus.on( 'evidence:pinned',         this._onEvidencePinned   );
         EventBus.on( 'mail:attachment-opened',  this._onAttachmentOpened );
         EventBus.on( 'evidence:focus-request',  this._onFocusRequest     );
 
-        // Restore last active case and evidence if reopened.
-        if ( this._activeCaseId ) {
-            this._refreshList();
-        }
-        else {
-            this._renderEmptyList( 'Select a case from Case Management to view evidence.' );
-        }
+        // Epic 01.1 — pull the active investigation directly rather than
+        // waiting for an event; covers reopening this window without a
+        // fresh investigationChanged firing in between.
+        this._syncInvestigation( this.context.getActiveInvestigation() );
 
     }
 
     close() {
 
-        EventBus.off( 'case:selected',         this._onCaseSelected     );
+        EventBus.off( 'investigationChanged',  this._onInvestigationChanged );
         EventBus.off( 'evidence:loaded',        this._onEvidenceLoaded   );
         EventBus.off( 'evidence:pinned',        this._onEvidencePinned   );
         EventBus.off( 'mail:attachment-opened', this._onAttachmentOpened );
@@ -237,9 +234,31 @@ class Evidence extends BaseApp {
     // Case / Category / List
     // ─────────────────────────────────────────────────────────────
 
-    _handleCaseSelected( c ) {
+    /**
+     * Sync local state with the active investigation. Called on open()
+     * and every 'investigationChanged' event — never assumes Case
+     * Management is the source, only ApplicationContext.
+     *
+     * @param {Object|null} investigation
+     * @returns {void}
+     */
+    _syncInvestigation( investigation ) {
 
-        this._activeCaseId   = c.id;
+        if ( !investigation ) {
+            this._activeCaseId = null;
+            this._renderEmptyList( 'No active investigation.\n\nOpen Case Management and start an investigation.' );
+            return;
+        }
+
+        if ( this._activeCaseId === investigation.caseId ) {
+            // Same investigation — DOM was rebuilt since we last rendered
+            // (window was closed/reopened), but the data is still loaded
+            // in EvidenceManager. Re-render without refetching.
+            this._refreshList();
+            return;
+        }
+
+        this._activeCaseId   = investigation.caseId;
         this._selectedId     = null;
         this._activeCategory = 'all';
         this._searchQuery    = '';
@@ -251,7 +270,7 @@ class Evidence extends BaseApp {
         this._renderEmptyDetail();
         this._renderEmptyList( 'Loading evidence...' );
 
-        EvidenceManager.loadForCase( c.id );
+        EvidenceManager.loadForCase( investigation.caseId );
 
     }
 
@@ -306,7 +325,7 @@ class Evidence extends BaseApp {
             this._renderEmptyList(
                 this._activeCaseId
                     ? 'No evidence matches your filters.'
-                    : 'Select a case from Case Management to view evidence.'
+                    : 'No active investigation.\n\nOpen Case Management and start an investigation.'
             );
             this._updateCategoryActiveState();
             return;

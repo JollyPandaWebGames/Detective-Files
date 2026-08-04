@@ -10,6 +10,7 @@
  *   - Store application config and expose id, title, emoji
  *   - Hold a reference to the Window instance provided by WindowManager
  *   - Expose the window's content area (contentEl) for subclass DOM injection
+ *   - Expose `context` (ApplicationContext) — see Epic 01, Architecture 2.0
  *   - Provide working default implementations of every lifecycle method
  *   - Enforce that applications never create windows directly
  *
@@ -17,21 +18,39 @@
  *
  *   create(contentEl)  — called once; build UI inside contentEl
  *   open()             — window is now visible; start listeners
- *   close()            — window closing; stop listeners
- *   minimize()         — window hidden
- *   restore()          — window restored from minimized
- *   destroy()          — full teardown; remove all references
+ *   close()             — window closing; stop listeners
+ *   minimize()          — window hidden
+ *   restore()           — window restored from minimized
+ *   destroy()           — full teardown; remove all references
+ *
+ *   Architecture 2.0 lifecycle (additive — see ARCHITECTURE_2.md):
+ *   onOpen()             — called immediately after open(); new code should
+ *                           prefer this over overriding open()
+ *   onClose()             — called immediately before close()
+ *   onSuspend()           — called immediately after minimize()
+ *   onResume()            — called immediately after restore()
+ *   onContextChanged(ctx) — called whenever ApplicationContext changes
+ *                           (investigation started/stopped, settings, theme…)
+ *
+ *   The two lifecycle sets coexist deliberately: every Phase 1 app
+ *   overrides open()/close()/minimize()/restore() and continues to work
+ *   unmodified. New apps, and apps migrated as part of Architecture 2.0,
+ *   should prefer the onX() hooks and read state from `this.context`
+ *   instead of importing managers directly.
  *
  * Rules:
  *   Never call WindowManager from inside an application.
  *   Never call other applications directly — use EventBus.
  *   Always call super() in constructor.
+ *   Prefer `this.context` over importing individual managers directly.
  *
  * Dependencies:
- *   EventBus — provided as emit() / on() / off() helpers
+ *   EventBus           — provided as emit() / on() / off() helpers
+ *   ApplicationContext — provided as this.context
  */
 
-import EventBus from './EventBus.js';
+import EventBus           from './EventBus.js';
+import ApplicationContext from './ApplicationContext.js';
 
 class BaseApp {
 
@@ -51,6 +70,14 @@ class BaseApp {
 
         /** Emoji icon. @type {string} */
         this.emoji = config.emoji ?? '🖥️';
+
+        /**
+         * The single source-of-truth facade for session, investigation,
+         * settings, theme, and desktop state. See core/ApplicationContext.js.
+         * Available from construction onward — never null.
+         * @type {import('./ApplicationContext.js').default}
+         */
+        this.context = ApplicationContext;
 
         /**
          * The Window instance assigned by ApplicationManager after launch.
@@ -75,6 +102,14 @@ class BaseApp {
 
         /** Whether the window is minimized. @type {boolean} */
         this.isMinimized = false;
+
+        /**
+         * Bound handler wired to 'context:changed' by ApplicationManager
+         * at launch and unwired at destroy(). Subclasses should override
+         * onContextChanged() rather than touching this directly.
+         * @type {Function}
+         */
+        this._onContextChangedBound = ( { context } ) => this.onContextChanged( context );
 
     }
 
@@ -145,12 +180,41 @@ class BaseApp {
      */
     destroy() {
 
+        EventBus.off( 'context:changed', this._onContextChangedBound );
+
         // Subclasses override to clean up timers / subscriptions.
         // Always null contentEl reference to help GC.
         this._contentEl = null;
         this._window    = null;
 
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Architecture 2.0 lifecycle hooks — additive, all no-ops by default
+    // ─────────────────────────────────────────────────────────────
+
+    /** Called immediately after open(). @returns {void} */
+    onOpen() {}
+
+    /** Called immediately before close(). @returns {void} */
+    onClose() {}
+
+    /** Called immediately after minimize(). @returns {void} */
+    onSuspend() {}
+
+    /** Called immediately after restore(). @returns {void} */
+    onResume() {}
+
+    /**
+     * Called whenever ApplicationContext changes — a new investigation
+     * started, settings changed, theme changed, etc. Subclasses that
+     * read from `this.context` should refresh their UI here instead of
+     * subscribing to individual manager events directly.
+     *
+     * @param {Object} context - ApplicationContext.snapshot()
+     * @returns {void}
+     */
+    onContextChanged( context ) {}
 
     // ─────────────────────────────────────────────────────────────
     // Optional hooks

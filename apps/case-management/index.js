@@ -17,8 +17,19 @@
  *   case:loaded    — refresh list once data arrives
  *   case:progress  — keep detail panel in sync if progress changes elsewhere
  *
- * Events emitted (in addition to CaseManager's own):
- *   case:selected  — user selected a case in the list
+ * Architecture (see ARCHITECTURE_2.md, Epic 01 & 01.1):
+ *   Selecting a row in the list is a purely local UI concern (detail
+ *   panel preview + highlight) and does not broadcast to the rest of
+ *   the workstation. Only starting/continuing an investigation via
+ *   context.startInvestigation() changes the Active Investigation and
+ *   causes every other application to refresh via 'investigationChanged'
+ *   — CaseManager.startCase() is never called directly from here.
+ *
+ *   Per Epic 01.1 §8, starting a different investigation while one is
+ *   already Active is blocked outright (Start/Continue is disabled with
+ *   an inline message) — there is no confirm-and-override dialog.
+ *   Case Management is the only application responsible for
+ *   starting/stopping investigations; no other application depends on it.
  *
  * Rules:
  *   Never access localStorage directly — use CaseManager / StorageManager.
@@ -371,7 +382,9 @@ class CaseManagement extends BaseApp {
 
         this._renderDetail( c );
 
-        EventBus.emit( 'case:selected', { case: c } );
+        // Architecture: row selection is local preview only. The rest
+        // of the workstation reacts to context.startInvestigation(), not
+        // to browsing the list — see class doc for rationale.
 
         // Phone: navigate to detail view.
         if ( this._detailEl ) {
@@ -395,6 +408,10 @@ class CaseManagement extends BaseApp {
         const statusClass  = STATUS_CLASS[ c.status ] ?? '';
         const canStart     = c.status === 'Unlocked';
         const inProgress   = c.status === 'In Progress';
+
+        const activeInv         = this.context.getActiveInvestigation();
+        const isActiveSession   = !!activeInv && activeInv.caseId === c.id;
+        const blockedByOther    = !!activeInv && !isActiveSession;
 
         this._detailEl.innerHTML = `
             <div class="casemgmt__detail-toolbar">
@@ -460,6 +477,21 @@ class CaseManagement extends BaseApp {
             lockedMsg.textContent = 'Complete previous investigations to unlock.';
             actionWrap.appendChild( lockedMsg );
         }
+        else if ( blockedByOther ) {
+            const blockedMsg = document.createElement( 'div' );
+            blockedMsg.className   = 'casemgmt__locked-message';
+            blockedMsg.textContent = 'Finish or stop the current investigation before starting another.';
+            actionWrap.appendChild( blockedMsg );
+
+            if ( canStart || inProgress ) {
+                const disabledBtn = document.createElement( 'button' );
+                disabledBtn.className  = 'casemgmt__start-btn';
+                disabledBtn.textContent = canStart ? 'Start Investigation' : 'Continue Investigation';
+                disabledBtn.setAttribute( 'type', 'button' );
+                disabledBtn.disabled = true;
+                actionWrap.appendChild( disabledBtn );
+            }
+        }
         else if ( canStart ) {
             const startBtn = document.createElement( 'button' );
             startBtn.className   = 'casemgmt__start-btn';
@@ -469,12 +501,23 @@ class CaseManagement extends BaseApp {
             actionWrap.appendChild( startBtn );
         }
         else if ( inProgress ) {
+
             const continueBtn = document.createElement( 'button' );
             continueBtn.className   = 'casemgmt__start-btn casemgmt__start-btn--continue';
             continueBtn.textContent  = 'Continue Investigation';
             continueBtn.setAttribute( 'type', 'button' );
             continueBtn.addEventListener( 'click', () => this._startCase( c.id ) );
             actionWrap.appendChild( continueBtn );
+
+            if ( isActiveSession ) {
+                const stopBtn = document.createElement( 'button' );
+                stopBtn.className   = 'casemgmt__start-btn casemgmt__start-btn--stop';
+                stopBtn.textContent  = 'Stop Investigation';
+                stopBtn.setAttribute( 'type', 'button' );
+                stopBtn.addEventListener( 'click', () => this._stopCase() );
+                actionWrap.appendChild( stopBtn );
+            }
+
         }
         else if ( c.status === 'Solved' ) {
             const solvedMsg = document.createElement( 'div' );
@@ -511,18 +554,42 @@ class CaseManagement extends BaseApp {
 
     /**
      * Start (or continue) an investigation.
-     * No gameplay yet — marks status, persists, emits case:started.
+     *
+     * Routed through ApplicationContext.startInvestigation() (Epic 01.1)
+     * rather than calling CaseManager directly. If a different
+     * investigation is already Active, the UI never reaches this point —
+     * the Start/Continue button is disabled and replaced with a message
+     * (see _renderDetail) instead of allowing a confirm-and-override.
      *
      * @param {string} caseId
      * @returns {void}
      */
     _startCase( caseId ) {
 
-        CaseManager.startCase( caseId );
+        const result = this.context.startInvestigation( caseId );
+        if ( !result.ok ) return;
 
-        // Refresh both panels to reflect the new "In Progress" status.
         this._refreshList();
         this._renderDetail( CaseManager.getById( caseId ) );
+
+    }
+
+    /**
+     * Stop the active investigation. Every other open application must
+     * react to 'investigationChanged' and fall back to its empty state —
+     * see Epic 01.1 §10.
+     *
+     * @returns {void}
+     */
+    _stopCase() {
+
+        const activeInv = this.context.getActiveInvestigation();
+        if ( !activeInv ) return;
+
+        this.context.stopInvestigation();
+
+        this._refreshList();
+        this._renderDetail( CaseManager.getById( activeInv.caseId ) );
 
     }
 

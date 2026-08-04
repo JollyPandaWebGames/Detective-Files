@@ -16,7 +16,7 @@
  *   Notes, zoom, center, and selection persisted via StorageManager.
  *
  * Events consumed:
- *   case:selected      — load map for the new case
+ *   investigationChanged — load map for the new investigation (Epic 01.1)
  *   map:loaded         — render markers
  *   map:focus-request  — highlight and centre on a location
  *
@@ -87,7 +87,7 @@ class CityMap extends BaseApp {
         this._notesEl        = null;
 
         // Bound handlers.
-        this._onCaseSelected  = ( { case: c } ) => this._handleCaseSelected( c );
+        this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onMapLoaded     = ()               => this._renderMap();
         this._onFocusRequest  = ( { locationId } ) => this._focusLocation( locationId );
         this._notesTimer      = null;
@@ -115,24 +115,19 @@ class CityMap extends BaseApp {
     }
 
     open() {
-        EventBus.on( 'case:selected',      this._onCaseSelected );
+        EventBus.on( 'investigationChanged', this._onInvestigationChanged );
         EventBus.on( 'map:loaded',         this._onMapLoaded    );
         EventBus.on( 'map:focus-request',  this._onFocusRequest );
 
         window.addEventListener( 'resize', this._onResize );
         this._resizeCanvas();
 
-        if ( this._activeCaseId ) {
-            this._renderMap();
-        }
-        else {
-            this._drawNoCaseMessage();
-        }
+        this._syncInvestigation( this.context.getActiveInvestigation() );
     }
 
     close() {
         this._saveViewState();
-        EventBus.off( 'case:selected',     this._onCaseSelected );
+        EventBus.off( 'investigationChanged', this._onInvestigationChanged );
         EventBus.off( 'map:loaded',        this._onMapLoaded    );
         EventBus.off( 'map:focus-request', this._onFocusRequest );
         window.removeEventListener( 'resize', this._onResize );
@@ -285,12 +280,25 @@ class CityMap extends BaseApp {
     // Case Handling
     // ─────────────────────────────────────────────────────────────
 
-    _handleCaseSelected( c ) {
-        this._activeCaseId = c.id;
+    _syncInvestigation( investigation ) {
+
+        if ( !investigation ) {
+            this._activeCaseId = null;
+            this._renderEmptyDetail();
+            this._drawNoCaseMessage();
+            return;
+        }
+
+        if ( this._activeCaseId === investigation.caseId ) {
+            this._renderMap();
+            return;
+        }
+
+        this._activeCaseId = investigation.caseId;
         this._selectedId   = null;
         this._renderEmptyDetail();
         this._drawNoCaseMessage();
-        MapManager.loadForCase( c.id ).then( () => {
+        MapManager.loadForCase( investigation.caseId ).then( () => {
             const saved = MapManager.getViewState();
             this._zoom    = Math.max( ZOOM_MIN, Math.min( saved.zoom, ZOOM_MAX ) );
             this._selectedId = saved.selected;
@@ -481,7 +489,8 @@ class CityMap extends BaseApp {
         ctx.font         = '13px monospace';
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText( 'Select a case in Case Management to load the map.', W / 2, H / 2 );
+        ctx.fillText( 'No active investigation.', W / 2, H / 2 - 10 );
+        ctx.fillText( 'Open Case Management and start an investigation.', W / 2, H / 2 + 12 );
         ctx.textAlign    = 'left';
         ctx.textBaseline = 'alphabetic';
 

@@ -16,7 +16,7 @@
  *   Progress survives app close/reopen.
  *
  * Events consumed:
- *   case:selected          — load analyses for the new case
+ *   investigationChanged   — load analyses for the new investigation (Epic 01.1)
  *   forensics:completed    — refresh queue, show notification
  *   forensics:collected    — refresh queue
  *   evidence:selected      — pre-select analysis for that evidence
@@ -70,6 +70,8 @@ class Forensics extends BaseApp {
         this._activeTab      = 'all';
         /** @type {string|null} */
         this._selectedId     = null;
+        /** @type {string|null} */
+        this._activeCaseId   = null;
         /** @type {string} */
         this._searchQuery    = '';
 
@@ -85,7 +87,7 @@ class Forensics extends BaseApp {
         this._notesTimer     = null;
 
         // Bound EventBus handlers.
-        this._onCaseSelected    = ( { case: c } ) => this._handleCaseSelected( c );
+        this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onCompleted       = ()               => this._refreshQueue();
         this._onCollected       = ()               => this._refreshQueue();
 
@@ -101,17 +103,17 @@ class Forensics extends BaseApp {
     }
 
     open() {
-        EventBus.on( 'case:selected',       this._onCaseSelected );
+        EventBus.on( 'investigationChanged', this._onInvestigationChanged );
         EventBus.on( 'forensics:completed', this._onCompleted    );
         EventBus.on( 'forensics:collected', this._onCollected    );
 
         ForensicsManager.startPolling();
         this._startCountdown();
-        this._refreshQueue();
+        this._syncInvestigation( this.context.getActiveInvestigation() );
     }
 
     close() {
-        EventBus.off( 'case:selected',       this._onCaseSelected );
+        EventBus.off( 'investigationChanged', this._onInvestigationChanged );
         EventBus.off( 'forensics:completed', this._onCompleted    );
         EventBus.off( 'forensics:collected', this._onCollected    );
 
@@ -197,11 +199,26 @@ class Forensics extends BaseApp {
     // Queue
     // ─────────────────────────────────────────────────────────────
 
-    _handleCaseSelected( c ) {
+    _syncInvestigation( investigation ) {
+
+        if ( !investigation ) {
+            this._activeCaseId = null;
+            this._renderEmptyCenter();
+            this._renderEmptyEvidence();
+            this._refreshQueue();
+            return;
+        }
+
+        if ( this._activeCaseId === investigation.caseId ) {
+            this._refreshQueue();
+            return;
+        }
+
+        this._activeCaseId = investigation.caseId;
         this._selectedId = null;
         this._renderEmptyCenter();
         this._renderEmptyEvidence();
-        ForensicsManager.loadForCase( c.id ).then( () => this._refreshQueue() );
+        ForensicsManager.loadForCase( investigation.caseId ).then( () => this._refreshQueue() );
     }
 
     _selectTab( tabId ) {
@@ -215,6 +232,11 @@ class Forensics extends BaseApp {
     _refreshQueue() {
 
         if ( !this._queueEl ) return;
+
+        if ( !this._activeCaseId ) {
+            this._queueEl.innerHTML = `<div class="flab__empty-hint">No active investigation.<br>Open Case Management and start an investigation.</div>`;
+            return;
+        }
 
         let analyses = this._searchQuery.trim()
             ? ForensicsManager.search( this._searchQuery )
