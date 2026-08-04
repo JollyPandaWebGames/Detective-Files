@@ -447,17 +447,29 @@ managers/
     ActiveInvestigationManager.js   NEW
     InvestigationWidgetManager.js   NEW
     ObjectiveManager.js             NEW (Mission 16)
+    ResolutionManager.js            NEW (Mission 17)
+    MailManager.js                  MODIFIED (Mission 17) — added injectMail()
     ApplicationManager.js           MODIFIED — session tracking + onX() hook calls
     CaseManager.js                  MODIFIED — added completeCase(), archiveCase()
 core/objectives/
     ConditionMatcher.js             NEW (Mission 16)
     ObjectiveGraph.js               NEW (Mission 16)
     ObjectiveActions.js             NEW (Mission 16)
+core/resolution/
+    ResolutionValidator.js          NEW (Mission 17)
+    ResolutionScorer.js              NEW (Mission 17)
+    ResolutionReport.js              NEW (Mission 17)
+    ResolutionOptions.js             NEW (Mission 17)
 apps/
     case-management/index.js        MODIFIED — see §7
     cctv/index.js                   MODIFIED (Mission 16) — added cctv:camera-viewed
+    board/index.js                  MODIFIED (Mission 17) — Solve Investigation → Resolution Wizard
+    board/ResolutionWizard.js       NEW (Mission 17)
+    board/style.css                 MODIFIED (Mission 17) — wizard + solve-dialog styling
 data/cases/case-001/objectives/
     index.json, phases.json, obj-*.json (17 files) NEW (Mission 16)
+data/cases/case-001/
+    solution.json                   NEW (Mission 17)
 css/
     widgets/investigation-widget.css NEW
 docs/
@@ -658,4 +670,171 @@ built with its needs in mind:
   `ObjectiveManager` itself — it will be a new manager/app that *reads*
   from this engine the same way the Investigation Widget does, keeping
   the "no investigation-specific logic in the engine" rule intact.
+
+## 13. Mission 17 — Case Resolution Engine
+
+Introduces the Deduction Engine: a case is solved by submitting a
+complete investigation report, evaluated against a per-case
+`solution.json`, not by simply picking a name from a list.
+
+### 13.1 Deduction Engine architecture
+
+Same three-pure-modules-plus-one-orchestrator shape as Mission 16, for
+the same reasons (testability, reuse by a future Case Editor "preview my
+solution" tool, staying under `CODING_STYLE.md`'s size limits):
+
+```
+core/resolution/ResolutionValidator.js  — pure: report vs. solution.json
+core/resolution/ResolutionScorer.js     — pure: validation -> outcome + score
+core/resolution/ResolutionReport.js     — pure: assembles the Case Summary
+core/resolution/ResolutionOptions.js    — shared Motive/Timeline vocabularies
+managers/ResolutionManager.js           — orchestrator: load, submit, persist, HQ mail
+apps/board/ResolutionWizard.js          — the 7-step UI, launched from Investigation Board
+```
+
+`ResolutionWizard` lives inside `apps/board/` rather than as its own
+top-level app because the spec is explicit that the Investigation Board
+launches it — it's a mode of that window, not a separate OS window. It
+renders as a full-screen overlay inside the board's own content element
+(`position:absolute; inset:0` over `.board`, which is why `.board`
+gained `position:relative`), and was kept in its own file specifically
+*because* `apps/board/index.js` was already near `CODING_STYLE.md`'s
+line limits — adding 400 more lines inline wasn't an option.
+
+### 13.2 Validation workflow
+
+`ResolutionManager.submit(report)`:
+
+1. Emits `investigation:submitted`.
+2. Builds a validation context by reading — never writing — from
+   `ObjectiveManager` (completed objective ids, current phase, phase
+   order list), `ForensicsManager` (collected analysis ids).
+3. Injects the case's fixed `victim` (from `solution.json`, not a wizard
+   step — there's no "choose the victim" step in the spec's 7 steps)
+   into the report before validating.
+4. `ResolutionValidator.validateReport()` checks five things against
+   `solution.json` — suspect, weapon, location, motive, timeline — plus
+   four requirement sets: required evidence submitted, required
+   objectives completed, required forensic reports collected, and
+   required phase reached (`current phase order >= required phase
+   order`, so a player who moved past the required phase still passes —
+   see `_isPhaseReached()`). Emits `investigation:validated`.
+5. `ResolutionScorer.scoreResolution()` turns that into one of the five
+   outcome tiers (§13.4) and a score object.
+6. `ResolutionReport.buildReport()` resolves every id in the report into
+   a readable name using lookups the manager gathered from
+   `PeopleManager`, `EvidenceManager`, `MapManager`, and
+   `ForensicsManager` — the pure module never imports a manager itself.
+7. The attempt is recorded, an HQ mail is generated, and
+   `resolution:generated` fires with the finished report.
+8. On a `Perfect` or `Successful` outcome only,
+   `ActiveInvestigationManager.complete()` is called (Epic 01.1's
+   `completeInvestigation()` path, implemented back then and unused
+   until now) and `investigation:completed` fires.
+
+Nothing is ever locked by an unsuccessful attempt — `reopen()` exists
+only to emit `investigation:reopened` for anything listening; the player
+could just as well close the wizard and keep investigating without
+calling it at all, because no state anywhere prevents that.
+
+### 13.3 Resolution report generation
+
+`ResolutionReport.buildReport()` is intentionally the only place that
+turns ids into prose — `person-003` becomes `"Unidentified Male (Person
+of Interest)"`, `ev-004` becomes its evidence title, and so on. This
+keeps `ResolutionValidator` comparing ids only (fast, unambiguous) while
+the Case Summary a player actually reads is fully readable, and it means
+a future localization pass only has to touch the data these lookups
+already resolve from, not this module.
+
+### 13.4 Scoring model
+
+Five outcome tiers, determined by `coreCorrectCount` (how many of
+suspect/weapon/location/motive match `solution.json`, out of 4) and
+`requirementsMet` (every required evidence/objective/forensics/phase
+check passed):
+
+| Core correct | Requirements met | Optional + full evidence | Outcome |
+|---|---|---|---|
+| 4/4 | yes | yes | **Perfect Investigation** |
+| 4/4 | yes | no | **Successful Investigation** |
+| 4/4 | no  | — | **Incomplete Investigation** |
+| 2–3/4 | — | — | **Incorrect Investigation** |
+| 0–1/4 | — | — | **Investigation Failed** |
+
+Score fields (per spec's Scoring section): `completionPercent` (from
+`ObjectiveManager.getProgress()`), `correctEvidencePercent` (required
+evidence actually submitted), `optionalObjectivesPercent`,
+`unusedEvidence` (evidence that exists for the case but was never
+selected as supporting evidence), and `timeTakenMs` (now minus the
+investigation's `startedAt`). Per spec, **no XP is computed or stored**
+— the score object is plain data, saved for a future profile system to
+read, and nothing in this mission consumes it as a reward.
+
+### 13.5 Save format
+
+Storage key: `resolution-state:{caseId}` — one entry per case, mirroring
+`ObjectiveManager`'s convention:
+
+```
+{
+  attempts:       [ { outcome, score, report, timestamp } ],
+  bestScore:      { ...score, outcome } | null,
+  lastSubmission: { outcome, score, report, timestamp } | null
+}
+```
+
+"Best" is ranked by outcome tier first, `completionPercent` as the
+tiebreaker within the same tier (`_isBetter()`) — a Perfect attempt with
+lower completion than a later Successful attempt is still never treated
+as worse, matching the tier ordering above.
+
+### 13.6 Event flow
+
+```
+Wizard.submit()
+  → ResolutionManager.submit()
+      → investigation:submitted
+      → (reads ObjectiveManager / ForensicsManager — no events, direct reads)
+      → investigation:validated     { validation }
+      → (reads PeopleManager / EvidenceManager / MapManager for names)
+      → resolution:generated        { report }
+      → MailManager.injectMail()    → mail:new, mail:loaded
+      → [if Perfect/Successful] ActiveInvestigationManager.complete()
+                                     → investigation:completed
+                                     → investigationChanged (Epic 01.1)
+                                     → context:changed (Epic 01)
+```
+
+Police Mail needs zero new code to show the HQ response — it already
+reacts to `mail:loaded`/`mail:new` the same as any file-loaded mail (see
+Epic 01.1 §11.5's Police Mail migration), and `injectMail()` goes through
+the exact same `_mergeMail()` path as JSON-loaded mail, so the injected
+message is indistinguishable from a hand-authored one once it exists.
+
+### 13.7 How Mission 18 (Investigation State Machine) will use this
+
+Mission 18 is explicitly out of scope here, but this mission was built
+so it has real hooks to expand from:
+
+- **Multiple attempts are already tracked** (`getAttempts()`) — a
+  branching-path state machine could key different narrative outcomes
+  off *which* attempt sequence a player took (e.g. reaching "Successful"
+  on the first try vs. after three "Incomplete" attempts), rather than
+  Mission 18 needing to build attempt-tracking itself.
+- **`investigation:completed` already fires with the outcome tier**, not
+  just a boolean — a state machine can branch on `Perfect` vs.
+  `Successful` distinctly (e.g. unlocking a bonus epilogue only on
+  Perfect) without touching `ResolutionManager`.
+- **Replay support** falls directly out of "nothing ever locks" (§13.2)
+  — an investigation can already be resubmitted indefinitely; Mission 18
+  deciding to branch the *narrative* on a resubmission is additive to a
+  mechanic that already exists, not a new one.
+- **Dynamic states** (a case that isn't simply Active/Completed but has
+  named narrative beats) would sit naturally alongside the existing
+  `ObjectiveManager` phase system (Mission 16) — Mission 18's state
+  machine reading `ObjectiveManager.getCurrentPhaseId()` and
+  `ResolutionManager.getAttempts()` the same way this mission's own
+  validator does, rather than either engine needing to know about the
+  other's internals.
 

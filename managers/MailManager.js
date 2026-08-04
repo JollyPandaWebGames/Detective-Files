@@ -103,6 +103,25 @@ class MailManagerClass {
 
     }
 
+    /**
+     * Inject a runtime-generated mail (Mission 17 — Headquarters
+     * responses to a submitted resolution). Unlike every other mail,
+     * this doesn't come from a JSON file — it's composed by
+     * ResolutionManager after a case is submitted. Goes through the
+     * same merge path as file-loaded mail so it behaves identically
+     * (read/starred/archived state, case scoping) once it exists.
+     *
+     * @param {Object} mailData - Same shape as a mail JSON file.
+     * @returns {void}
+     */
+    injectMail( mailData ) {
+
+        this._mergeMail( mailData );
+        EventBus.emit( 'mail:new',    { mail: this._mails.get( mailData.id ) } );
+        EventBus.emit( 'mail:loaded', { count: this._mails.size } );
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Queries
     // ─────────────────────────────────────────────────────────────

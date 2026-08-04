@@ -377,6 +377,11 @@ class ObjectiveManagerClass {
         return this._currentPhaseId;
     }
 
+    /** @returns {Object[]} Phase definitions in order — {id, title, order, unlockedApps}. */
+    getPhases() {
+        return [ ...this._phases ];
+    }
+
     /** @returns {Object[]} */
     getHistory() {
         return [ ...this._history ];

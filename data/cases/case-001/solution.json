@@ -1,0 +1,23 @@
+{
+    "victim":            "person-001",
+    "suspect":           "person-003",
+    "weapon":            "ev-004",
+    "location":          "loc-001",
+    "motive":            "theft",
+    "timeline":          "2145-2215",
+
+    "requiredEvidence":  [ "ev-003", "ev-004", "ev-006" ],
+    "optionalEvidence":  [ "ev-002", "ev-005" ],
+
+    "requiredObjectives": [
+        "obj-collect-toxicology",
+        "obj-collect-trace",
+        "obj-form-theory"
+    ],
+
+    "requiredForensics": [ "analysis-003", "analysis-004" ],
+
+    "requiredPhase": "theory",
+
+    "notes": "The unidentified male (person-003) incapacitated Dr. Rask with his own RX-7 sedative (ev-004), then cut the USB lanyard (ev-006) and took the drive — a targeted theft of the research, not a spontaneous struggle. The fingerprint/DNA report (ev-003) is required supporting evidence because it's the only material link tying an unknown third party to the scene at all."
+}

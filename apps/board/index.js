@@ -7,6 +7,7 @@ import MapManager from '../../managers/MapManager.js';
 import CctvManager from '../../managers/CctvManager.js';
 import MessengerManager from '../../managers/MessengerManager.js';
 import ForensicsManager from '../../managers/ForensicsManager.js';
+import ResolutionWizard from './ResolutionWizard.js';
 
 const NODE_TYPES = {
     evidence:    { emoji:'🔍', color:'#1a3a2a', border:'#37D67A', label:'Evidence'   },
@@ -45,7 +46,7 @@ class InvestigationBoard extends BaseApp {
         this._onTS=(e)=>this._ts(e); this._onTM=(e)=>this._tm(e); this._onTE=()=>this._te();
     }
 
-    create(el) { el.classList.add('board'); this._buildLayout(el); }
+    create(el) { el.classList.add('board'); this._buildLayout(el); this._wizard = new ResolutionWizard(el); }
 
     open() {
         EventBus.on('investigationChanged',this._onInvestigationChanged);
@@ -486,10 +487,13 @@ ${conns.length?`<div class="board__insp-section">Connections (${conns.length})</
 <div class="board__solve-theories">${theories.length?theories.map(t=>`<div class="board__solve-theory-row"><div class="board__solve-theory-title">💡 ${this._esc(t.title)}</div><div class="board__solve-theory-conf">Confidence: ${t.data?.confidence??0}%</div><div class="board__solve-theory-desc">${this._esc(t.data?.description??'')}</div></div>`).join(''):'<div class="board__empty-hint">No theories yet.</div>'}</div>
 <div class="board__solve-section">Unconnected Nodes</div>
 <div class="board__solve-orphans">${orphans.length?orphans.map(n=>`<div class="board__solve-orphan">${NODE_TYPES[n.type]?.emoji??'📌'} ${this._esc(n.title)}</div>`).join(''):'<div class="board__empty-hint">All connected ✅</div>'}</div>
-<div class="board__solve-note">⚠️ Case resolution will be evaluated in Mission 15.</div>
-<button type="button" class="board__solve-close">Close Review</button>
+<div class="board__solve-actions">
+<button type="button" class="board__solve-close">Cancel</button>
+<button type="button" class="board__solve-continue">Continue to Resolution Wizard →</button>
+</div>
 </div>`;
         dlg.querySelector('.board__solve-close').addEventListener('click',()=>dlg.remove());
+        dlg.querySelector('.board__solve-continue').addEventListener('click',()=>{dlg.remove();this._wizard.open();});
         dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.remove();});
         document.body.appendChild(dlg);
     }
