@@ -1,0 +1,24 @@
+{
+    "id": "obj-form-theory",
+    "title": "Form a Theory",
+    "description": "Create a theory node on the Investigation Board tying the case together.",
+    "category": "Theory",
+    "priority": "critical",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "theoryCreated"
+        }
+    ],
+    "actions": [
+        {
+            "type": "changePhase",
+            "target": "resolution"
+        }
+    ],
+    "dependencies": [
+        "obj-confirm-motive",
+        "obj-review-board"
+    ]
+}

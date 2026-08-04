@@ -478,6 +478,8 @@ class CCTVViewer extends BaseApp {
         this._panY           = 0;
         this._speedIndex     = 2; // Reset to 1×.
 
+        EventBus.emit( 'cctv:camera-viewed', { cameraId } );
+
         // Update camera list selection.
         this._cameraListEl.querySelectorAll( '.cctv__camera-item' ).forEach( el => {
             el.classList.toggle( 'cctv__camera-item--selected', el.dataset.camId === cameraId );

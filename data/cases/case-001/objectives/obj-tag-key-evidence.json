@@ -1,0 +1,17 @@
+{
+    "id": "obj-tag-key-evidence",
+    "title": "Flag the Lanyard as Key Evidence",
+    "description": "Pin the severed lanyard cord for quick reference.",
+    "category": "Optional",
+    "priority": "optional",
+    "optional": true,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "evidenceTagged",
+            "target": "ev-006"
+        }
+    ],
+    "actions": [],
+    "dependencies": []
+}

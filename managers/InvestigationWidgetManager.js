@@ -63,6 +63,10 @@ class InvestigationWidgetManagerClass {
         EventBus.on( 'context:changed',         this._onContextChanged );
         EventBus.on( 'investigationChanged',    this._onContextChanged );
         EventBus.on( 'case:progress',            this._onContextChanged );
+        EventBus.on( 'objective:loaded',         this._onContextChanged );
+        EventBus.on( 'objective:completed',      this._onContextChanged );
+        EventBus.on( 'objective:progress',       this._onContextChanged );
+        EventBus.on( 'objective:phase-changed',  this._onContextChanged );
 
         this._render();
 
@@ -142,6 +146,8 @@ class InvestigationWidgetManagerClass {
         }
 
         const currentObjective = ( inv.currentObjectives ?? [] )[ 0 ] ?? 'No objectives remaining';
+        const details          = ApplicationContext.getAvailableObjectiveDetails();
+        const isCritical       = details[ 0 ]?.priority === 'critical';
 
         return `
             <div class="investigation-widget__header">
@@ -149,7 +155,7 @@ class InvestigationWidgetManagerClass {
                 <button type="button" class="investigation-widget__toggle" data-action="collapse" aria-label="Collapse">–</button>
             </div>
             <div class="investigation-widget__status investigation-widget__status--active">${ inv.status }</div>
-            <div class="investigation-widget__objective">${ this._escape( currentObjective ) }</div>
+            <div class="investigation-widget__objective${ isCritical ? ' investigation-widget__objective--critical' : '' }">${ this._escape( currentObjective ) }</div>
             <div class="investigation-widget__progress-track">
                 <div class="investigation-widget__progress-fill" style="width:${ Math.max( 0, Math.min( 100, inv.progress ) ) }%"></div>
             </div>

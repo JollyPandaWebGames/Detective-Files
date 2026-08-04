@@ -1,0 +1,18 @@
+{
+    "id": "obj-review-board",
+    "title": "Build the Investigation Board",
+    "description": "Connect at least one pair of evidence, people, or locations on the board.",
+    "category": "Theory",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "boardConnectionCreated"
+        }
+    ],
+    "actions": [],
+    "dependencies": [
+        "obj-collect-trace"
+    ]
+}

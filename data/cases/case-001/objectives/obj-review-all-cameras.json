@@ -1,0 +1,25 @@
+{
+    "id": "obj-review-all-cameras",
+    "title": "Inspect Every Camera",
+    "description": "Review footage from all three cameras at the scene.",
+    "category": "Optional",
+    "priority": "optional",
+    "optional": true,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "cameraViewed",
+            "target": "camera-01"
+        },
+        {
+            "type": "cameraViewed",
+            "target": "camera-02"
+        },
+        {
+            "type": "cameraViewed",
+            "target": "camera-03"
+        }
+    ],
+    "actions": [],
+    "dependencies": []
+}

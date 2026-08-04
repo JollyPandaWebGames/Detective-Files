@@ -1,0 +1,28 @@
+{
+    "id": "obj-inspect-beaker",
+    "title": "Inspect the Shattered Beaker",
+    "description": "Examine the broken glassware found near the overturned chair.",
+    "category": "Evidence",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "evidenceViewed",
+            "target": "ev-004"
+        }
+    ],
+    "actions": [
+        {
+            "type": "unlockObjective",
+            "target": "obj-request-toxicology"
+        },
+        {
+            "type": "changePhase",
+            "target": "evidence"
+        }
+    ],
+    "dependencies": [
+        "obj-open-evidence"
+    ]
+}

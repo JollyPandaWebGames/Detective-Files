@@ -137,7 +137,9 @@ class Workstation {
         // ── 7d. Active Investigation ──────────────────────────────
         // Re-affirm whatever investigation was active last session.
         // Emits 'investigationChanged' so every application below
-        // reloads its data via ApplicationContext (Epic 01.1).
+        // reloads its data via ApplicationContext (Epic 01.1). Also
+        // resumes that case's objective graph via ObjectiveManager
+        // (Mission 16) — see ARCHITECTURE_2.md §12.
         ActiveInvestigationManager.initialize();
 
         // ── 7e. Evidence Data ──────────────────────────────────────

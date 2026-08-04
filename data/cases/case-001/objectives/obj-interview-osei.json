@@ -1,0 +1,24 @@
+{
+    "id": "obj-interview-osei",
+    "title": "Interview Dr. Yara Osei",
+    "description": "Speak with Dr. Rask's research assistant.",
+    "category": "Interview",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "messageRead",
+            "target": "conv-001"
+        }
+    ],
+    "actions": [
+        {
+            "type": "unlockObjective",
+            "target": "obj-interview-webb"
+        }
+    ],
+    "dependencies": [
+        "obj-read-assignment"
+    ]
+}

@@ -1,0 +1,19 @@
+{
+    "id": "obj-open-evidence",
+    "title": "Open the Evidence Database",
+    "description": "Review the physical evidence collected from the scene.",
+    "category": "Evidence",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "applicationOpened",
+            "target": "evidence"
+        }
+    ],
+    "actions": [],
+    "dependencies": [
+        "obj-read-assignment"
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "id": "obj-collect-toxicology",
+    "title": "Collect the Toxicology Report",
+    "description": "Retrieve the lab's findings on the beaker residue.",
+    "category": "Laboratory",
+    "priority": "critical",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "analysisCollected",
+            "target": "analysis-003"
+        }
+    ],
+    "actions": [
+        {
+            "type": "changePhase",
+            "target": "laboratory"
+        },
+        {
+            "type": "revealHiddenObjective",
+            "target": "obj-lanyard-lead"
+        }
+    ],
+    "dependencies": [
+        "obj-request-toxicology"
+    ]
+}

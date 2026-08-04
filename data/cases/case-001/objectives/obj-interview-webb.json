@@ -1,0 +1,19 @@
+{
+    "id": "obj-interview-webb",
+    "title": "Interview Marcus Webb",
+    "description": "Speak with the night security guard about the corrupted camera feed.",
+    "category": "Interview",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "messageRead",
+            "target": "conv-003"
+        }
+    ],
+    "actions": [],
+    "dependencies": [
+        "obj-interview-osei"
+    ]
+}

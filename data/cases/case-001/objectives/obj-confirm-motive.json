@@ -1,0 +1,22 @@
+{
+    "id": "obj-confirm-motive",
+    "title": "Confirm the Motive",
+    "description": "The clean-cut cord means the USB drive was the target, not a struggle.",
+    "category": "Theory",
+    "priority": "normal",
+    "optional": false,
+    "hidden": true,
+    "conditions": [
+        {
+            "type": "customEvent",
+            "event": "motive:confirmed"
+        }
+    ],
+    "actions": [
+        {
+            "type": "unlockObjective",
+            "target": "obj-form-theory"
+        }
+    ],
+    "dependencies": []
+}

@@ -1,0 +1,19 @@
+{
+    "id": "obj-request-toxicology",
+    "title": "Request Toxicology Analysis",
+    "description": "Submit the beaker residue for lab analysis.",
+    "category": "Laboratory",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "analysisRequested",
+            "target": "analysis-003"
+        }
+    ],
+    "actions": [],
+    "dependencies": [
+        "obj-inspect-beaker"
+    ]
+}

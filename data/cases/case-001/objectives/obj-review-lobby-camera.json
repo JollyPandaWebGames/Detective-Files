@@ -1,0 +1,19 @@
+{
+    "id": "obj-review-lobby-camera",
+    "title": "Review the Lobby Camera",
+    "description": "Check camera 01 for anyone entering the building that night.",
+    "category": "Investigation",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "cameraViewed",
+            "target": "camera-01"
+        }
+    ],
+    "actions": [],
+    "dependencies": [
+        "obj-read-assignment"
+    ]
+}

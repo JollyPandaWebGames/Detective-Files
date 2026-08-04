@@ -1,0 +1,25 @@
+{
+    "id": "obj-question-all-witnesses",
+    "title": "Question Every Witness",
+    "description": "Speak with everyone who was near the scene that night.",
+    "category": "Optional",
+    "priority": "optional",
+    "optional": true,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "messageRead",
+            "target": "conv-001"
+        },
+        {
+            "type": "messageRead",
+            "target": "conv-002"
+        },
+        {
+            "type": "messageRead",
+            "target": "conv-003"
+        }
+    ],
+    "actions": [],
+    "dependencies": []
+}

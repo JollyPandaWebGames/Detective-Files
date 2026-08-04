@@ -40,6 +40,7 @@
 
 import CaseManager                    from './CaseManager.js';
 import SessionManager                 from './SessionManager.js';
+import ObjectiveManager               from './ObjectiveManager.js';
 import EventBus                        from '../core/EventBus.js';
 import { createInvestigationSession }  from '../core/InvestigationSession.js';
 
@@ -89,6 +90,9 @@ class ActiveInvestigationManagerClass {
 
         this._session = createInvestigationSession( c, this._statusFor( c ), saved.startedAt );
 
+        // Mission 16 — resume the objective graph along with the session.
+        ObjectiveManager.loadForCase( saved.caseId );
+
         EventBus.emit( 'investigationChanged', { investigation: this.getActive() } );
 
     }
@@ -134,6 +138,17 @@ class ActiveInvestigationManagerClass {
         this._session.solved   = c.status === 'Solved';
         this._session.currentObjectives = c.objectives ?? [];
 
+        // Mission 16 — Objective Engine. When this case has a live
+        // objective graph loaded, it supersedes the static placeholder
+        // fields InvestigationSession otherwise falls back to.
+        if ( ObjectiveManager.hasGraph() ) {
+            const objProgress = ObjectiveManager.getProgress();
+            this._session.progress             = objProgress.progress;
+            this._session.solved               = objProgress.requiredComplete;
+            this._session.currentObjectives    = ObjectiveManager.getAvailableObjectives().map( o => o.title );
+            this._session.completedObjectives  = ObjectiveManager.getCompletedObjectives().map( o => o.title );
+        }
+
         return { ...this._session };
 
     }
@@ -175,6 +190,11 @@ class ActiveInvestigationManagerClass {
 
         SessionManager.setActiveSessionPointer( { caseId, startedAt } );
 
+        // Mission 16 — fire-and-forget, consistent with every other
+        // per-case manager's loadForCase() pattern; 'objective:loaded'
+        // and 'objective:progress' fire once the fetch resolves.
+        ObjectiveManager.loadForCase( caseId );
+
         const investigation = this.getActive();
 
         EventBus.emit( 'investigationStarted', { investigation } );
@@ -199,6 +219,7 @@ class ActiveInvestigationManagerClass {
 
         this._session = null;
         SessionManager.setActiveSessionPointer( null );
+        ObjectiveManager.unloadCase();
 
         EventBus.emit( 'investigationStopped', { investigationId } );
         EventBus.emit( 'investigationChanged', { investigation: null } );

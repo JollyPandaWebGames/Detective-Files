@@ -1,0 +1,23 @@
+{
+    "version": "1.0",
+    "objectives": [
+        "obj-read-assignment.json",
+        "obj-open-evidence.json",
+        "obj-review-lobby-camera.json",
+        "obj-interview-osei.json",
+        "obj-interview-webb.json",
+        "obj-inspect-beaker.json",
+        "obj-request-toxicology.json",
+        "obj-collect-toxicology.json",
+        "obj-lanyard-lead.json",
+        "obj-request-trace.json",
+        "obj-collect-trace.json",
+        "obj-confirm-motive.json",
+        "obj-review-board.json",
+        "obj-form-theory.json",
+        "obj-review-all-cameras.json",
+        "obj-question-all-witnesses.json",
+        "obj-tag-key-evidence.json"
+    ],
+    "phasesFile": "phases.json"
+}

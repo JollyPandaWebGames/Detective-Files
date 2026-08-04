@@ -121,6 +121,17 @@
     color:            var(--color-warning);
 }
 
+.investigation-widget__objective--critical {
+    color:            var(--color-danger);
+    font-weight:      bold;
+}
+
+.investigation-widget__objective--critical::before {
+    content:          '!';
+    color:            var(--color-danger);
+    font-weight:      bold;
+}
+
 .investigation-widget__progress-track {
     width:            100%;
     height:           6px;

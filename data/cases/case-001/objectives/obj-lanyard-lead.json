@@ -1,0 +1,24 @@
+{
+    "id": "obj-lanyard-lead",
+    "title": "Examine the Severed Lanyard",
+    "description": "A lead that only makes sense once the sedative is confirmed.",
+    "category": "Evidence",
+    "priority": "normal",
+    "optional": false,
+    "hidden": true,
+    "conditions": [
+        {
+            "type": "evidenceViewed",
+            "target": "ev-006"
+        }
+    ],
+    "actions": [
+        {
+            "type": "unlockObjective",
+            "target": "obj-request-trace"
+        }
+    ],
+    "dependencies": [
+        "obj-collect-toxicology"
+    ]
+}

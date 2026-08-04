@@ -1,0 +1,35 @@
+{
+    "id": "obj-collect-trace",
+    "title": "Collect the Trace Analysis Report",
+    "description": "Retrieve the lab's findings on the lanyard cut.",
+    "category": "Laboratory",
+    "priority": "critical",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "analysisCollected",
+            "target": "analysis-004"
+        }
+    ],
+    "actions": [
+        {
+            "type": "revealHiddenObjective",
+            "target": "obj-confirm-motive"
+        },
+        {
+            "type": "emitEvent",
+            "event": "motive:confirmed",
+            "payload": {
+                "caseId": "case-001"
+            }
+        },
+        {
+            "type": "changePhase",
+            "target": "theory"
+        }
+    ],
+    "dependencies": [
+        "obj-request-trace"
+    ]
+}

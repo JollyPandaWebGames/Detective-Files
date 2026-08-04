@@ -1,0 +1,62 @@
+{
+    "phases": [
+        {
+            "id": "assignment",
+            "title": "Assignment",
+            "order": 1,
+            "unlockedApps": [
+                "police-mail"
+            ]
+        },
+        {
+            "id": "crime-scene",
+            "title": "Crime Scene",
+            "order": 2,
+            "unlockedApps": [
+                "evidence",
+                "cctv",
+                "city-map"
+            ]
+        },
+        {
+            "id": "witnesses",
+            "title": "Witnesses",
+            "order": 3,
+            "unlockedApps": [
+                "messenger",
+                "criminal-database"
+            ]
+        },
+        {
+            "id": "evidence",
+            "title": "Evidence",
+            "order": 4,
+            "unlockedApps": [
+                "evidence",
+                "forensics"
+            ]
+        },
+        {
+            "id": "laboratory",
+            "title": "Laboratory",
+            "order": 5,
+            "unlockedApps": [
+                "forensics"
+            ]
+        },
+        {
+            "id": "theory",
+            "title": "Theory",
+            "order": 6,
+            "unlockedApps": [
+                "board"
+            ]
+        },
+        {
+            "id": "resolution",
+            "title": "Resolution",
+            "order": 7,
+            "unlockedApps": []
+        }
+    ]
+}

@@ -1,0 +1,34 @@
+{
+    "id": "obj-read-assignment",
+    "title": "Read Initial Assignment",
+    "description": "Open Police Mail and read Captain Morgan's case assignment.",
+    "category": "Main",
+    "priority": "critical",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "emailRead",
+            "target": "mail-001"
+        }
+    ],
+    "actions": [
+        {
+            "type": "unlockObjective",
+            "target": "obj-open-evidence"
+        },
+        {
+            "type": "unlockObjective",
+            "target": "obj-review-lobby-camera"
+        },
+        {
+            "type": "unlockObjective",
+            "target": "obj-interview-osei"
+        },
+        {
+            "type": "changePhase",
+            "target": "crime-scene"
+        }
+    ],
+    "dependencies": []
+}

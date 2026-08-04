@@ -435,6 +435,7 @@ which case id is passed to `startInvestigation()`.
   all) — both are placeholders for future gameplay, same caveat as
   Epic 01 §9.
 
+## 10. File Map
 
 ```
 core/
@@ -445,12 +446,216 @@ managers/
     SessionManager.js               NEW
     ActiveInvestigationManager.js   NEW
     InvestigationWidgetManager.js   NEW
+    ObjectiveManager.js             NEW (Mission 16)
     ApplicationManager.js           MODIFIED — session tracking + onX() hook calls
     CaseManager.js                  MODIFIED — added completeCase(), archiveCase()
+core/objectives/
+    ConditionMatcher.js             NEW (Mission 16)
+    ObjectiveGraph.js               NEW (Mission 16)
+    ObjectiveActions.js             NEW (Mission 16)
 apps/
     case-management/index.js        MODIFIED — see §7
+    cctv/index.js                   MODIFIED (Mission 16) — added cctv:camera-viewed
+data/cases/case-001/objectives/
+    index.json, phases.json, obj-*.json (17 files) NEW (Mission 16)
 css/
     widgets/investigation-widget.css NEW
 docs/
     ARCHITECTURE_2.md                NEW (this file)
 ```
+
+## 12. Mission 16 — Objective Engine
+
+Upgrades `ObjectiveManager` from a placeholder (Epic 01.1 §11.1 described
+its `currentObjectives`/`completedObjectives` fields as unpopulated,
+pending this mission) into a fully data-driven engine. A case's entire
+investigation progression — branching objectives, dependencies, optional
+and hidden tasks, conditions, actions, and phases — is now pure JSON
+under `data/cases/{caseId}/objectives/`. No investigation-specific logic
+lives in the engine itself.
+
+### 12.1 Objective graph architecture
+
+Three focused modules, kept under the file/class size limits in
+`CODING_STYLE.md`:
+
+```
+core/objectives/ConditionMatcher.js   — condition type ↔ real EventBus event mapping
+core/objectives/ObjectiveGraph.js     — pure dependency/availability/progress math
+core/objectives/ObjectiveActions.js   — executes an objective's actions
+managers/ObjectiveManager.js          — orchestrator: load, state, persistence, public API
+```
+
+`ObjectiveManager` is the only one of the four that's a stateful
+singleton (like every other `*Manager`); the other three are pure
+functions over plain data, which is what keeps the engine reusable by a
+future Case Editor without dragging EventBus/StorageManager along.
+
+An objective definition is exactly the shape MISSION 16's spec JSON
+example shows — `id`, `title`, `description`, `category`, `priority`,
+`optional`, `hidden`, `conditions[]`, `actions[]`, `dependencies[]`. A
+case supplies a list of these files plus `phases.json` under an
+`objectives/index.json` manifest, following the same
+index-manifest-plus-files convention every other per-case data folder in
+`CASE_FORMAT.md` already uses (evidence, forensics, people, etc.) — this
+mission introduces no new file-loading pattern.
+
+### 12.2 Dependency resolution
+
+`ObjectiveGraph.recomputeAvailability()` is the entire algorithm: for
+every objective that isn't already `completed` or `skipped`, if it's
+`hidden` and not yet `revealed` its status is `hidden`; otherwise its
+status is `available` if every id in its `dependencies` array is
+`completed`, else `locked`. This runs after every completion, every
+reveal, and every forced unlock — it's cheap (linear in objective count)
+and stateless enough to just re-run from scratch rather than track
+incremental deltas, which is what keeps it simple enough to stay pure.
+
+Multiple dependencies are AND'd together, matching the spec's "Review DNA
+Report requires Request DNA Analysis AND Collect Laboratory Report"
+example directly — case-001's `obj-form-theory` depends on both
+`obj-confirm-motive` and `obj-review-board` as a real instance of this.
+
+### 12.3 Condition evaluation
+
+Every objective's `conditions` array uses AND semantics — all conditions
+must be satisfied for the objective to complete. `ObjectiveManager`
+tracks a parallel `satisfied: boolean[]` per objective in its runtime
+state; each condition type maps (via `ConditionMatcher`) to exactly one
+real EventBus event name and a function that pulls the comparable id out
+of that event's payload. On every fired event, only objectives currently
+`available` are checked (locked/hidden/completed objectives never
+evaluate conditions), and only the unsatisfied conditions in that
+objective's array are tested — once all are true, the objective
+completes.
+
+This is also where the optional-objective checklist pattern comes from:
+`obj-review-all-cameras` in case-001 has three `cameraViewed` conditions,
+one per camera, and only completes once all three cameras have been
+viewed — directly implementing the spec's "Inspect every CCTV camera"
+example without any special-case code, just three array entries.
+
+`customEvent` conditions bypass the built-in table entirely — they name
+their own EventBus event (and optional `target`) directly in JSON.
+`ObjectiveManager` collects every case's custom event names at load time
+and subscribes to them alongside the built-ins, so the engine never has
+to guess in advance what a case might reference.
+
+### 12.4 Action execution
+
+`ObjectiveActions.executeActions()` runs an objective's `actions` array,
+in order, once it completes. Every action type from the spec is
+implemented: `unlockObjective` (force an objective available immediately,
+bypassing its own dependency check — an explicit designer override, kept
+distinct from revealing), `revealHiddenObjective` (un-hides an objective
+but its dependencies still apply normally), `changePhase`, `emitEvent`
+(fires an arbitrary EventBus event/payload — this is what lets
+`customEvent` conditions chain off other objectives' completions), and
+the seven `unlockX` content actions.
+
+**On the `unlockX` content actions not gating anything yet:** there is no
+content-gating engine (Mission 19 — Dynamic Content Unlock Engine — is
+still Planned). Every application already shows all of an active case's
+content. These actions record the unlock in history and emit
+`content:unlocked` so Mission 19 (or a UI toast) has something concrete
+to hook into later — forward-compatible plumbing, not a fabricated
+feature, consistent with how Epic 01.1 treated `InvestigationSession`'s
+`unlocked*` fields.
+
+Action order matters and is exploited deliberately in case-001:
+`obj-collect-trace`'s actions list `revealHiddenObjective` before
+`emitEvent` — the reveal runs first (making `obj-confirm-motive`
+`available`, since its `customEvent` condition was already subscribed at
+load time), so the `emitEvent` that follows in the same synchronous pass
+is immediately seen and completes it. This is a real, working chain, not
+a diagram — starting case-001 and completing the trace analysis actually
+cascades through it live.
+
+### 12.5 Event flow
+
+`ObjectiveManager` never imports an application. Applications never
+import `ObjectiveManager`. The entire connection is EventBus:
+applications emit the same events they always did (`mail:read`,
+`evidence:selected`, `forensics:collected`, `board:theory-created`,
+etc.) with zero awareness that anything is listening for objective
+purposes — exactly the "applications remain unaware of objective logic"
+requirement. The one genuinely new event added this mission is
+`cctv:camera-viewed`, emitted by the CCTV app when a camera is selected,
+because no existing event captured "the player looked at this specific
+camera." Every other condition type in case-001 maps onto an event the
+codebase already emitted.
+
+### 12.6 Save format
+
+Storage key: `objectives-state:{caseId}` — one entry per case, not per
+investigation-session, since re-starting the same case should resume the
+same objective progress. Persisted shape:
+
+```
+{
+  states: { [objectiveId]: { status, revealed, satisfied[], unlockedAt, completedAt } },
+  currentPhaseId: string,
+  history: [ { type, objectiveId?, phaseId?, contentType?, target?, timestamp } ]
+}
+```
+
+"Unlocked content" and "hidden objectives" (both called out explicitly
+in the spec's Save System section) are intentionally *not* stored as
+separate duplicate lists — they're pure derivations of `states` +
+`history` (hidden objectives are just `states` filtered by
+`status === 'hidden'`; unlocked content is the `content-unlocked`
+entries in `history`). Storing the same fact twice risks the two copies
+drifting out of sync, which `CODING_STYLE.md`'s "avoid clever code,
+prefer explicit solutions" principle argues against — one normalized
+source is simpler to reason about and just as persistent.
+
+### 12.7 Debug mode
+
+`ObjectiveManager.debug()` — call it from the browser console — prints a
+`console.table` of every objective grouped by completed/available/locked/
+hidden, plus the full history and currently-subscribed event list, and
+returns the same data as a plain object. `CODING_STYLE.md` prohibits
+global variables, so this is a manager method to call explicitly rather
+than a `window.*` debug global — a designer opens devtools, and calls
+`ObjectiveManager.debug()` directly (the manager is already loaded as a
+module-level singleton, so devtools' console can reach it via a live
+expression the same way it can reach any other imported singleton).
+
+### 12.8 Responsive
+
+The Active Investigation widget is the only UI surface objectives
+currently render into, and it already has a mobile breakpoint from Epic
+01 (§5). The one addition this mission makes — highlighting the current
+objective when it's `critical` priority — is a text color/weight change,
+which doesn't introduce any new layout that could break at narrow
+widths.
+
+### 12.9 How Mission 17 (Case Resolution) will use this engine
+
+Mission 17 is explicitly out of scope for this pass, but the engine was
+built with its needs in mind:
+
+- **`getProgress().requiredComplete`** is already the exact boolean
+  Mission 17's "can the player attempt to solve this case yet" gate
+  needs — true once every non-optional objective is completed,
+  independent of the optional ones.
+- **`getCompletedObjectives()` / `getHistory()`** give Mission 17
+  everything it needs to validate *how* the player reached a conclusion
+  — e.g. a resolution wizard could require specific objectives
+  (`obj-collect-trace`, `obj-form-theory`) to be in the completed set
+  before accepting an accusation, or could score a resolution's
+  thoroughness against which optional objectives were also completed.
+- **`content:unlocked` events** give Mission 17 a timeline of what
+  evidence/reports were unlocked and when, useful for a "did the player
+  have access to the information their conclusion relies on" check.
+- **The `resolution` phase** in case-001's `phases.json` already exists
+  as an empty placeholder (`unlockedApps: []`) — Mission 17 is the
+  natural place to decide what that phase actually unlocks (a
+  resolution/accusation UI) and to call
+  `ApplicationContext.completeInvestigation()` (already implemented,
+  currently unused by any gameplay flow) once a resolution is accepted.
+- Nothing about Mission 17's resolution logic needs to live in
+  `ObjectiveManager` itself — it will be a new manager/app that *reads*
+  from this engine the same way the Investigation Widget does, keeping
+  the "no investigation-specific logic in the engine" rule intact.
+

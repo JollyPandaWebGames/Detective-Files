@@ -51,8 +51,8 @@
 import EventBus                    from './EventBus.js';
 import SessionManager              from '../managers/SessionManager.js';
 import ActiveInvestigationManager  from '../managers/ActiveInvestigationManager.js';
+import ObjectiveManager            from '../managers/ObjectiveManager.js';
 import SettingsManager             from '../managers/SettingsManager.js';
-import ThemeManager                from '../managers/ThemeManager.js';
 
 /**
  * Minimal stand-in for a future user/profile system. No accounts,
@@ -94,6 +94,9 @@ class ApplicationContextClass {
         EventBus.on( 'investigationStarted',    rebroadcast );
         EventBus.on( 'investigationChanged',    rebroadcast );
         EventBus.on( 'investigationStopped',    rebroadcast );
+        EventBus.on( 'objective:completed',     rebroadcast );
+        EventBus.on( 'objective:progress',      rebroadcast );
+        EventBus.on( 'objective:phase-changed', rebroadcast );
         EventBus.on( 'settings:changed',        rebroadcast );
         EventBus.on( 'theme:changed',           rebroadcast );
         EventBus.on( 'wallpaper:changed',       rebroadcast );
@@ -187,6 +190,18 @@ class ApplicationContextClass {
     /** @returns {boolean} */
     hasActiveInvestigation() {
         return ActiveInvestigationManager.hasActive();
+    }
+
+    /**
+     * Mission 16 — full available-objective detail (including priority),
+     * for consumers that need more than InvestigationSession's flattened
+     * title list — currently just the Active Investigation widget, so it
+     * can highlight Critical objectives per the spec.
+     *
+     * @returns {Object[]}
+     */
+    getAvailableObjectiveDetails() {
+        return ObjectiveManager.getAvailableObjectives();
     }
 
     /**

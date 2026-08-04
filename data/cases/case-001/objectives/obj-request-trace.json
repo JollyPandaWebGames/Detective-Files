@@ -1,0 +1,19 @@
+{
+    "id": "obj-request-trace",
+    "title": "Request Trace Analysis on the Lanyard",
+    "description": "Submit the severed cord for tool-mark examination.",
+    "category": "Laboratory",
+    "priority": "normal",
+    "optional": false,
+    "hidden": false,
+    "conditions": [
+        {
+            "type": "analysisRequested",
+            "target": "analysis-004"
+        }
+    ],
+    "actions": [],
+    "dependencies": [
+        "obj-lanyard-lead"
+    ]
+}
