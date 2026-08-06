@@ -448,6 +448,7 @@ managers/
     InvestigationWidgetManager.js   NEW
     ObjectiveManager.js             NEW (Mission 16)
     ResolutionManager.js            NEW (Mission 17)
+    StateMachineManager.js          NEW (Mission 18)
     MailManager.js                  MODIFIED (Mission 17) — added injectMail()
     ApplicationManager.js           MODIFIED — session tracking + onX() hook calls
     CaseManager.js                  MODIFIED — added completeCase(), archiveCase()
@@ -460,6 +461,12 @@ core/resolution/
     ResolutionScorer.js              NEW (Mission 17)
     ResolutionReport.js              NEW (Mission 17)
     ResolutionOptions.js             NEW (Mission 17)
+core/state-machine/
+    StateTransitionMatcher.js       NEW (Mission 18)
+    StateActions.js                  NEW (Mission 18)
+    RandomEventEngine.js             NEW (Mission 18)
+    StateTimerScheduler.js           NEW (Mission 18)
+    HqMailBuilder.js                 NEW (Mission 18)
 apps/
     case-management/index.js        MODIFIED — see §7
     cctv/index.js                   MODIFIED (Mission 16) — added cctv:camera-viewed
@@ -470,6 +477,7 @@ data/cases/case-001/objectives/
     index.json, phases.json, obj-*.json (17 files) NEW (Mission 16)
 data/cases/case-001/
     solution.json                   NEW (Mission 17)
+    states.json                      NEW (Mission 18)
 css/
     widgets/investigation-widget.css NEW
 docs/
@@ -837,4 +845,174 @@ so it has real hooks to expand from:
   `ResolutionManager.getAttempts()` the same way this mission's own
   validator does, rather than either engine needing to know about the
   other's internals.
+
+## 14. Mission 18 — Investigation State Machine
+
+Investigations become dynamic: a case is composed of Investigation
+States, only one active at a time, and the world reacts to player
+progress through it — content unlock signals, HQ mail, notifications,
+and timers that survive a refresh.
+
+### 14.1 State Machine architecture
+
+Same shape as Missions 16/17 — pure modules plus one orchestrator:
+
+```
+core/state-machine/StateTransitionMatcher.js — trigger type ↔ real EventBus event
+core/state-machine/StateActions.js            — executes a state's entry actions
+core/state-machine/RandomEventEngine.js        — deterministic seeded random rolls
+core/state-machine/StateTimerScheduler.js      — setTimeout bookkeeping (extracted
+                                                  from the manager to stay under
+                                                  CODING_STYLE.md's 500-line limit)
+core/state-machine/HqMailBuilder.js            — pure HQ-mail-shape assembly
+managers/StateMachineManager.js                — orchestrator
+```
+
+Unlike `ObjectiveManager` (a dependency *graph* — many objectives can be
+`available` simultaneously) `StateMachineManager` is a true FSM — exactly
+one state is ever active. That difference shapes the event-subscription
+strategy: `ObjectiveManager` subscribes to every condition event a case
+might need, once, at load time, because any available objective could
+fire at any moment. `StateMachineManager` instead subscribes **only** to
+the current state's own transition triggers, and tears that subscription
+down and rebuilds it fresh on every transition — there's never a reason
+to listen for an event a state the player isn't in cares about.
+
+### 14.2 Transition system
+
+A transition is `{ to, trigger }`. Five of the seven trigger types from
+spec are event-driven (`objectiveCompleted`, `evidenceDiscovered`,
+`messageRead`, `forensicsCompleted`, `customEvent`) and go through
+`StateTransitionMatcher` the same way Mission 16's conditions do. The
+other two are manager-driven, not event-driven:
+
+- **`timeElapsed`** — carries a `delayMs`, scheduled via the timer system
+  (§14.3) rather than an EventBus subscription.
+- **`manualTrigger`** — never fires on its own. `StateMachineManager.
+  triggerManualTransition(targetStateId)` is the public entry point;
+  it's only valid if the current state actually declares a
+  `manualTrigger` transition to that target, so it can't be used to
+  jump the machine to an arbitrary state from outside.
+
+First match wins. If a state somehow declared two transitions on the
+same event, only the first evaluated fires — `_activateState()` tears
+down the current state's listeners synchronously as its very first step,
+so there's no window for a second match against a state that's already
+been left.
+
+`objectiveCompleted` reacting to `'objective:completed'` — a Mission 16
+*output* — is the concrete version of the spec's own example chain
+("Player reads HQ email → Crime Scene unlocked → new objective
+appears..."): Mission 16 and Mission 18 aren't merged into one engine,
+they're two independent engines that both speak EventBus, and each
+happily reacts to the other's events without either importing the other.
+
+### 14.3 Timer architecture
+
+Every timer — whether a `timeElapsed` transition or a standalone,
+non-transitioning `state.timers[]` entry (the spec's "5 minutes → HQ
+requests update" example, which doesn't change state, just fires an
+action) — is persisted as `{ id, stateId, endsAt, kind, ... }`, where
+`endsAt` is an **absolute** timestamp, not a remaining duration. This is
+what makes timers survive a refresh correctly rather than approximately:
+on `loadForCase()`, any pending timer belonging to the resumed state has
+its remaining time recomputed as `endsAt - Date.now()` — if that's
+already ≤ 0 (the delay fully elapsed while the tab was closed), it fires
+immediately as a catch-up; otherwise it's re-armed with only the
+remaining duration, never the full original delay. `StateTimerScheduler`
+owns the live `setTimeout` handles; `StateMachineManager` owns the
+persisted record and the resume-time reconciliation, since scheduling
+mechanics and case-scoped persistence are different concerns kept in
+different files.
+
+### 14.4 Random event framework
+
+`RandomEventEngine.rollRandomEvents()` uses mulberry32, a small seedable
+PRNG, so a state's random events (`state.randomEvents[]`, each with an
+independent `probability`) roll deterministically from a stored
+`randomSeed` — the same seed always produces the same fired/not-fired
+outcome for the same state, which is what makes the spec's "Random event
+seed" save field meaningful rather than decorative: replaying a
+persisted session reproduces exactly what happened, including which
+random events fired. Case-001's `lab-results` state demonstrates this
+with a 60%-chance "Anonymous Tip Received" HQ mail — the spec's own
+example event, generated for real rather than described.
+
+### 14.5 Save structure
+
+Storage key: `state-machine:{caseId}`:
+
+```
+{
+  currentStateId: string,
+  history:        [ { type: 'entered'|'exited'|'random-event'|'content-unlocked',
+                       stateId, timestamp, reason?, triggeredBy?, eventId? } ],
+  randomSeed:     number,
+  pendingTimers:  [ { id, stateId, endsAt, kind, transitionTo?, actions?, repeat? } ]
+}
+```
+
+History carries exactly what the spec's "State History" section asks
+for — entered-at and exited-at are both just `history` entries with
+`type: 'entered'`/`'exited'` and matching `stateId`/`timestamp`, and
+`reason`/`triggeredBy` are recorded on both. No separate "entered
+at"/"exited at" fields are duplicated elsewhere — same normalization
+principle as Mission 16/17's save formats.
+
+### 14.6 Event flow
+
+```
+Player action → real app event (e.g. messenger:message-read)
+  → StateMachineManager's wired handler for the CURRENT state only
+      → triggerMatchesEvent() → match found
+          → _activateState(newStateId)
+              → state:exited (old)
+              → state:entered (new) + state:transition
+              → StateActions.executeStateActions() → notify / generateHqMail /
+                emitEvent / content:unlocked
+              → RandomEventEngine roll → any fired event's own actions
+              → new transition listeners wired, new timers armed
+  → ApplicationContext's 'context:changed' rebroadcast (state:entered,
+    state:transition both listened for) → every open application that
+    reads from ApplicationContext refreshes with zero extra code, the
+    same mechanism Epic 01.1 built for investigation changes generally
+```
+
+No application imports `StateMachineManager`. No application needs to —
+the spec's "Applications automatically refresh... All update from
+ApplicationContext" requirement is satisfied by the exact same
+`context:changed` broadcast every other engine in this project already
+plugs into, not a new bespoke wiring path.
+
+### 14.7 How Mission 19 (Dynamic Unlock System) expands this
+
+Mission 18 is explicitly out of scope for touching Mission 19, but was
+built with it in mind, in the same way Mission 16 and 17 were:
+
+- **`content:unlocked` is already the shared signal.** Mission 16's
+  objective actions and Mission 18's state actions both emit the exact
+  same event shape (`{ contentType, target, ...sourceId }`) for the
+  exact same reason — right now, neither actually hides/reveals
+  anything in an application, because entities are globally visible the
+  moment their case is active. Mission 19's entire job, as its name
+  says, is to make *individual entities* (an email, an evidence item, a
+  suspect, a camera, a location) unlock independently — and it can do
+  that by listening to the one event both engines already emit, rather
+  than needing either engine to change.
+- **States naturally become the "container" for what's unlocked when.**
+  A state's `actions` list is already "the set of things that become
+  true when this state is entered" — Mission 19 turning `unlockEvidence`
+  from "emit a signal" into "actually hide `ev-004` from the Evidence
+  Database until this fires" is a change entirely inside Mission 19's
+  own gating layer, not a change to how states declare their actions.
+- **Per-entity state (locked/unlocked/hidden) mirrors what Mission 16
+  already proved out** for objectives (`hidden`/`revealed`/`locked`/
+  `available`/`completed`) — Mission 19 has a working precedent for the
+  state-tracking shape to reuse across evidence, mail, people, CCTV, and
+  locations, rather than inventing a new one.
+- **`StateMachineManager.getCurrentState()` and `getHistory()`** give
+  Mission 19 the "what state is the player in, and what already
+  happened" context a gating check needs — e.g. "this email is only
+  visible once the `lab-results` state was entered" — without Mission 19
+  needing its own copy of state tracking.
 

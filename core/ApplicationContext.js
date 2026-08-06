@@ -52,6 +52,7 @@ import EventBus                    from './EventBus.js';
 import SessionManager              from '../managers/SessionManager.js';
 import ActiveInvestigationManager  from '../managers/ActiveInvestigationManager.js';
 import ObjectiveManager            from '../managers/ObjectiveManager.js';
+import StateMachineManager          from '../managers/StateMachineManager.js';
 import SettingsManager             from '../managers/SettingsManager.js';
 
 /**
@@ -97,6 +98,8 @@ class ApplicationContextClass {
         EventBus.on( 'objective:completed',     rebroadcast );
         EventBus.on( 'objective:progress',      rebroadcast );
         EventBus.on( 'objective:phase-changed', rebroadcast );
+        EventBus.on( 'state:entered',            rebroadcast );
+        EventBus.on( 'state:transition',         rebroadcast );
         EventBus.on( 'settings:changed',        rebroadcast );
         EventBus.on( 'theme:changed',           rebroadcast );
         EventBus.on( 'wallpaper:changed',       rebroadcast );
@@ -193,7 +196,7 @@ class ApplicationContextClass {
     }
 
     /**
-     * Mission 16 — full available-objective detail (including priority),
+     * Mission 18 — full available-objective detail (including priority),
      * for consumers that need more than InvestigationSession's flattened
      * title list — currently just the Active Investigation widget, so it
      * can highlight Critical objectives per the spec.
@@ -202,6 +205,19 @@ class ApplicationContextClass {
      */
     getAvailableObjectiveDetails() {
         return ObjectiveManager.getAvailableObjectives();
+    }
+
+    /**
+     * Mission 18 — the active investigation's current state (title,
+     * transitions, etc.), or null if this case has no state machine.
+     * Applications should treat this as read-only context, the same way
+     * they treat currentInvestigation — no application mutates it
+     * directly.
+     *
+     * @returns {Object|null}
+     */
+    getCurrentInvestigationState() {
+        return StateMachineManager.getCurrentState();
     }
 
     /**

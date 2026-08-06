@@ -42,6 +42,7 @@ import CaseManager                    from './CaseManager.js';
 import SessionManager                 from './SessionManager.js';
 import ObjectiveManager               from './ObjectiveManager.js';
 import ResolutionManager              from './ResolutionManager.js';
+import StateMachineManager            from './StateMachineManager.js';
 import EventBus                        from '../core/EventBus.js';
 import { createInvestigationSession }  from '../core/InvestigationSession.js';
 
@@ -96,6 +97,9 @@ class ActiveInvestigationManagerClass {
 
         // Mission 17 — resume the case's solution + resolution attempts.
         ResolutionManager.loadForCase( saved.caseId );
+
+        // Mission 18 — resume the investigation state machine.
+        StateMachineManager.loadForCase( saved.caseId );
 
         EventBus.emit( 'investigationChanged', { investigation: this.getActive() } );
 
@@ -202,6 +206,9 @@ class ActiveInvestigationManagerClass {
         // Mission 17 — load this case's solution.json, if it has one.
         ResolutionManager.loadForCase( caseId );
 
+        // Mission 18 — load this case's investigation state machine.
+        StateMachineManager.loadForCase( caseId );
+
         const investigation = this.getActive();
 
         EventBus.emit( 'investigationStarted', { investigation } );
@@ -228,6 +235,7 @@ class ActiveInvestigationManagerClass {
         SessionManager.setActiveSessionPointer( null );
         ObjectiveManager.unloadCase();
         ResolutionManager.unloadCase();
+        StateMachineManager.unloadCase();
 
         EventBus.emit( 'investigationStopped', { investigationId } );
         EventBus.emit( 'investigationChanged', { investigation: null } );

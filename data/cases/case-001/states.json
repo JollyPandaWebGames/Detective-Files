@@ -1,0 +1,83 @@
+{
+    "states": [
+        {
+            "id": "assignment",
+            "title": "Assignment",
+            "initial": true,
+            "actions": [],
+            "transitions": [
+                { "to": "crime-scene", "trigger": { "type": "objectiveCompleted", "target": "obj-read-assignment" } }
+            ]
+        },
+        {
+            "id": "crime-scene",
+            "title": "Crime Scene",
+            "actions": [
+                { "type": "notify", "title": "New Case Files", "body": "Crime scene reports are now available in the Evidence Database." },
+                { "type": "unlockEvidence", "target": "ev-001" }
+            ],
+            "transitions": [
+                { "to": "active-investigation", "trigger": { "type": "objectiveCompleted", "target": "obj-inspect-beaker" } },
+                { "to": "active-investigation", "trigger": { "type": "timeElapsed", "delayMs": 45000 } }
+            ]
+        },
+        {
+            "id": "active-investigation",
+            "title": "Active Investigation",
+            "actions": [
+                { "type": "generateHqMail", "subject": "Toxicology Submitted", "body": "The lab has received the beaker sample for toxicology analysis. Results will take some time — you'll be notified." }
+            ],
+            "transitions": [
+                { "to": "lab-results", "trigger": { "type": "forensicsCompleted", "target": "analysis-003" } }
+            ],
+            "timers": [
+                {
+                    "id": "active-investigation-hq-nudge",
+                    "delayMs": 300000,
+                    "repeat": false,
+                    "actions": [
+                        { "type": "generateHqMail", "subject": "Status Check", "body": "Any progress on the Rask case, Detective? Keep Headquarters updated." }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "lab-results",
+            "title": "Lab Results",
+            "actions": [
+                { "type": "unlockPerson", "target": "person-005" },
+                { "type": "notify", "title": "New Lead", "body": "Marcus Webb's statement is worth a closer look." }
+            ],
+            "randomEvents": [
+                {
+                    "id": "evt-anonymous-tip",
+                    "probability": 0.6,
+                    "actions": [
+                        { "type": "generateHqMail", "subject": "Anonymous Tip Received", "body": "An anonymous caller reported an unmarked van near Valcourt BioLabs the night of the incident. Forwarded for your review." }
+                    ]
+                }
+            ],
+            "transitions": [
+                { "to": "theory-building", "trigger": { "type": "forensicsCompleted", "target": "analysis-004" } }
+            ]
+        },
+        {
+            "id": "theory-building",
+            "title": "Theory Building",
+            "actions": [
+                { "type": "notify", "title": "Time to Theorize", "body": "Enough evidence has been gathered — consider building your case on the Investigation Board." }
+            ],
+            "transitions": [
+                { "to": "resolution-ready", "trigger": { "type": "objectiveCompleted", "target": "obj-form-theory" } }
+            ]
+        },
+        {
+            "id": "resolution-ready",
+            "title": "Resolution Ready",
+            "actions": [
+                { "type": "generateHqMail", "subject": "Ready to Close?", "body": "Captain Morgan wants your conclusions. Use the Investigation Board to submit your resolution when ready." }
+            ],
+            "transitions": []
+        }
+    ]
+}
