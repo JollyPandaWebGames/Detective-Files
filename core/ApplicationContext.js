@@ -53,6 +53,7 @@ import SessionManager              from '../managers/SessionManager.js';
 import ActiveInvestigationManager  from '../managers/ActiveInvestigationManager.js';
 import ObjectiveManager            from '../managers/ObjectiveManager.js';
 import StateMachineManager          from '../managers/StateMachineManager.js';
+import UnlockManager                 from '../managers/UnlockManager.js';
 import SettingsManager             from '../managers/SettingsManager.js';
 
 /**
@@ -100,6 +101,9 @@ class ApplicationContextClass {
         EventBus.on( 'objective:phase-changed', rebroadcast );
         EventBus.on( 'state:entered',            rebroadcast );
         EventBus.on( 'state:transition',         rebroadcast );
+        EventBus.on( 'content:unlocked',          rebroadcast );
+        EventBus.on( 'content:hidden',             rebroadcast );
+        EventBus.on( 'content:revealed',           rebroadcast );
         EventBus.on( 'settings:changed',        rebroadcast );
         EventBus.on( 'theme:changed',           rebroadcast );
         EventBus.on( 'wallpaper:changed',       rebroadcast );
@@ -218,6 +222,30 @@ class ApplicationContextClass {
      */
     getCurrentInvestigationState() {
         return StateMachineManager.getCurrentState();
+    }
+
+    /**
+     * Mission 19 — the entire "Applications never decide what is
+     * visible" contract lives here. Applications ask ApplicationContext,
+     * which asks UnlockManager, which is the single authority.
+     *
+     * @param {string} type - e.g. 'evidence', 'email', 'conversation',
+     *   'person', 'location', 'cctv', 'forensics'.
+     * @param {string} id
+     * @returns {boolean}
+     */
+    isUnlocked( type, id ) {
+        return UnlockManager.isUnlocked( type, id );
+    }
+
+    /**
+     * @param {string}   type
+     * @param {string[]} allIds - Every id that exists for this type,
+     *   from the app's own domain manager.
+     * @returns {string[]} Only the ids currently visible.
+     */
+    getVisibleIds( type, allIds ) {
+        return UnlockManager.getVisibleIds( type, allIds );
     }
 
     /**

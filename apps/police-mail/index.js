@@ -82,6 +82,7 @@ class PoliceMail extends BaseApp {
 
         // Bound EventBus handlers — stored for clean removal in close().
         this._onMailLoaded  = () => this._refreshList();
+        this._onContentUnlocked = () => this._refreshList();
         this._onMailChanged = () => this._refreshList();
         this._onFocusRequest = ( { mailId } ) => this._focusMail( mailId );
         this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
@@ -102,6 +103,8 @@ class PoliceMail extends BaseApp {
     open() {
 
         EventBus.on( 'mail:loaded',      this._onMailLoaded   );
+        EventBus.on( 'content:unlocked', this._onContentUnlocked );
+        EventBus.on( 'content:hidden',    this._onContentUnlocked );
         EventBus.on( 'mail:read',        this._onMailChanged  );
         EventBus.on( 'mail:unread',      this._onMailChanged  );
         EventBus.on( 'mail:starred',     this._onMailChanged  );
@@ -118,6 +121,8 @@ class PoliceMail extends BaseApp {
     close() {
 
         EventBus.off( 'mail:loaded',      this._onMailLoaded   );
+        EventBus.off( 'content:unlocked', this._onContentUnlocked );
+        EventBus.off( 'content:hidden',    this._onContentUnlocked );
         EventBus.off( 'mail:read',        this._onMailChanged  );
         EventBus.off( 'mail:unread',      this._onMailChanged  );
         EventBus.off( 'mail:starred',     this._onMailChanged  );
@@ -308,9 +313,13 @@ class PoliceMail extends BaseApp {
             return;
         }
 
-        const mails = this._searchQuery.trim()
+        let mails = this._searchQuery.trim()
             ? MailManager.search( this._searchQuery, this._activeCaseId )
             : MailManager.getFolder( this._activeFolder, this._activeCaseId );
+
+        // Mission 19 — visibility is UnlockManager's call, not ours.
+        const visibleIds = new Set( this.context.getVisibleIds( 'email', mails.map( m => m.id ) ) );
+        mails = mails.filter( m => visibleIds.has( m.id ) );
 
         this._listEl.innerHTML = '';
 

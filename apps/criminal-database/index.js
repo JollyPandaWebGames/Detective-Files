@@ -94,6 +94,7 @@ class CriminalDatabase extends BaseApp {
         // Bound EventBus handlers.
         this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onLoaded        = ()               => this._refreshList();
+        this._onContentUnlocked = ()             => this._refreshList();
         this._onPinned        = ()               => this._refreshList();
         this._onFocusRequest  = ( { personId } ) => this._focusPerson( personId );
 
@@ -111,6 +112,8 @@ class CriminalDatabase extends BaseApp {
     open() {
         EventBus.on( 'investigationChanged', this._onInvestigationChanged );
         EventBus.on( 'person:loaded',       this._onLoaded       );
+        EventBus.on( 'content:unlocked',    this._onContentUnlocked );
+        EventBus.on( 'content:hidden',       this._onContentUnlocked );
         EventBus.on( 'person:pinned',       this._onPinned       );
         EventBus.on( 'person:focus-request', this._onFocusRequest );
         this._syncInvestigation( this.context.getActiveInvestigation() );
@@ -119,6 +122,8 @@ class CriminalDatabase extends BaseApp {
     close() {
         EventBus.off( 'investigationChanged', this._onInvestigationChanged );
         EventBus.off( 'person:loaded',       this._onLoaded       );
+        EventBus.off( 'content:unlocked',    this._onContentUnlocked );
+        EventBus.off( 'content:hidden',       this._onContentUnlocked );
         EventBus.off( 'person:pinned',       this._onPinned       );
         EventBus.off( 'person:focus-request', this._onFocusRequest );
         clearTimeout( this._notesTimer );
@@ -291,6 +296,10 @@ class CriminalDatabase extends BaseApp {
         if ( this._statusFilter !== 'all' ) {
             people = people.filter( p => p.status === this._statusFilter );
         }
+
+        // Mission 19 — visibility is UnlockManager's call, not ours.
+        const visibleIds = new Set( this.context.getVisibleIds( 'person', people.map( p => p.id ) ) );
+        people = people.filter( p => visibleIds.has( p.id ) );
 
         this._listEl.innerHTML = '';
 

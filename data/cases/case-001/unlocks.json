@@ -1,0 +1,75 @@
+{
+    "rules": [
+        {
+            "id": "unlock-camera",
+            "target": "camera-03",
+            "type": "cctv",
+            "conditions": [
+                { "event": "objectiveCompleted", "value": "obj-open-evidence" }
+            ]
+        },
+        {
+            "id": "unlock-lanyard",
+            "target": "ev-006",
+            "type": "evidence",
+            "conditions": [
+                { "event": "objectiveCompleted", "value": "obj-collect-toxicology" }
+            ],
+            "actions": [
+                { "type": "unlock" },
+                { "type": "notify", "title": "New Evidence Discovered", "body": "A severed lanyard cord was logged near the overturned chair." }
+            ]
+        },
+        {
+            "id": "unlock-webb-profile",
+            "target": "person-005",
+            "type": "person",
+            "conditions": [
+                { "event": "emailRead", "value": "mail-007" }
+            ],
+            "actions": [
+                { "type": "unlock" },
+                { "type": "notify", "title": "New Witness Found", "body": "Marcus Webb, night security guard, has been added to the Criminal Database." }
+            ]
+        },
+        {
+            "id": "unlock-webb-conversation",
+            "target": "conv-003",
+            "type": "conversation",
+            "conditions": [
+                { "event": "emailRead", "value": "mail-007" }
+            ]
+        },
+        {
+            "id": "unlock-trace-analysis",
+            "target": "analysis-004",
+            "type": "forensics",
+            "conditions": {
+                "match": "all",
+                "conditions": [
+                    { "event": "evidenceViewed", "value": "ev-006" },
+                    { "event": "forensicCompleted", "value": "analysis-003" }
+                ]
+            },
+            "actions": [
+                { "type": "unlock" },
+                { "type": "generate", "subject": "Trace Analysis Available", "body": "The lab can now examine the lanyard cord for tool marks. Request the analysis when ready." }
+            ]
+        },
+        {
+            "id": "unlock-motive-hint",
+            "target": "hint-motive",
+            "type": "hint",
+            "conditions": {
+                "match": "any",
+                "conditions": [
+                    { "event": "evidenceViewed", "value": "ev-004" },
+                    { "event": "forensicCompleted", "value": "analysis-003" }
+                ]
+            },
+            "actions": [
+                { "type": "notify", "title": "Detective's Hint", "body": "Whatever incapacitated Dr. Rask was already in the room. Consider what that means about premeditation." }
+            ]
+        }
+    ]
+}

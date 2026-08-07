@@ -14,6 +14,8 @@
  * Events emitted:
  *   state:entered / state:exited / state:transition
  *   state:timer-started / state:timer-finished
+ *   state:random-event   { stateId, eventId } — added for Mission 19's
+ *                        'randomEvent' unlock condition type to listen to
  *   content:unlocked   — see StateActions for why this doesn't yet gate
  *                        anything (Mission 19's job)
  *
@@ -384,6 +386,7 @@ class StateMachineManagerClass {
 
         fired.forEach( evt => {
             this._history.push( { type: 'random-event', stateId: state.id, eventId: evt.id, timestamp: Date.now() } );
+            EventBus.emit( 'state:random-event', { stateId: state.id, eventId: evt.id } );
             executeStateActions( evt.actions, this._actionCtx( state.id ) );
         } );
 

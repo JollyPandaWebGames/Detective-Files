@@ -92,6 +92,7 @@ class CCTVViewer extends BaseApp {
         // Bound EventBus handlers.
         this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onCctvLoaded     = ()               => this._renderCameraList();
+        this._onContentUnlocked = ()              => this._renderCameraList();
         this._onFocusRequest   = ( p )            => this._handleFocusRequest( p );
 
         // Bound RAF handler.
@@ -133,6 +134,8 @@ class CCTVViewer extends BaseApp {
 
         EventBus.on( 'investigationChanged', this._onInvestigationChanged );
         EventBus.on( 'cctv:loaded',        this._onCctvLoaded   );
+        EventBus.on( 'content:unlocked',   this._onContentUnlocked );
+        EventBus.on( 'content:hidden',      this._onContentUnlocked );
         EventBus.on( 'cctv:focus-request', this._onFocusRequest );
 
         EventBus.emit( 'cctv:opened', {} );
@@ -148,6 +151,8 @@ class CCTVViewer extends BaseApp {
 
         EventBus.off( 'investigationChanged', this._onInvestigationChanged );
         EventBus.off( 'cctv:loaded',        this._onCctvLoaded   );
+        EventBus.off( 'content:unlocked',   this._onContentUnlocked );
+        EventBus.off( 'content:hidden',      this._onContentUnlocked );
         EventBus.off( 'cctv:focus-request', this._onFocusRequest );
 
         document.removeEventListener( 'mousemove', this._onPanMove );
@@ -419,7 +424,12 @@ class CCTVViewer extends BaseApp {
 
         if ( !this._cameraListEl ) return;
 
-        const cameras = CctvManager.getAll();
+        const allCameras = CctvManager.getAll();
+
+        // Mission 19 — visibility is UnlockManager's call, not ours.
+        const visibleIds = new Set( this.context.getVisibleIds( 'cctv', allCameras.map( c => c.id ) ) );
+        const cameras     = allCameras.filter( c => visibleIds.has( c.id ) );
+
         this._cameraListEl.innerHTML = '';
 
         if ( cameras.length === 0 ) {

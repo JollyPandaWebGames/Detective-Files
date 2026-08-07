@@ -94,6 +94,7 @@ class Evidence extends BaseApp {
         this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onEvidenceLoaded     = ()              => this._refreshList();
         this._onEvidencePinned     = ()              => this._refreshList();
+        this._onContentUnlocked   = ()              => this._refreshList();
         this._onAttachmentOpened   = ( { attachmentId } ) => this._focusByAttachment( attachmentId );
         this._onFocusRequest       = ( { evidenceId }   ) => this._focusByAttachment( null, evidenceId );
 
@@ -115,6 +116,8 @@ class Evidence extends BaseApp {
         EventBus.on( 'investigationChanged',    this._onInvestigationChanged );
         EventBus.on( 'evidence:loaded',         this._onEvidenceLoaded   );
         EventBus.on( 'evidence:pinned',         this._onEvidencePinned   );
+        EventBus.on( 'content:unlocked',        this._onContentUnlocked );
+        EventBus.on( 'content:hidden',           this._onContentUnlocked );
         EventBus.on( 'mail:attachment-opened',  this._onAttachmentOpened );
         EventBus.on( 'evidence:focus-request',  this._onFocusRequest     );
 
@@ -130,6 +133,8 @@ class Evidence extends BaseApp {
         EventBus.off( 'investigationChanged',  this._onInvestigationChanged );
         EventBus.off( 'evidence:loaded',        this._onEvidenceLoaded   );
         EventBus.off( 'evidence:pinned',        this._onEvidencePinned   );
+        EventBus.off( 'content:unlocked',       this._onContentUnlocked );
+        EventBus.off( 'content:hidden',          this._onContentUnlocked );
         EventBus.off( 'mail:attachment-opened', this._onAttachmentOpened );
         EventBus.off( 'evidence:focus-request', this._onFocusRequest     );
 
@@ -318,6 +323,11 @@ class Evidence extends BaseApp {
             : EvidenceManager.getByCategory( this._activeCategory );
 
         items = EvidenceManager.filterByStatus( items, this._statusFilter );
+
+        // Mission 19 — applications never decide visibility themselves;
+        // ask ApplicationContext, which asks UnlockManager.
+        const visibleIds = new Set( this.context.getVisibleIds( 'evidence', items.map( e => e.id ) ) );
+        items = items.filter( e => visibleIds.has( e.id ) );
 
         this._listEl.innerHTML = '';
 

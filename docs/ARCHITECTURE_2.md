@@ -449,6 +449,7 @@ managers/
     ObjectiveManager.js             NEW (Mission 16)
     ResolutionManager.js            NEW (Mission 17)
     StateMachineManager.js          NEW (Mission 18)
+    UnlockManager.js                 NEW (Mission 19)
     MailManager.js                  MODIFIED (Mission 17) — added injectMail()
     ApplicationManager.js           MODIFIED — session tracking + onX() hook calls
     CaseManager.js                  MODIFIED — added completeCase(), archiveCase()
@@ -465,19 +466,29 @@ core/state-machine/
     StateTransitionMatcher.js       NEW (Mission 18)
     StateActions.js                  NEW (Mission 18)
     RandomEventEngine.js             NEW (Mission 18)
-    StateTimerScheduler.js           NEW (Mission 18)
+    StateTimerScheduler.js           NEW (Mission 18) — also reused by Mission 19
     HqMailBuilder.js                 NEW (Mission 18)
+core/unlock/
+    UnlockConditionMatcher.js       NEW (Mission 19)
+    UnlockConditionGroup.js          NEW (Mission 19)
+    UnlockActions.js                  NEW (Mission 19)
 apps/
     case-management/index.js        MODIFIED — see §7
-    cctv/index.js                   MODIFIED (Mission 16) — added cctv:camera-viewed
+    cctv/index.js                   MODIFIED (Mission 16, 19) — cctv:camera-viewed + unlock filtering
     board/index.js                  MODIFIED (Mission 17) — Solve Investigation → Resolution Wizard
     board/ResolutionWizard.js       NEW (Mission 17)
     board/style.css                 MODIFIED (Mission 17) — wizard + solve-dialog styling
+    evidence/index.js               MODIFIED (Mission 19) — unlock filtering
+    messenger/index.js              MODIFIED (Mission 19) — unlock filtering
+    police-mail/index.js            MODIFIED (Mission 19) — unlock filtering
+    criminal-database/index.js      MODIFIED (Mission 19) — unlock filtering
+    forensics/index.js              MODIFIED (Mission 19) — unlock filtering
 data/cases/case-001/objectives/
     index.json, phases.json, obj-*.json (17 files) NEW (Mission 16)
 data/cases/case-001/
     solution.json                   NEW (Mission 17)
     states.json                      NEW (Mission 18)
+    unlocks.json                     NEW (Mission 19)
 css/
     widgets/investigation-widget.css NEW
 docs/
@@ -1015,4 +1026,174 @@ built with it in mind, in the same way Mission 16 and 17 were:
   happened" context a gating check needs — e.g. "this email is only
   visible once the `lab-results` state was entered" — without Mission 19
   needing its own copy of state tracking.
+
+## 15. Mission 19 — Dynamic Content Unlock Engine
+
+This is the mission Missions 16 and 18 were both explicitly building
+toward. Every `content:unlocked` event either engine emitted was
+documented, at the time, as "forward-compatible plumbing — nothing gates
+on this yet." That's no longer true for the content types applications
+actually filter through (§15.6). `UnlockManager` is the single authority
+for "is this visible" — applications never decide that themselves.
+
+### 15.1 UnlockManager architecture
+
+Same pure-modules-plus-orchestrator shape as every engine since Mission
+16:
+
+```
+core/unlock/UnlockConditionMatcher.js — condition type ↔ real EventBus event
+core/unlock/UnlockConditionGroup.js    — pure AND/OR/nested boolean tree
+core/unlock/UnlockActions.js            — executes a resolved rule's actions
+managers/UnlockManager.js               — orchestrator
+```
+
+`UnlockManager` reuses `StateTimerScheduler` from `core/state-machine/`
+for its `timeElapsed` conditions rather than writing a second timer
+bookkeeper — that class was already generic (delay + callback, no
+investigation-specific logic), so reusing it here is exactly the kind of
+cross-engine reuse the "no investigation-specific logic in the engine"
+rule is meant to enable, not prevent.
+
+**Default-open model.** An entity with no rule targeting it is visible.
+This was a deliberate design decision, not an oversight: flipping to
+default-*locked* would mean every one of case-001's ~30 entities needs an
+explicit unlock rule just to behave as it already did before this
+mission, for zero narrative benefit on content that was never meant to
+be gated. `unlocks.json` gates only the handful of entities whose
+progressive reveal actually matters to the story — everything else is
+visible immediately, same as always.
+
+### 15.2 Rule evaluation
+
+A rule is `{ id, target, type, conditions, actions? }`, matching the
+spec's own example exactly (which has no `actions` field at all —
+`UnlockActions.executeUnlockActions()` defaults a rule with no actions
+to a single implicit `{ type: 'unlock' }`, so the simplest possible rule
+does exactly what its absence of an `actions` block implies).
+
+Each rule's leaf conditions are tracked with a `Set<number>` of
+satisfied indices (assigned by `normalizeConditions()` at load time, in
+tree order). On every subscribed event, every *unresolved* rule checks
+its unsatisfied leaves against that event; a matching leaf is added to
+the set and the rule's tree is re-evaluated. Once a rule resolves, it's
+marked `resolved` permanently — no rule re-locks once satisfied.
+
+### 15.3 Condition groups
+
+`UnlockConditionGroup.js` is the whole AND/OR/nested-group
+implementation: a rule's `conditions` field is normalized into a
+`{ match: 'all'|'any', conditions: [...] }` tree (a bare array becomes
+an implicit `match: 'all'` group, so simple rules — like the spec's own
+example — never need to think about groups at all), and
+`evaluateConditionTree()` recursively resolves it against the satisfied
+set. Case-001 has real, live examples of both: `unlock-trace-analysis`
+requires `evidenceViewed(ev-006)` **AND** `forensicCompleted(analysis-003)`
+(the spec's own "Review DNA Report requires X AND Y" pattern, reused
+here); `unlock-motive-hint` fires on `evidenceViewed(ev-004)` **OR**
+`forensicCompleted(analysis-003)` — either is enough.
+
+### 15.4 Event flow
+
+```
+Player action → real app event (e.g. mail:read)
+  → UnlockManager's subscribed handler
+      → for every unresolved rule: check unsatisfied leaves against this event
+          → leaf(es) satisfied → re-evaluate that rule's condition tree
+              → tree now true → rule resolves
+                  → UnlockActions.executeUnlockActions()
+                      → 'unlock' → content:unlocked  (+ optional notify/generate)
+                      → 'hide'   → content:hidden
+                      → 'reveal' → content:revealed
+  → ApplicationContext's 'context:changed' rebroadcast (content:unlocked/
+    hidden/revealed all listened for) → every open application reading
+    from ApplicationContext refreshes automatically
+```
+
+`objectiveAvailable` conditions are the one exception to pure
+event-passthrough — "available" isn't itself a single event Mission 16
+emits, so `UnlockManager` polls `ObjectiveManager.getAvailableObjectives()`
+on every objective-related event (`objective:completed`,
+`objective:progress`, `objective:unlocked`, `objective:revealed`) rather
+than needing Mission 16 to add a dedicated event for a state it doesn't
+otherwise announce.
+
+### 15.5 Save structure
+
+Storage key: `unlocks:{caseId}`:
+
+```
+{
+  rules:         { [ruleId]: { satisfied: number[], resolved: boolean, timerEndsAt: number|null } },
+  unlocked:       { [type]: [ids] },
+  hidden:          { [type]: [ids] },
+  history:         [ { type: 'unlocked'|'hidden'|'revealed'|'enable'|..., ruleId, targetType, targetId, timestamp } ],
+  notifications:  [ notification ]
+}
+```
+
+Maps every field the spec's Save System section names — unlocked
+entities, hidden entities, reveal history, unlock history, and
+notification history — without inventing a duplicate representation of
+anything: "reveal history" and "unlock history" are both just `history`
+entries filtered by `type`, the same normalization principle every
+engine's save format in this project has used since Mission 16.
+
+### 15.6 Application integration
+
+The spec's own diagram — *"Applications → ApplicationContext →
+UnlockManager → Visible Content"* — is implemented literally:
+`ApplicationContext.isUnlocked(type, id)` and
+`ApplicationContext.getVisibleIds(type, allIds)` are thin delegates to
+`UnlockManager`; no application imports `UnlockManager` directly.
+
+Six applications were wired to actually filter through it this pass —
+every one the spec named by name (Evidence Database, Messenger, Police
+Mail) plus three more whose case-001 content this mission's own
+`unlocks.json` gates (Criminal Database, CCTV, Forensics Lab). The
+pattern is identical in all six: fetch the full list from the app's own
+domain manager exactly as before, then `context.getVisibleIds(type, ids)`
+before rendering, and listen for `content:unlocked`/`content:hidden` to
+re-render live. City Map and Investigation Board were **not** wired this
+pass — case-001's `unlocks.json` doesn't gate any `location` or
+`boardTemplate`/`theory` entities, so there was nothing to demonstrate,
+and wiring a filter with zero live rules to exercise it would be
+unverifiable. `UnlockManager` already supports both target types
+generically; adding the two remaining apps' filter call is the same
+one-line pattern as the six already done, whenever a future case's
+`unlocks.json` needs it.
+
+### 15.7 Debug mode
+
+`UnlockManager.debug()` — call from the browser console — prints every
+rule (target, type, resolved, satisfied count) as a table, plus pending
+rules, currently unlocked entities by type, and the last trigger that
+changed anything. Same console-method pattern as `ObjectiveManager.
+debug()` and `StateMachineManager.debug()` — no global variables, per
+`CODING_STYLE.md`.
+
+### 15.8 How Mission 20 (Tutorial Case) will use this
+
+Mission 20 is explicitly out of scope here, but per its own spec line,
+its job is to demonstrate every major mechanic Missions 15–19
+introduced — which means it needs all four engines built so far
+(Objectives, Resolution, State Machine, Unlock) working together in one
+compact, teachable case, not a fifth new system:
+
+- A tutorial case's `unlocks.json` is the natural place to make the
+  *first* things a new player sees feel deliberately staged — a locked
+  "advanced" application or a hidden evidence item that unlocks after
+  the tutorial's first objective, mirroring case-001's
+  `unlock-camera` rule (itself copied verbatim from the spec's own
+  example) but pared down to the single clearest example rather than
+  case-001's six.
+- Because gating is entirely data-driven and default-open, a tutorial
+  case can gate as little or as much as it needs to teach the concept
+  without touching any engine code — exactly the "no investigation
+  should require custom JavaScript" requirement this mission's own spec
+  insists on, now provable by whatever Mission 20 builds.
+- `UnlockManager.debug()`, alongside `ObjectiveManager.debug()` and
+  `StateMachineManager.debug()`, gives Mission 20 (or whoever plays it
+  first) a ready-made way to verify the tutorial's rules actually fired
+  as designed, without building any new debugging tool.
 

@@ -43,6 +43,7 @@ import SessionManager                 from './SessionManager.js';
 import ObjectiveManager               from './ObjectiveManager.js';
 import ResolutionManager              from './ResolutionManager.js';
 import StateMachineManager            from './StateMachineManager.js';
+import UnlockManager                   from './UnlockManager.js';
 import EventBus                        from '../core/EventBus.js';
 import { createInvestigationSession }  from '../core/InvestigationSession.js';
 
@@ -100,6 +101,9 @@ class ActiveInvestigationManagerClass {
 
         // Mission 18 — resume the investigation state machine.
         StateMachineManager.loadForCase( saved.caseId );
+
+        // Mission 19 — resume this case's unlock rules.
+        UnlockManager.loadForCase( saved.caseId );
 
         EventBus.emit( 'investigationChanged', { investigation: this.getActive() } );
 
@@ -209,6 +213,9 @@ class ActiveInvestigationManagerClass {
         // Mission 18 — load this case's investigation state machine.
         StateMachineManager.loadForCase( caseId );
 
+        // Mission 19 — load this case's unlock rules.
+        UnlockManager.loadForCase( caseId );
+
         const investigation = this.getActive();
 
         EventBus.emit( 'investigationStarted', { investigation } );
@@ -236,6 +243,7 @@ class ActiveInvestigationManagerClass {
         ObjectiveManager.unloadCase();
         ResolutionManager.unloadCase();
         StateMachineManager.unloadCase();
+        UnlockManager.unloadCase();
 
         EventBus.emit( 'investigationStopped', { investigationId } );
         EventBus.emit( 'investigationChanged', { investigation: null } );

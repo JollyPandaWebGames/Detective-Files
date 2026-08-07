@@ -68,6 +68,7 @@ class Messenger extends BaseApp {
         // Bound EventBus handlers.
         this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onLoaded       = ()               => this._renderConvList();
+        this._onContentUnlocked = ()             => this._renderConvList();
         this._onPinned       = ()               => this._renderConvList();
         this._onFocusRequest = ( { convId } )   => this._openConversation( convId );
 
@@ -85,6 +86,8 @@ class Messenger extends BaseApp {
     open() {
         EventBus.on( 'investigationChanged',            this._onInvestigationChanged );
         EventBus.on( 'messenger:loaded',               this._onLoaded       );
+        EventBus.on( 'content:unlocked',                this._onContentUnlocked );
+        EventBus.on( 'content:hidden',                   this._onContentUnlocked );
         EventBus.on( 'messenger:conversation-pinned',  this._onPinned       );
         EventBus.on( 'messenger:focus-request',        this._onFocusRequest );
         this._syncInvestigation( this.context.getActiveInvestigation() );
@@ -93,6 +96,8 @@ class Messenger extends BaseApp {
     close() {
         EventBus.off( 'investigationChanged',           this._onInvestigationChanged );
         EventBus.off( 'messenger:loaded',              this._onLoaded       );
+        EventBus.off( 'content:unlocked',               this._onContentUnlocked );
+        EventBus.off( 'content:hidden',                  this._onContentUnlocked );
         EventBus.off( 'messenger:conversation-pinned', this._onPinned       );
         EventBus.off( 'messenger:focus-request',       this._onFocusRequest );
         clearTimeout( this._notesTimer );
@@ -204,9 +209,13 @@ class Messenger extends BaseApp {
             return;
         }
 
-        const conversations = this._searchQuery.trim()
+        let conversations = this._searchQuery.trim()
             ? MessengerManager.search( this._searchQuery )
             : MessengerManager.getAll();
+
+        // Mission 19 — visibility is UnlockManager's call, not ours.
+        const visibleIds = new Set( this.context.getVisibleIds( 'conversation', conversations.map( c => c.id ) ) );
+        conversations = conversations.filter( c => visibleIds.has( c.id ) );
 
         this._convListEl.innerHTML = '';
 

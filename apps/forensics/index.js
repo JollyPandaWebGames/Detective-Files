@@ -89,6 +89,7 @@ class Forensics extends BaseApp {
         // Bound EventBus handlers.
         this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
         this._onCompleted       = ()               => this._refreshQueue();
+        this._onContentUnlocked = ()               => this._refreshQueue();
         this._onCollected       = ()               => this._refreshQueue();
 
     }
@@ -105,6 +106,8 @@ class Forensics extends BaseApp {
     open() {
         EventBus.on( 'investigationChanged', this._onInvestigationChanged );
         EventBus.on( 'forensics:completed', this._onCompleted    );
+        EventBus.on( 'content:unlocked',    this._onContentUnlocked );
+        EventBus.on( 'content:hidden',       this._onContentUnlocked );
         EventBus.on( 'forensics:collected', this._onCollected    );
 
         ForensicsManager.startPolling();
@@ -115,6 +118,8 @@ class Forensics extends BaseApp {
     close() {
         EventBus.off( 'investigationChanged', this._onInvestigationChanged );
         EventBus.off( 'forensics:completed', this._onCompleted    );
+        EventBus.off( 'content:unlocked',    this._onContentUnlocked );
+        EventBus.off( 'content:hidden',       this._onContentUnlocked );
         EventBus.off( 'forensics:collected', this._onCollected    );
 
         ForensicsManager.stopPolling();
@@ -247,6 +252,10 @@ class Forensics extends BaseApp {
         analyses = [ ...analyses ].sort( ( a, b ) =>
             ( order[ a.queueStatus ] ?? 9 ) - ( order[ b.queueStatus ] ?? 9 )
         );
+
+        // Mission 19 — visibility is UnlockManager's call, not ours.
+        const visibleIds = new Set( this.context.getVisibleIds( 'forensics', analyses.map( a => a.id ) ) );
+        analyses = analyses.filter( a => visibleIds.has( a.id ) );
 
         this._queueEl.innerHTML = '';
 
