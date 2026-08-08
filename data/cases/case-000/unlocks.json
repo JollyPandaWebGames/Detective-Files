@@ -1,0 +1,16 @@
+{
+    "rules": [
+        {
+            "id": "unlock-suspect-profile",
+            "target": "person-000-2",
+            "type": "person",
+            "conditions": [
+                { "event": "forensicCompleted", "value": "analysis-000-1" }
+            ],
+            "actions": [
+                { "type": "unlock" },
+                { "type": "notify", "title": "Suspect Identified", "body": "Marcus Reed has been added to the Criminal Database as a Person of Interest." }
+            ]
+        }
+    ]
+}

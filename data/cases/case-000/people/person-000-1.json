@@ -1,0 +1,23 @@
+{
+    "id": "person-000-1",
+    "caseId": "case-000",
+    "name": "Danny Cole",
+    "role": "Victim",
+    "age": 24,
+    "occupation": "Stockroom Clerk",
+    "employer": "Third & Main Pawn & Loan",
+    "status": "Missing",
+    "avatarEmoji": "🧑",
+    "description": "Danny closed the shop alone last night, as he did most weeknights. He never made it home. His car was still parked outside this morning, keys still in the ignition.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "19 Holloway Lane, City Centre"
+    ],
+    "relatedEvidence": [ "ev-000-1", "ev-000-2", "ev-000-5" ],
+    "relatedLocations": [ "loc-000-1" ],
+    "relatedConversations": [ "conv-000-1" ],
+    "relationships": [
+        { "personId": "person-000-3", "type": "Coworker", "description": "Worked the evening shift together most nights." },
+        { "personId": "person-000-2", "type": "Unknown",   "description": "Believed to have owed this individual money." }
+    ]
+}

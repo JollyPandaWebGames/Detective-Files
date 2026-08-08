@@ -220,6 +220,11 @@ class Settings extends BaseApp {
             this._buildToggle( 'animations', 'Enable desktop animations', s.animations ),
         ] ) );
 
+        // Tooltips.
+        frag.appendChild( this._buildGroup( 'Guidance', [
+            this._buildToggle( 'tooltipsEnabled', 'Show contextual tooltips', s.tooltipsEnabled ),
+        ] ) );
+
         return frag;
 
     }

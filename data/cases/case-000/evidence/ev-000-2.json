@@ -1,0 +1,21 @@
+{
+    "id": "ev-000-2",
+    "caseId": "case-000",
+    "title": "Overturned Stool",
+    "category": "Physical Evidence",
+    "type": "object",
+    "status": "Collected",
+    "location": "Third & Main Pawn & Loan — Back Room",
+    "collectedBy": "Officer Reyes",
+    "date": "2026-07-14",
+    "description": "A stockroom stool found knocked over near the back door. Scuff marks on the floor suggest it was kicked or bumped rather than fallen naturally.",
+    "thumbnail": "ev-000-2-thumb.png",
+    "preview": "ev-000-2-preview.png",
+    "tags": [ "physical", "scene", "struggle" ],
+    "related": [ "ev-000-3" ],
+    "sourceAttachmentId": null,
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Officer Reyes",   "date": "2026-07-14 07:20" },
+        { "stage": "Transferred", "by": "Evidence Locker", "date": "2026-07-14 08:05" }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "version": "1.0",
+    "objectives": [
+        "obj-read-assignment.json",
+        "obj-open-evidence.json",
+        "obj-inspect-stool.json",
+        "obj-interview-witness.json",
+        "obj-visit-scene.json",
+        "obj-review-camera.json",
+        "obj-inspect-ticket.json",
+        "obj-request-analysis.json",
+        "obj-collect-analysis.json",
+        "obj-check-suspect.json",
+        "obj-build-board.json",
+        "obj-form-theory.json",
+        "obj-review-all-evidence.json",
+        "obj-tag-key-evidence.json"
+    ],
+    "phasesFile": "phases.json"
+}

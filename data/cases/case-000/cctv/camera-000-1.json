@@ -1,0 +1,18 @@
+{
+    "id": "camera-000-1",
+    "caseId": "case-000",
+    "name": "Back Alley Camera",
+    "location": "Third & Main Pawn & Loan — Rear Alley",
+    "date": "2026-07-13",
+    "duration": 260,
+    "video": null,
+    "thumbnail": null,
+    "available": true,
+    "resolution": "720p",
+    "notes": "The only camera covering the back door. Picture quality is poor but the timestamps are reliable.",
+    "importantTimestamps": [
+        { "time": 48,  "label": "Danny Cole steps out through the back door" },
+        { "time": 112, "label": "Unidentified man approaches from the alley" },
+        { "time": 176, "label": "Both figures move out of frame together" }
+    ]
+}

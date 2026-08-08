@@ -1,0 +1,17 @@
+{
+    "id": "obj-open-evidence",
+    "caseId": "case-000",
+    "title": "Review the evidence",
+    "description": "Open the Evidence Database and see what's been logged from the scene.",
+    "category": "Evidence",
+    "priority": "normal",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "obj-read-assignment" ],
+    "conditions": [
+        { "type": "applicationOpened", "target": "evidence" }
+    ],
+    "actions": [
+        { "type": "unlockObjective", "target": "obj-inspect-stool" }
+    ]
+}

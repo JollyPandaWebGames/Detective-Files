@@ -1,0 +1,12 @@
+{
+    "id": "analysis-000-1",
+    "caseId": "case-000",
+    "evidenceId": "ev-000-3",
+    "evidenceTitle": "Cut Zip Tie",
+    "type": "Fingerprint & Trace",
+    "description": "Latent fingerprint recovery and tool-mark examination on the cut zip tie found at the scene. Cross-reference any recovered print against known persons.",
+    "duration": 60,
+    "resultFile": "results/result-000-1.json",
+    "status": "Available",
+    "availableFor": [ "ev-000-3" ]
+}

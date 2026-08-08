@@ -1,0 +1,17 @@
+{
+    "id": "obj-form-theory",
+    "caseId": "case-000",
+    "title": "Write up your theory",
+    "description": "Add a theory card to the board summarizing what you believe happened to Danny Cole.",
+    "category": "Theory",
+    "priority": "critical",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "obj-build-board" ],
+    "conditions": [
+        { "type": "theoryCreated" }
+    ],
+    "actions": [
+        { "type": "changePhase", "target": "resolution" }
+    ]
+}

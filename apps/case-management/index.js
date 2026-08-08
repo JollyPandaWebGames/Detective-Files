@@ -48,9 +48,10 @@ const FOLDERS = [
 ];
 
 const DIFFICULTY_CLASS = {
-    Easy:   'case-difficulty--easy',
-    Medium: 'case-difficulty--medium',
-    Hard:   'case-difficulty--hard',
+    'Very Easy': 'case-difficulty--very-easy',
+    Easy:        'case-difficulty--easy',
+    Medium:      'case-difficulty--medium',
+    Hard:        'case-difficulty--hard',
 };
 
 const STATUS_CLASS = {
@@ -183,7 +184,7 @@ class CaseManagement extends BaseApp {
         this._difficultySelect = document.createElement( 'select' );
         this._difficultySelect.className = 'casemgmt__difficulty-select';
         this._difficultySelect.setAttribute( 'aria-label', 'Filter by difficulty' );
-        [ 'all', 'Easy', 'Medium', 'Hard' ].forEach( level => {
+        [ 'all', 'Very Easy', 'Easy', 'Medium', 'Hard' ].forEach( level => {
             const opt = document.createElement( 'option' );
             opt.value       = level;
             opt.textContent = level === 'all' ? 'All Difficulties' : level;

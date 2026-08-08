@@ -1,0 +1,22 @@
+{
+    "id": "person-000-2",
+    "caseId": "case-000",
+    "name": "Marcus Reed",
+    "role": "Person of Interest",
+    "age": 38,
+    "occupation": "Debt Collector",
+    "employer": "Self-employed",
+    "status": "Unknown",
+    "avatarEmoji": "🕴️",
+    "description": "Marcus Reed has no criminal record on file, but two anonymous complaints in the past year describe him showing up at people's workplaces over unpaid debts. Danny reportedly owed him a significant sum. His whereabouts last night are unconfirmed.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "56 Fogwood Street, Research Quarter"
+    ],
+    "relatedEvidence": [ "ev-000-3", "ev-000-4" ],
+    "relatedLocations": [ "loc-000-1" ],
+    "relatedConversations": [],
+    "relationships": [
+        { "personId": "person-000-1", "type": "Creditor", "description": "Danny reportedly owed him money from a personal loan." }
+    ]
+}

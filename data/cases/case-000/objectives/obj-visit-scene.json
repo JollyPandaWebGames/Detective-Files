@@ -1,0 +1,18 @@
+{
+    "id": "obj-visit-scene",
+    "caseId": "case-000",
+    "title": "Visit the crime scene",
+    "description": "Open the City Map and select Third & Main Pawn & Loan to see the scene for yourself.",
+    "category": "Investigation",
+    "priority": "normal",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "obj-interview-witness" ],
+    "conditions": [
+        { "type": "locationVisited", "target": "loc-000-1" }
+    ],
+    "actions": [
+        { "type": "unlockObjective", "target": "obj-review-camera" },
+        { "type": "changePhase", "target": "field-work" }
+    ]
+}

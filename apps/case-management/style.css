@@ -248,6 +248,7 @@
     color:          var(--color-text-secondary);
 }
 
+.case-difficulty--very-easy { border-color: var(--color-success); color: var(--color-success); }
 .case-difficulty--easy   { border-color: var(--color-success); color: var(--color-success); }
 .case-difficulty--medium { border-color: var(--color-warning); color: var(--color-warning); }
 .case-difficulty--hard   { border-color: var(--color-danger);  color: var(--color-danger);  }

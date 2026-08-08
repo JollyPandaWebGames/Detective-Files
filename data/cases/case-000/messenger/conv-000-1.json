@@ -1,0 +1,111 @@
+{
+    "id": "conv-000-1",
+    "caseId": "case-000",
+    "contactId": "person-000-3",
+    "name": "Elena Cruz",
+    "role": "Witness",
+    "avatar": null,
+    "avatarEmoji": "👩",
+    "online": false,
+    "unread": 2,
+    "messages": [
+        {
+            "id": "msg-000-1",
+            "type": "system",
+            "timestamp": "2026-07-14T09:00:00",
+            "text": "Conversation started. Elena Cruz worked the same evening shift as Danny Cole.",
+            "sender": "system",
+            "attachments": []
+        },
+        {
+            "id": "msg-000-2",
+            "type": "npc",
+            "sender": "Elena Cruz",
+            "timestamp": "2026-07-14T09:04:00",
+            "text": "Detective, hi. I already told the officer everything I remember, but happy to go through it again.",
+            "attachments": []
+        },
+        {
+            "id": "msg-000-3",
+            "type": "npc",
+            "sender": "Elena Cruz",
+            "timestamp": "2026-07-14T09:05:00",
+            "text": "I left around 8:40. Danny was closing up alone, like always. That part wasn't unusual.",
+            "attachments": [
+                {
+                    "type": "evidence",
+                    "id": "ev-000-1",
+                    "label": "Case Brief",
+                    "emoji": "📄"
+                }
+            ]
+        },
+        {
+            "id": "msg-000-4",
+            "type": "choice",
+            "timestamp": "2026-07-14T09:06:00",
+            "prompt": "How do you want to respond?",
+            "choices": [
+                {
+                    "id": "choice-000-1a",
+                    "text": "Did anything unusual happen before you left?",
+                    "nextMessageId": "msg-000-5a"
+                },
+                {
+                    "id": "choice-000-1b",
+                    "text": "Did Danny mention any problems recently?",
+                    "nextMessageId": "msg-000-5b"
+                },
+                {
+                    "id": "choice-000-1c",
+                    "text": "Has anyone been asking about him lately?",
+                    "nextMessageId": "msg-000-5c"
+                }
+            ]
+        }
+    ],
+    "branches": {
+        "msg-000-5a": {
+            "id": "msg-000-5a",
+            "type": "npc",
+            "sender": "Elena Cruz",
+            "timestamp": "2026-07-14T09:08:00",
+            "text": "Actually, yes. A man came in around closing and got into it with Danny at the counter. Kept his voice low but he looked angry. Danny told me it was 'nothing' after he left.",
+            "attachments": [
+                {
+                    "type": "location",
+                    "locationId": "loc-000-1",
+                    "label": "Third & Main Pawn & Loan",
+                    "emoji": "📍"
+                }
+            ],
+            "nextMessageId": "msg-000-6"
+        },
+        "msg-000-5b": {
+            "id": "msg-000-5b",
+            "type": "npc",
+            "sender": "Elena Cruz",
+            "timestamp": "2026-07-14T09:08:00",
+            "text": "He'd been stressed for a few weeks. Mentioned once that he'd borrowed money from someone and it was getting complicated. He never said who.",
+            "attachments": [],
+            "nextMessageId": "msg-000-6"
+        },
+        "msg-000-5c": {
+            "id": "msg-000-5c",
+            "type": "npc",
+            "sender": "Elena Cruz",
+            "timestamp": "2026-07-14T09:08:00",
+            "text": "A man's shown up a couple of times this month asking when Danny would be in. Never gave a name. Showed up again last night, actually.",
+            "attachments": [],
+            "nextMessageId": "msg-000-6"
+        },
+        "msg-000-6": {
+            "id": "msg-000-6",
+            "type": "npc",
+            "sender": "Elena Cruz",
+            "timestamp": "2026-07-14T09:11:00",
+            "text": "I hope he's okay. He's a good kid, just in over his head with something. Let me know if there's anything else I can do.",
+            "attachments": []
+        }
+    }
+}

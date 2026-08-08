@@ -20,6 +20,7 @@
  *   7d. Active Investigation — resumes last session's active investigation
  *   7e–7k. Gameplay managers — Evidence/CCTV/Map/Messenger/People/Forensics/Board/RecycleBin
  *   7l. ApplicationContext   — wires the unified context:changed broadcast
+ *   7m. Tooltip guidance     — Mission 20 subtle contextual hints
  *   8.  Event bridge     — application:requested → ApplicationManager.launch()
  *   8b. Session restore  — reopen applications left open in the last session
  *   9.  Show desktop     — fade-in
@@ -64,6 +65,7 @@ import PeopleManager               from '../managers/PeopleManager.js';
 import ForensicsManager            from '../managers/ForensicsManager.js';
 import BoardManager                from '../managers/BoardManager.js';
 import RecycleBinManager           from '../managers/RecycleBinManager.js';
+import TooltipManager              from '../managers/TooltipManager.js';
 
 class Workstation {
 
@@ -178,6 +180,11 @@ class Workstation {
         // Architecture 2.0 — wires the unified 'context:changed' broadcast.
         // Must run after every manager it aggregates has initialized.
         ApplicationContext.initialize();
+
+        // ── 7m. Tooltips ───────────────────────────────────────────
+        // Mission 20 — subtle contextual guidance. Listens for
+        // 'investigationChanged' itself; no case-specific wiring needed.
+        TooltipManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit

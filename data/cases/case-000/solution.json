@@ -1,0 +1,15 @@
+{
+    "caseId": "case-000",
+    "victim": "person-000-1",
+    "suspect": "person-000-2",
+    "weapon": "ev-000-3",
+    "location": "loc-000-1",
+    "motive": "financial",
+    "timeline": "2100-2145",
+    "requiredEvidence": [ "ev-000-3", "ev-000-4", "ev-000-5" ],
+    "optionalEvidence": [ "ev-000-1", "ev-000-2" ],
+    "requiredObjectives": [ "obj-collect-analysis", "obj-build-board", "obj-form-theory" ],
+    "requiredForensics": [ "analysis-000-1" ],
+    "requiredPhase": "theory",
+    "notes": "Danny Cole owed Marcus Reed money. Reed confronted him at closing, a brief struggle knocked over the stockroom stool, and Reed restrained Danny with a zip tie before leading him out through the back alley — caught on the Back Alley Camera. The zip tie's fingerprint match and the torn pawn ticket found at the scene confirm Reed's involvement."
+}

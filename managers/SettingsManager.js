@@ -48,6 +48,7 @@ const DEFAULT_SETTINGS = {
     animations:       true,
     reduceAnimations: false,
     largerTitleText:  false,
+    tooltipsEnabled:  true,
 };
 
 /**

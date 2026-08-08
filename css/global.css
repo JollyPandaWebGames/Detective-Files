@@ -71,3 +71,40 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-text-secondary);
 }
+
+/* ── Tooltip Guidance (Mission 20) ────────────────────────────── */
+.cid-tooltip-bubble {
+    position:      fixed;
+    z-index:       9999;
+    max-width:     240px;
+    padding:       var(--space-2) var(--space-3);
+    background:    var(--color-bg-window);
+    border:        var(--color-border-pixel);
+    color:         var(--color-text-primary);
+    font-family:   var(--font-ui);
+    font-size:     var(--font-size-sm);
+    line-height:   var(--line-height-normal);
+    cursor:        pointer;
+    opacity:       0;
+    transform:     translateY(4px);
+    transition:    opacity var(--duration-slow) var(--ease-out),
+                   transform var(--duration-slow) var(--ease-out);
+    pointer-events: none;
+}
+
+.cid-tooltip-bubble--visible {
+    opacity:        1;
+    transform:      translateY(0);
+    pointer-events: auto;
+}
+
+.cid-tooltip-target-highlight {
+    outline:        2px solid var(--color-highlight);
+    outline-offset: 2px;
+    animation:      cid-tooltip-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes cid-tooltip-pulse {
+    0%, 100% { outline-color: var(--color-highlight); }
+    50%      { outline-color: transparent; }
+}

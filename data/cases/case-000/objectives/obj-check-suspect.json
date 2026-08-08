@@ -1,0 +1,18 @@
+{
+    "id": "obj-check-suspect",
+    "caseId": "case-000",
+    "title": "Look up the suspect",
+    "description": "The fingerprint match gives you a name. Open the Criminal Database and pull up Marcus Reed's profile.",
+    "category": "Investigation",
+    "priority": "normal",
+    "hidden": true,
+    "optional": false,
+    "dependencies": [],
+    "conditions": [
+        { "type": "personProfileOpened", "target": "person-000-2" }
+    ],
+    "actions": [
+        { "type": "unlockObjective", "target": "obj-build-board" },
+        { "type": "changePhase", "target": "theory" }
+    ]
+}
