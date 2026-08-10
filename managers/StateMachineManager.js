@@ -455,6 +455,18 @@ class StateMachineManagerClass {
         MailManager.injectMail( buildHqMail( this._caseId, partial ) );
     }
 
+    /**
+     * Case 00 replay support — wipe this case's persisted state-machine
+     * history so the next loadForCase() starts from its initial state
+     * fresh, with nudge timers re-armed. Call before loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    resetForCase( caseId ) {
+        StorageManager.remove( `state-machine:${ caseId }` );
+    }
+
     /** @returns {string} */
     _storageKey() {
         return `state-machine:${ this._caseId }`;

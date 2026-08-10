@@ -189,7 +189,15 @@ class CaseManagerClass {
      * persist it, and emit case:started so other systems
      * (e.g. Police Mail) can react.
      *
-     * No-op if the case is locked or already in progress/solved.
+     * Case 00 replay support — cases with `replayable: true` never hit
+     * the "already started" short-circuit below. Every start is treated
+     * as fresh: status and progress reset even if the case was
+     * previously 'In Progress' or 'Solved'. ActiveInvestigationManager
+     * is responsible for wiping every other manager's persisted state
+     * to match — this method only owns the case's own status/progress.
+     *
+     * No-op if the case is locked, or already in progress/solved and
+     * not marked replayable.
      *
      * @param {string} caseId
      * @returns {void}
@@ -204,14 +212,14 @@ class CaseManagerClass {
             return;
         }
 
-        if ( c.status === 'In Progress' || c.status === 'Solved' ) {
+        if ( ( c.status === 'In Progress' || c.status === 'Solved' ) && !c.replayable ) {
             // Already started — just re-emit so dependent systems can re-sync.
             EventBus.emit( 'case:started', { caseId } );
             return;
         }
 
         c.status   = 'In Progress';
-        c.progress = c.progress ?? 0;
+        c.progress = 0;
 
         this._saveProgress( caseId );
 

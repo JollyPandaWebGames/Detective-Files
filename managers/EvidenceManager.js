@@ -409,6 +409,59 @@ class EvidenceManagerClass {
 
     }
 
+    /**
+     * Case 00 replay support — wipe persisted view/note/pin state for
+     * every evidence item belonging to this case, and drop the case
+     * from the in-memory cache so the next loadForCase() re-fetches
+     * clean. Call before loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {Promise<void>}
+     */
+    async resetForCase( caseId ) {
+
+        let ids;
+
+        if ( this._cache.has( caseId ) ) {
+            ids = [ ...this._cache.get( caseId ).keys() ];
+        }
+        else {
+            ids = await this._fetchIdsForCase( caseId, 'evidence', 'files' );
+        }
+
+        ids.forEach( id => delete this._state[ id ] );
+        this._cache.delete( caseId );
+
+        StorageManager.save( STORAGE_KEY, this._state );
+
+    }
+
+    /**
+     * Fetch a case's domain index manifest and derive item ids from its
+     * filenames (filename stem === item id, by project convention),
+     * without loading each item's full content. Used by resetForCase()
+     * when no in-memory cache is available to read ids from directly.
+     *
+     * @param {string} caseId
+     * @param {string} domain     - e.g. 'evidence', 'cctv', 'people'.
+     * @param {string} listKey    - the index.json array field name.
+     * @returns {Promise<string[]>}
+     */
+    async _fetchIdsForCase( caseId, domain, listKey ) {
+
+        try {
+            const res = await fetch( `${ CASE_BASE }${ caseId }/${ domain }/index.json` );
+            if ( !res.ok ) throw new Error( `HTTP ${ res.status }` );
+            const index = await res.json();
+            return ( index[ listKey ] ?? [] ).map( f => f.replace( /\.json$/, '' ) );
+        }
+        catch ( error ) {
+            console.warn( `EvidenceManager: Could not resolve ids for "${ caseId }" during reset.`, error );
+            return [];
+        }
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Internal — loading
     // ─────────────────────────────────────────────────────────────

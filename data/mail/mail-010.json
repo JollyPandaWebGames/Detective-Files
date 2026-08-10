@@ -1,0 +1,16 @@
+{
+    "id": "mail-010",
+    "caseId": "case-00",
+    "from": "Captain Morgan",
+    "fromTitle": "Chief of Detectives",
+    "subject": "Your First Investigation",
+    "date": "2026-08-01 08:00",
+    "priority": "High",
+    "read": false,
+    "starred": false,
+    "folder": "inbox",
+    "attachments": [
+        { "id": "att-00-1", "name": "Incident Report.pdf", "type": "pdf" }
+    ],
+    "body": "Welcome to CID OS, Detective.\n\nHere's a straightforward one to start with: Nora Finch, who owns Ellery & Finch Books downtown, reported her till short and a locked display case broken into. She found it the morning after closing.\n\nRead the attached incident report, then work the evidence — Evidence Database, City Map, Messenger, CCTV, Forensics, and the Criminal Database are all available to you. When you're confident you understand what happened, build your case on the Investigation Board and submit your resolution.\n\nThis one's simple by design — good for getting comfortable with how things work around here.\n\n— Captain Morgan\nChief of Detectives, CID"
+}

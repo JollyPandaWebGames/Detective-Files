@@ -1,0 +1,22 @@
+{
+    "id": "person-00-2",
+    "caseId": "case-00",
+    "name": "Callum Voss",
+    "role": "Person of Interest",
+    "age": 26,
+    "occupation": "Part-time Bookstore Clerk",
+    "employer": "Ellery & Finch Books",
+    "status": "Unknown",
+    "avatarEmoji": "🧑",
+    "description": "Callum closes the store alone most evenings. No prior record on file. Financial records obtained during the investigation show he was several weeks behind on rent at the time of the break-in.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "112 Holloway Lane, Apt 4"
+    ],
+    "relatedEvidence": [ "ev-00-3" ],
+    "relatedLocations": [ "loc-00-2", "loc-00-3" ],
+    "relatedConversations": [],
+    "relationships": [
+        { "personId": "person-00-1", "type": "Employee", "description": "Works part-time evening shifts for Nora Finch." }
+    ]
+}

@@ -4,7 +4,7 @@
 Version: 1.0
 
 No media assets have been generated for Case 001 yet. As documented in
-`docs/missions/mission-20/media-assets.md`, no CID OS application
+`docs/missions/case-00/media-assets.md`, no CID OS application
 currently renders image or video fields for any case — this applies
 equally to Case 001, which is content-complete at the data layer but has
 never had an asset pass.

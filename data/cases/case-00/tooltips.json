@@ -1,0 +1,47 @@
+{
+    "version": "1.0",
+    "tooltips": [
+        {
+            "id": "tip-evidence-unlocked",
+            "trigger": { "type": "objectiveUnlocked", "target": "T00-05" },
+            "targetSelector": "[data-app-id=\"evidence\"]",
+            "text": "The display case latch is logged here. Open it, then add a note."
+        },
+        {
+            "id": "tip-map-unlocked",
+            "trigger": { "type": "objectiveUnlocked", "target": "T00-06" },
+            "targetSelector": "[data-app-id=\"city-map\"]",
+            "text": "Select Ellery & Finch Books to visit the scene."
+        },
+        {
+            "id": "tip-messenger-unlocked",
+            "trigger": { "type": "objectiveUnlocked", "target": "T00-07" },
+            "targetSelector": "[data-app-id=\"messenger\"]",
+            "text": "Priya Shah is ready to talk. Open Messenger."
+        },
+        {
+            "id": "tip-cctv-unlocked",
+            "trigger": { "type": "objectiveUnlocked", "target": "T00-08" },
+            "targetSelector": "[data-app-id=\"cctv\"]",
+            "text": "Check the Storefront Camera, then bookmark the important moment."
+        },
+        {
+            "id": "tip-forensics-unlocked",
+            "trigger": { "type": "objectiveUnlocked", "target": "T00-09" },
+            "targetSelector": "[data-app-id=\"forensics\"]",
+            "text": "Submit the receipt here. It won't take long."
+        },
+        {
+            "id": "tip-suspect-revealed",
+            "trigger": { "type": "objectiveRevealed", "target": "T00-10" },
+            "targetSelector": "[data-app-id=\"criminal-database\"]",
+            "text": "The lab recovered a name. Look them up here."
+        },
+        {
+            "id": "tip-board-unlocked",
+            "trigger": { "type": "objectiveUnlocked", "target": "T00-11" },
+            "targetSelector": "[data-app-id=\"board\"]",
+            "text": "Connect the evidence, the suspect, and the location, then add a theory card."
+        }
+    ]
+}

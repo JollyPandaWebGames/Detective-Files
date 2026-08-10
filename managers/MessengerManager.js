@@ -142,6 +142,51 @@ class MessengerManagerClass {
 
     }
 
+    /**
+     * Case 00 replay support — wipe persisted read/pin/notes/choice
+     * state for every conversation belonging to this case. Call before
+     * loadForCase() — that call already purges the in-memory
+     * conversation objects for any previously-loaded case, this only
+     * needs to clear the persisted overlay.
+     *
+     * @param {string} caseId
+     * @returns {Promise<void>}
+     */
+    async resetForCase( caseId ) {
+
+        let ids = [ ...this._conversations.values() ]
+            .filter( c => c.caseId === caseId )
+            .map( c => c.id );
+
+        if ( ids.length === 0 ) {
+            ids = await this._fetchIdsForCase( caseId );
+        }
+
+        ids.forEach( id => delete this._state[ id ] );
+
+        StorageManager.save( STORAGE_KEY, this._state );
+
+    }
+
+    /**
+     * @param {string} caseId
+     * @returns {Promise<string[]>}
+     */
+    async _fetchIdsForCase( caseId ) {
+
+        try {
+            const res = await fetch( `${ CASE_BASE }${ caseId }/messenger/index.json` );
+            if ( !res.ok ) throw new Error( `HTTP ${ res.status }` );
+            const index = await res.json();
+            return ( index.files ?? [] ).map( f => f.replace( /\.json$/, '' ) );
+        }
+        catch ( error ) {
+            console.warn( `MessengerManager: Could not resolve ids for "${ caseId }" during reset.`, error );
+            return [];
+        }
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Queries
     // ─────────────────────────────────────────────────────────────

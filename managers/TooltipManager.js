@@ -237,6 +237,18 @@ class TooltipManagerClass {
         StorageManager.save( this._storageKey(), [ ...this._shown ] );
     }
 
+    /**
+     * Case 00 replay support — wipe this case's shown-tooltip history so
+     * every tip re-fires on the next loadForCase(). Call before
+     * loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    resetForCase( caseId ) {
+        StorageManager.remove( `tooltips-shown:${ caseId }` );
+    }
+
     /** @returns {string} */
     _storageKey() {
         return `tooltips-shown:${ this._caseId }`;

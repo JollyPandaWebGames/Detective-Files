@@ -1,0 +1,21 @@
+{
+    "id": "ev-00-3",
+    "caseId": "case-00",
+    "title": "Crumpled Pawn Shop Receipt",
+    "category": "Documents",
+    "type": "document",
+    "status": "Collected",
+    "location": "Ellery & Finch Books — Stockroom Trash",
+    "collectedBy": "Officer Reyes",
+    "date": "2026-08-01",
+    "description": "A small, crumpled receipt found in the stockroom trash. The printed text is too faded to read clearly by eye — worth submitting for analysis.",
+    "thumbnail": "ev-00-3-thumb.png",
+    "preview": "ev-00-3-preview.png",
+    "tags": [ "document", "motive", "tutorial" ],
+    "related": [ "ev-00-2" ],
+    "sourceAttachmentId": null,
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Officer Reyes",   "date": "2026-08-01 08:25" },
+        { "stage": "Transferred", "by": "Evidence Locker", "date": "2026-08-01 09:00" }
+    ]
+}

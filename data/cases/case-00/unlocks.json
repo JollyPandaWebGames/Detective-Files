@@ -1,0 +1,16 @@
+{
+    "rules": [
+        {
+            "id": "unlock-suspect-profile",
+            "target": "person-00-2",
+            "type": "person",
+            "conditions": [
+                { "event": "forensicCompleted", "value": "analysis-00-1" }
+            ],
+            "actions": [
+                { "type": "unlock" },
+                { "type": "notify", "title": "Person of Interest Identified", "body": "Callum Voss has been added to the Criminal Database." }
+            ]
+        }
+    ]
+}

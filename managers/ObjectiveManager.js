@@ -428,6 +428,19 @@ class ObjectiveManagerClass {
         this._persist();
     }
 
+    /**
+     * Case 00 replay support — wipe this case's persisted objective
+     * state so the next loadForCase() starts completely fresh. Does
+     * nothing to in-memory state if the case isn't currently loaded;
+     * callers are expected to call this before loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    resetForCase( caseId ) {
+        StorageManager.remove( `objectives-state:${ caseId }` );
+    }
+
     /** @returns {void} */
     _emitProgress() {
         EventBus.emit( 'objective:progress', this.getProgress() );

@@ -1,0 +1,23 @@
+{
+    "id": "case-00",
+    "title": "Tutorial Investigation",
+    "difficulty": "Tutorial",
+    "status": "Unlocked",
+    "replayable": true,
+    "description": "Welcome, Detective. This is your first investigation. A local bookstore owner has reported a break-in. Start the case to begin — this is a good place to learn how CID OS works.",
+    "thumbnail": "case-00.png",
+    "estimatedTime": "10-15 minutes",
+    "reward": 0,
+    "objectives": [
+        "Start Investigation",
+        "Read Police Mail",
+        "Inspect Evidence",
+        "Inspect City Map",
+        "Read Messenger",
+        "Review CCTV",
+        "Complete Forensics",
+        "Search Criminal Database",
+        "Build Investigation Board",
+        "Solve Investigation"
+    ]
+}

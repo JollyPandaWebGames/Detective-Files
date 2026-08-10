@@ -1,0 +1,22 @@
+{
+    "id": "person-00-1",
+    "caseId": "case-00",
+    "name": "Nora Finch",
+    "role": "Reporting Party",
+    "age": 45,
+    "occupation": "Bookstore Owner",
+    "employer": "Ellery & Finch Books",
+    "status": "Cooperative",
+    "avatarEmoji": "👩‍🦳",
+    "description": "Nora owns and runs Ellery & Finch Books. She found the till short and a locked display case broken into when she opened up the next morning, and reported it before contacting her insurer.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "3 Ellery Row, Downtown"
+    ],
+    "relatedEvidence": [ "ev-00-1" ],
+    "relatedLocations": [ "loc-00-2" ],
+    "relatedConversations": [],
+    "relationships": [
+        { "personId": "person-00-2", "type": "Employer", "description": "Callum works part-time evening shifts for her." }
+    ]
+}

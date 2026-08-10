@@ -1,0 +1,22 @@
+{
+    "victim":            "person-00-1",
+    "suspect":           "person-00-2",
+    "weapon":            "ev-00-3",
+    "location":          "loc-00-2",
+    "motive":            "financial",
+    "timeline":          "2100-2145",
+
+    "requiredEvidence":  [ "ev-00-2", "ev-00-3" ],
+    "optionalEvidence":  [ "ev-00-1" ],
+
+    "requiredObjectives": [
+        "T00-09",
+        "T00-11",
+        "T00-12"
+    ],
+
+    "requiredForensics": [ "analysis-00-1" ],
+    "requiredPhase":     "board",
+
+    "notes": "Callum Voss took the till cash and a signed first-edition book from the locked display case after closing alone, to cover overdue rent, and pawned the book the same night. The broken latch, the pawn receipt, and Priya Shah's account of a lone figure inside after hours all point to the same conclusion — there are no alternate suspects or red herrings in this case by design."
+}

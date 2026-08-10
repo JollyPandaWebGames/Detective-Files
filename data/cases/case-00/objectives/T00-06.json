@@ -1,0 +1,18 @@
+{
+    "id": "T00-06",
+    "caseId": "case-00",
+    "title": "Inspect City Map",
+    "description": "The report contains a location. Open City Map and inspect Ellery & Finch Books.",
+    "category": "Investigation",
+    "priority": "normal",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "T00-05" ],
+    "conditions": [
+        { "type": "locationVisited", "target": "loc-00-2" }
+    ],
+    "actions": [
+        { "type": "unlockObjective", "target": "T00-07" },
+        { "type": "changePhase", "target": "witnesses" }
+    ]
+}

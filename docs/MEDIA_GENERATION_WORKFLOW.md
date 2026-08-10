@@ -88,7 +88,7 @@ TF20-VIDEO-001      Suspect confrontation clip
 
 7. **Import assets.** Approved files are placed under the case's asset
    directory (mirroring the pattern used for existing case cover art,
-   e.g. `data/cases/case-000/assets/`).
+   e.g. `data/cases/case-00/assets/`).
 
 8. **Connect assets to case data.** The corresponding JSON field
    (`thumbnail`, `preview`, `video`, `avatarEmoji` → avatar image, etc.)

@@ -157,7 +157,7 @@ Required/Optional, Generation status.
 
 ## Google Flow image prompts
 One entry per image asset, in the format used in
-`docs/missions/mission-20/media-prompts.md`. Every prompt must instruct
+`docs/missions/case-00/media-prompts.md`. Every prompt must instruct
 Google Flow to reuse the established Detective Files art style, character
 designs, environment design, and visual identity rather than redefining
 them.

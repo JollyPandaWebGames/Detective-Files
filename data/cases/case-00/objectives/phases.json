@@ -1,0 +1,14 @@
+{
+    "version": "1.0",
+    "phases": [
+        { "id": "assignment",       "title": "Assignment",        "order": 1, "unlockedApps": [ "police-mail" ] },
+        { "id": "evidence-review",  "title": "Evidence Review",   "order": 2, "unlockedApps": [ "evidence" ] },
+        { "id": "field-work",       "title": "Field Work",        "order": 3, "unlockedApps": [ "city-map" ] },
+        { "id": "witnesses",        "title": "Witnesses",         "order": 4, "unlockedApps": [ "messenger" ] },
+        { "id": "surveillance",     "title": "Surveillance",      "order": 5, "unlockedApps": [ "cctv" ] },
+        { "id": "laboratory",       "title": "Laboratory",        "order": 6, "unlockedApps": [ "forensics" ] },
+        { "id": "background-check", "title": "Background Check",  "order": 7, "unlockedApps": [ "criminal-database" ] },
+        { "id": "board",            "title": "Building a Theory", "order": 8, "unlockedApps": [ "board" ] },
+        { "id": "resolution",       "title": "Resolution",        "order": 9, "unlockedApps": [] }
+    ]
+}

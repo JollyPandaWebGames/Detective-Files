@@ -1,0 +1,13 @@
+{
+    "id": "result-00-1",
+    "analysisId": "analysis-00-1",
+    "summary": "The restored receipt is from a pawn shop on Ashcroft Street, dated the same night as the break-in, for a signed first-edition book. The name on the ticket is Callum Voss.",
+    "confidence": 95,
+    "details": "Document recovery restored the faded thermal print well enough to read the shop name, address, item description, and the name given at time of pawn. The timestamp on the receipt is roughly an hour after Ellery & Finch Books' posted closing time, consistent with the witness account.",
+    "newEvidence": [],
+    "relatedPeople": [ "person-00-2" ],
+    "recommendations": [
+        "Look up Callum Voss in the Criminal Database.",
+        "Confirm the timeline against the Storefront Camera footage."
+    ]
+}

@@ -122,6 +122,47 @@ class MailManagerClass {
 
     }
 
+    /**
+     * Case 00 replay support — restore every static mail belonging to
+     * this case back to its unread/unstarred/inbox default, and remove
+     * every runtime-generated mail (state-machine nudges, resolution
+     * feedback — see HqMailBuilder, `mail-state-{caseId}-{timestamp}`
+     * ids) so a fresh playthrough regenerates them instead of carrying
+     * over stale ones. Unlike every other manager, mail is loaded once
+     * globally at boot rather than per-case, so this mutates the
+     * in-memory objects directly instead of relying on a future
+     * loadForCase() to re-fetch them. Call before loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    resetForCase( caseId ) {
+
+        for ( const mail of [ ...this._mails.values() ] ) {
+
+            if ( mail.caseId !== caseId ) continue;
+
+            const isGenerated = mail.id.startsWith( 'mail-state-' );
+
+            delete this._state[ mail.id ];
+
+            if ( isGenerated ) {
+                this._mails.delete( mail.id );
+            }
+            else {
+                mail.read     = false;
+                mail.starred  = false;
+                mail.archived = false;
+                mail.folder   = 'inbox';
+            }
+
+        }
+
+        StorageManager.save( STORAGE_KEY, this._state );
+        EventBus.emit( 'mail:loaded', { count: this._mails.size } );
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Queries
     // ─────────────────────────────────────────────────────────────
@@ -371,6 +412,57 @@ class MailManagerClass {
         mail.archived = false;
         this._saveState( mailId );
         EventBus.emit( 'mail:unarchived', { mailId } );
+
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Internal — loading
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Case 00 replay support. Mail is unusual among the gameplay
+     * managers — it's loaded once, globally, at boot rather than
+     * per-case, so there's no loadForCase() to naturally start fresh.
+     * Two kinds of mail need different treatment:
+     *
+     *   - Static mail (from a data/mail/*.json file, id doesn't start
+     *     with 'mail-state-') — reset its read/starred/archived state
+     *     back to defaults, but keep the mail itself; it will never be
+     *     re-fetched, so deleting it would lose it permanently.
+     *   - Generated mail (built at runtime by HqMailBuilder /
+     *     ResolutionManager, id starts with 'mail-state-') — remove it
+     *     entirely. Replaying should regenerate these fresh from the
+     *     state machine and resolution engine, not carry over stale
+     *     ones from the previous playthrough.
+     *
+     * Call before StateMachineManager.loadForCase() and
+     * ResolutionManager.loadForCase(), since both of those can generate
+     * mail as soon as they load.
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    resetForCase( caseId ) {
+
+        for ( const [ id, mail ] of [ ...this._mails ] ) {
+
+            if ( mail.caseId !== caseId ) continue;
+
+            if ( id.startsWith( 'mail-state-' ) ) {
+                this._mails.delete( id );
+                delete this._state[ id ];
+                continue;
+            }
+
+            mail.read     = false;
+            mail.starred  = false;
+            mail.archived = false;
+            delete this._state[ id ];
+
+        }
+
+        StorageManager.save( STORAGE_KEY, this._state );
+        EventBus.emit( 'mail:loaded', { count: this._mails.size } );
 
     }
 

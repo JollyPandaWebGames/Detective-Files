@@ -1,0 +1,21 @@
+{
+    "id": "ev-00-2",
+    "caseId": "case-00",
+    "title": "Broken Display Case Latch",
+    "category": "Physical Evidence",
+    "type": "object",
+    "status": "Collected",
+    "location": "Ellery & Finch Books — Display Case",
+    "collectedBy": "Officer Reyes",
+    "date": "2026-08-01",
+    "description": "The small brass latch on the store's locked display case was forced open. No forced entry to the building itself — whoever did this was already inside.",
+    "thumbnail": "ev-00-2-thumb.png",
+    "preview": "ev-00-2-preview.png",
+    "tags": [ "physical", "scene", "tutorial" ],
+    "related": [ "ev-00-3" ],
+    "sourceAttachmentId": null,
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Officer Reyes",   "date": "2026-08-01 08:20" },
+        { "stage": "Transferred", "by": "Evidence Locker", "date": "2026-08-01 09:00" }
+    ]
+}

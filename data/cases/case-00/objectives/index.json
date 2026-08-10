@@ -1,0 +1,17 @@
+{
+    "version": "1.0",
+    "objectives": [
+        "T00-03.json",
+        "T00-04.json",
+        "T00-05.json",
+        "T00-06.json",
+        "T00-07.json",
+        "T00-08.json",
+        "T00-09.json",
+        "T00-10.json",
+        "T00-11.json",
+        "T00-12.json",
+        "T00-13.json"
+    ],
+    "phasesFile": "phases.json"
+}

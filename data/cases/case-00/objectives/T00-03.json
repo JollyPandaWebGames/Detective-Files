@@ -1,0 +1,17 @@
+{
+    "id": "T00-03",
+    "caseId": "case-00",
+    "title": "Read Police Mail",
+    "description": "This is your Active Investigation. Every CID OS application will now use this investigation. You can minimize this panel, but it cannot be closed while an investigation is active. — Your first lead has arrived. Open Police Mail and read the investigation report.",
+    "category": "Main",
+    "priority": "critical",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [],
+    "conditions": [
+        { "type": "emailRead", "target": "mail-010" }
+    ],
+    "actions": [
+        { "type": "unlockObjective", "target": "T00-04" }
+    ]
+}

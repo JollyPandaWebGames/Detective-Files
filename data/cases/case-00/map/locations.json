@@ -1,0 +1,43 @@
+{
+    "version": "1.0",
+    "mapWidth": 1200,
+    "mapHeight": 800,
+    "locations": [
+        {
+            "id": "loc-00-1",
+            "name": "Police Headquarters",
+            "type": "Police Station",
+            "address": "1 Holloway Lane, City Centre",
+            "x": 280,
+            "y": 420,
+            "description": "Central Investigation Department. Your assignment came from here.",
+            "relatedEvidence": [ "ev-00-1" ],
+            "relatedCameras": [],
+            "relatedWitnesses": []
+        },
+        {
+            "id": "loc-00-2",
+            "name": "Ellery & Finch Books",
+            "type": "Incident Location",
+            "address": "3 Ellery Row, Downtown",
+            "x": 560,
+            "y": 340,
+            "description": "A small street-corner bookstore. The till was found short and a display case broken into the morning after closing.",
+            "relatedEvidence": [ "ev-00-2", "ev-00-3" ],
+            "relatedCameras": [ "camera-00-1" ],
+            "relatedWitnesses": [ "person-00-3" ]
+        },
+        {
+            "id": "loc-00-3",
+            "name": "Pawn Shop",
+            "type": "Secondary Location",
+            "address": "44 Ashcroft Street, Industrial District",
+            "x": 750,
+            "y": 500,
+            "description": "A small pawn shop identified from the receipt found at the scene.",
+            "relatedEvidence": [ "ev-00-3" ],
+            "relatedCameras": [],
+            "relatedWitnesses": []
+        }
+    ]
+}

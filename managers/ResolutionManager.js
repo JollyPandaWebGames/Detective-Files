@@ -346,6 +346,18 @@ class ResolutionManagerClass {
 
     }
 
+    /**
+     * Case 00 replay support — wipe this case's persisted resolution
+     * attempt history so the next loadForCase() starts completely
+     * fresh. Call before loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    resetForCase( caseId ) {
+        StorageManager.remove( `resolution-state:${ caseId }` );
+    }
+
     /** @returns {string} */
     _storageKey() {
         return `resolution-state:${ this._caseId }`;

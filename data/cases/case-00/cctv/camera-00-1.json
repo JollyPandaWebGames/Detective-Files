@@ -1,0 +1,17 @@
+{
+    "id": "camera-00-1",
+    "caseId": "case-00",
+    "name": "Storefront Camera",
+    "location": "Ellery & Finch Books — Front Window",
+    "date": "2026-07-31",
+    "duration": 200,
+    "video": null,
+    "thumbnail": null,
+    "available": true,
+    "resolution": "720p",
+    "notes": "The one camera covering the store's front window. Priya Shah's account points to a specific moment worth checking.",
+    "importantTimestamps": [
+        { "time": 30,  "label": "Store lights turn off — posted closing time" },
+        { "time": 118, "label": "A single figure still visible moving inside, alone" }
+    ]
+}

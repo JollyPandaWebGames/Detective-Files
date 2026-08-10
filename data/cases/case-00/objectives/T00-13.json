@@ -1,0 +1,15 @@
+{
+    "id": "T00-13",
+    "caseId": "case-00",
+    "title": "Complete Tutorial",
+    "description": "Investigation Complete. You solved your first investigation. You can replay Case 00 at any time to practice the investigation workflow.",
+    "category": "Main",
+    "priority": "normal",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "T00-12" ],
+    "conditions": [
+        { "type": "applicationOpened", "target": "case-management" }
+    ],
+    "actions": []
+}

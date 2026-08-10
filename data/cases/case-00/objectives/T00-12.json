@@ -1,0 +1,18 @@
+{
+    "id": "T00-12",
+    "caseId": "case-00",
+    "title": "Solve Investigation",
+    "description": "You have enough evidence. Review your investigation and submit your conclusion.",
+    "category": "Main",
+    "priority": "critical",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "T00-11" ],
+    "conditions": [
+        { "type": "investigationSolved" }
+    ],
+    "actions": [
+        { "type": "unlockObjective", "target": "T00-13" },
+        { "type": "changePhase", "target": "resolution" }
+    ]
+}

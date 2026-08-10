@@ -149,6 +149,53 @@ class ForensicsManagerClass {
     }
 
     /**
+     * Case 00 replay support — wipe persisted request/result state for
+     * every analysis belonging to this case, and drop the case from the
+     * in-memory cache so the next loadForCase() re-fetches clean. Call
+     * before loadForCase(). Safe with respect to the completion-polling
+     * interval — it only checks state that still exists.
+     *
+     * @param {string} caseId
+     * @returns {Promise<void>}
+     */
+    async resetForCase( caseId ) {
+
+        let ids;
+
+        if ( this._cache.has( caseId ) ) {
+            ids = [ ...this._cache.get( caseId ).keys() ];
+        }
+        else {
+            ids = await this._fetchIdsForCase( caseId );
+        }
+
+        ids.forEach( id => delete this._state[ id ] );
+        this._cache.delete( caseId );
+
+        StorageManager.save( STORAGE_KEY, this._state );
+
+    }
+
+    /**
+     * @param {string} caseId
+     * @returns {Promise<string[]>}
+     */
+    async _fetchIdsForCase( caseId ) {
+
+        try {
+            const res = await fetch( `${ CASE_BASE }${ caseId }/forensics/index.json` );
+            if ( !res.ok ) throw new Error( `HTTP ${ res.status }` );
+            const index = await res.json();
+            return ( index.analyses ?? [] ).map( f => f.replace( /\.json$/, '' ) );
+        }
+        catch ( error ) {
+            console.warn( `ForensicsManager: Could not resolve ids for "${ caseId }" during reset.`, error );
+            return [];
+        }
+
+    }
+
+    /**
      * Start polling for completions.
      * Call when the Forensics Lab window opens.
      *

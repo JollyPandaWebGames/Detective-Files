@@ -44,6 +44,14 @@ import ObjectiveManager               from './ObjectiveManager.js';
 import ResolutionManager              from './ResolutionManager.js';
 import StateMachineManager            from './StateMachineManager.js';
 import UnlockManager                   from './UnlockManager.js';
+import TooltipManager                  from './TooltipManager.js';
+import BoardManager                    from './BoardManager.js';
+import EvidenceManager                 from './EvidenceManager.js';
+import CctvManager                     from './CctvManager.js';
+import ForensicsManager                from './ForensicsManager.js';
+import PeopleManager                   from './PeopleManager.js';
+import MessengerManager                from './MessengerManager.js';
+import MailManager                     from './MailManager.js';
 import EventBus                        from '../core/EventBus.js';
 import { createInvestigationSession }  from '../core/InvestigationSession.js';
 
@@ -202,6 +210,19 @@ class ActiveInvestigationManagerClass {
 
         SessionManager.setActiveSessionPointer( { caseId, startedAt } );
 
+        if ( c.replayable ) {
+            // Case 00 replay support — every application (Evidence,
+            // CCTV, Forensics, Messenger, Criminal Database, Board) and
+            // TooltipManager lazily call their own manager's
+            // loadForCase() when they observe investigationChanged, so
+            // that event must NOT fire until every manager's
+            // resetForCase() has actually finished — otherwise an app
+            // could reload stale cached data a moment before the reset
+            // clears it. See _resetThenStart() below.
+            this._resetThenStart( caseId );
+            return { ok: true };
+        }
+
         // Mission 16 — fire-and-forget, consistent with every other
         // per-case manager's loadForCase() pattern; 'objective:loaded'
         // and 'objective:progress' fire once the fetch resolves.
@@ -222,6 +243,52 @@ class ActiveInvestigationManagerClass {
         EventBus.emit( 'investigationChanged', { investigation } );
 
         return { ok: true };
+
+    }
+
+    /**
+     * Case 00 replay support. Wipes every manager's persisted state for
+     * `caseId`, then loads it fresh and only THEN emits
+     * investigationStarted/investigationChanged — so every listener
+     * (apps' own loadForCase() calls, TooltipManager) sees clean state
+     * the first time it reacts, never a stale cache.
+     *
+     * Not awaited by start() — start() already returns synchronously
+     * before any per-case data is loaded even in the non-replayable
+     * path (loadForCase() calls there are fire-and-forget too), so
+     * callers already have to treat "started" and "data loaded" as
+     * separate moments; this just makes that gap slightly longer for
+     * replayable cases specifically.
+     *
+     * @param {string} caseId
+     * @returns {Promise<void>}
+     */
+    async _resetThenStart( caseId ) {
+
+        await Promise.all( [
+            ObjectiveManager.resetForCase( caseId ),
+            ResolutionManager.resetForCase( caseId ),
+            StateMachineManager.resetForCase( caseId ),
+            UnlockManager.resetForCase( caseId ),
+            TooltipManager.resetForCase( caseId ),
+            BoardManager.resetForCase( caseId ),
+            EvidenceManager.resetForCase( caseId ),
+            CctvManager.resetForCase( caseId ),
+            ForensicsManager.resetForCase( caseId ),
+            PeopleManager.resetForCase( caseId ),
+            MessengerManager.resetForCase( caseId ),
+            MailManager.resetForCase( caseId ),
+        ] );
+
+        ObjectiveManager.loadForCase( caseId );
+        ResolutionManager.loadForCase( caseId );
+        StateMachineManager.loadForCase( caseId );
+        UnlockManager.loadForCase( caseId );
+
+        const investigation = this.getActive();
+
+        EventBus.emit( 'investigationStarted', { investigation } );
+        EventBus.emit( 'investigationChanged', { investigation } );
 
     }
 

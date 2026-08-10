@@ -356,6 +356,18 @@ class UnlockManagerClass {
         if ( value ) map.get( type ).add( id ); else map.get( type ).delete( id );
     }
 
+    /**
+     * Case 00 replay support — wipe this case's persisted unlock state
+     * so the next loadForCase() starts fully re-gated. Call before
+     * loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {void}
+     */
+    resetForCase( caseId ) {
+        StorageManager.remove( `unlocks:${ caseId }` );
+    }
+
     /** @returns {string} */
     _storageKey() {
         return `unlocks:${ this._caseId }`;

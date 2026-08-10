@@ -1,0 +1,19 @@
+{
+    "id": "T00-05",
+    "caseId": "case-00",
+    "title": "Inspect Evidence",
+    "description": "Your report mentions physical evidence. Open Evidence Database, inspect the broken display case latch, and add a detective note.",
+    "category": "Evidence",
+    "priority": "normal",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "T00-04" ],
+    "conditions": [
+        { "type": "evidenceViewed", "target": "ev-00-2" },
+        { "type": "evidenceNoted",  "target": "ev-00-2" }
+    ],
+    "actions": [
+        { "type": "unlockObjective", "target": "T00-06" },
+        { "type": "changePhase", "target": "field-work" }
+    ]
+}

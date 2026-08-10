@@ -1,0 +1,20 @@
+{
+    "id": "person-00-3",
+    "caseId": "case-00",
+    "name": "Priya Shah",
+    "role": "Witness",
+    "age": 31,
+    "occupation": "Café Owner",
+    "employer": "Self-employed",
+    "status": "Interview Pending",
+    "avatarEmoji": "👩",
+    "description": "Priya owns the café next door to Ellery & Finch Books. She was closing up around the same time on the night in question and noticed Callum still inside, alone, well after posted closing time, with the front lights off.",
+    "knownAliases": [],
+    "knownAddresses": [
+        "5 Ellery Row, Downtown"
+    ],
+    "relatedEvidence": [],
+    "relatedLocations": [ "loc-00-2" ],
+    "relatedConversations": [ "conv-00-1" ],
+    "relationships": []
+}

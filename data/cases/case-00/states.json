@@ -1,0 +1,100 @@
+{
+    "states": [
+        {
+            "id": "assignment",
+            "title": "Assignment",
+            "initial": true,
+            "actions": [],
+            "timers": [],
+            "transitions": [
+                { "to": "evidence-review", "trigger": { "type": "objectiveCompleted", "target": "T00-04" } }
+            ]
+        },
+        {
+            "id": "evidence-review",
+            "title": "Evidence Review",
+            "actions": [
+                { "type": "notify", "title": "Evidence Logged", "body": "The broken display case latch is in the Evidence Database." }
+            ],
+            "timers": [],
+            "transitions": [
+                { "to": "field-work", "trigger": { "type": "objectiveCompleted", "target": "T00-05" } }
+            ]
+        },
+        {
+            "id": "field-work",
+            "title": "Field Work",
+            "actions": [
+                { "type": "notify", "title": "Location Logged", "body": "Ellery & Finch Books is on the City Map." }
+            ],
+            "timers": [],
+            "transitions": [
+                { "to": "witnesses", "trigger": { "type": "objectiveCompleted", "target": "T00-06" } }
+            ]
+        },
+        {
+            "id": "witnesses",
+            "title": "Witnesses",
+            "actions": [
+                { "type": "notify", "title": "New Lead", "body": "Priya Shah is ready to talk. Check Messenger." }
+            ],
+            "timers": [],
+            "transitions": [
+                { "to": "surveillance", "trigger": { "type": "objectiveCompleted", "target": "T00-07" } }
+            ]
+        },
+        {
+            "id": "surveillance",
+            "title": "Surveillance",
+            "actions": [
+                { "type": "notify", "title": "Camera Footage Available", "body": "The Storefront Camera may have caught the moment Priya described." }
+            ],
+            "timers": [],
+            "transitions": [
+                { "to": "laboratory", "trigger": { "type": "objectiveCompleted", "target": "T00-08" } }
+            ]
+        },
+        {
+            "id": "laboratory",
+            "title": "Laboratory",
+            "actions": [
+                { "type": "notify", "title": "Ready for Analysis", "body": "The pawn shop receipt can be submitted to the Forensics Lab." }
+            ],
+            "timers": [],
+            "transitions": [
+                { "to": "background-check", "trigger": { "type": "forensicsCompleted", "target": "analysis-00-1" } }
+            ]
+        },
+        {
+            "id": "background-check",
+            "title": "Background Check",
+            "actions": [
+                { "type": "generateHqMail", "subject": "Report Ready", "body": "The lab restored the receipt and recovered a name, Detective — check the Forensics Lab, then the Criminal Database." }
+            ],
+            "timers": [],
+            "transitions": [
+                { "to": "board", "trigger": { "type": "objectiveCompleted", "target": "T00-10" } }
+            ]
+        },
+        {
+            "id": "board",
+            "title": "Building a Theory",
+            "actions": [
+                { "type": "notify", "title": "Time to Connect the Clues", "body": "Open the Investigation Board and connect what you've found." }
+            ],
+            "timers": [],
+            "transitions": [
+                { "to": "resolution", "trigger": { "type": "objectiveCompleted", "target": "T00-12" } }
+            ]
+        },
+        {
+            "id": "resolution",
+            "title": "Resolution",
+            "actions": [
+                { "type": "generateHqMail", "subject": "Investigation Complete", "body": "Well done, Detective. You solved your first investigation. You can replay this tutorial any time from Case Management to practice the workflow again." }
+            ],
+            "timers": [],
+            "transitions": []
+        }
+    ]
+}

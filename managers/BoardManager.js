@@ -26,6 +26,12 @@ class BoardManagerClass {
         this._all[caseId] = this._board;
     }
 
+    /** Case 00 replay support — wipe this case's saved board. Call before loadForCase(). */
+    resetForCase(caseId) {
+        delete this._all[caseId];
+        StorageManager.save(STORAGE_KEY, this._all);
+    }
+
     getNodes() { return this._board.nodes; }
     getConnections() { return this._board.connections; }
     getGroups() { return this._board.groups; }

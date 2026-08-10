@@ -1,0 +1,12 @@
+{
+    "id": "analysis-00-1",
+    "caseId": "case-00",
+    "evidenceId": "ev-00-3",
+    "evidenceTitle": "Crumpled Pawn Shop Receipt",
+    "type": "Document Recovery",
+    "description": "Restore the faded print on the receipt and identify the issuing shop and item description.",
+    "duration": 15,
+    "resultFile": "results/result-00-1.json",
+    "status": "Available",
+    "availableFor": [ "ev-00-3" ]
+}

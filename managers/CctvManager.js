@@ -139,6 +139,52 @@ class CctvManagerClass {
 
     }
 
+    /**
+     * Case 00 replay support — wipe persisted view/bookmark state for
+     * every camera belonging to this case, and drop the case from the
+     * in-memory cache so the next loadForCase() re-fetches clean. Call
+     * before loadForCase().
+     *
+     * @param {string} caseId
+     * @returns {Promise<void>}
+     */
+    async resetForCase( caseId ) {
+
+        let ids;
+
+        if ( this._cache.has( caseId ) ) {
+            ids = [ ...this._cache.get( caseId ).keys() ];
+        }
+        else {
+            ids = await this._fetchIdsForCase( caseId );
+        }
+
+        ids.forEach( id => delete this._state[ id ] );
+        this._cache.delete( caseId );
+
+        StorageManager.save( STORAGE_KEY, this._state );
+
+    }
+
+    /**
+     * @param {string} caseId
+     * @returns {Promise<string[]>}
+     */
+    async _fetchIdsForCase( caseId ) {
+
+        try {
+            const res = await fetch( `${ CASE_BASE }${ caseId }/cctv/index.json` );
+            if ( !res.ok ) throw new Error( `HTTP ${ res.status }` );
+            const index = await res.json();
+            return ( index.files ?? [] ).map( f => f.replace( /\.json$/, '' ) );
+        }
+        catch ( error ) {
+            console.warn( `CctvManager: Could not resolve ids for "${ caseId }" during reset.`, error );
+            return [];
+        }
+
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Queries
     // ─────────────────────────────────────────────────────────────

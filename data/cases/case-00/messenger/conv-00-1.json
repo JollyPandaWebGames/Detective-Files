@@ -1,0 +1,90 @@
+{
+    "id": "conv-00-1",
+    "caseId": "case-00",
+    "contactId": "person-00-3",
+    "name": "Priya Shah",
+    "role": "Witness",
+    "avatar": null,
+    "avatarEmoji": "👩",
+    "online": false,
+    "unread": 2,
+    "messages": [
+        {
+            "id": "msg-00-1",
+            "type": "system",
+            "timestamp": "2026-08-01T09:00:00",
+            "text": "Conversation started. Priya Shah owns the café next door to Ellery & Finch Books.",
+            "sender": "system",
+            "attachments": []
+        },
+        {
+            "id": "msg-00-2",
+            "type": "npc",
+            "sender": "Priya Shah",
+            "timestamp": "2026-08-01T09:04:00",
+            "text": "Detective, hi! I figured someone would reach out. I was closing up my place around the same time that night.",
+            "attachments": []
+        },
+        {
+            "id": "msg-00-3",
+            "type": "npc",
+            "sender": "Priya Shah",
+            "timestamp": "2026-08-01T09:05:00",
+            "text": "Their lights went off right around closing time, like normal. But I noticed someone was still moving around inside a while after that — alone, with the front lights off. Struck me as odd enough that I remembered it.",
+            "attachments": [
+                {
+                    "type": "location",
+                    "locationId": "loc-00-2",
+                    "label": "Ellery & Finch Books",
+                    "emoji": "📍"
+                }
+            ]
+        },
+        {
+            "id": "msg-00-4",
+            "type": "choice",
+            "timestamp": "2026-08-01T09:06:00",
+            "prompt": "How do you want to respond?",
+            "choices": [
+                {
+                    "id": "choice-00-1a",
+                    "text": "Could you tell about how long after closing that was?",
+                    "nextMessageId": "msg-00-5a"
+                },
+                {
+                    "id": "choice-00-1b",
+                    "text": "Did you recognize who it was?",
+                    "nextMessageId": "msg-00-5b"
+                }
+            ]
+        }
+    ],
+    "branches": {
+        "msg-00-5a": {
+            "id": "msg-00-5a",
+            "type": "npc",
+            "sender": "Priya Shah",
+            "timestamp": "2026-08-01T09:08:00",
+            "text": "Maybe an hour, hour and a half after? I wasn't watching the clock, but it was well past when they'd normally have locked up and left.",
+            "attachments": [],
+            "nextMessageId": "msg-00-6"
+        },
+        "msg-00-5b": {
+            "id": "msg-00-5b",
+            "type": "npc",
+            "sender": "Priya Shah",
+            "timestamp": "2026-08-01T09:08:00",
+            "text": "I couldn't see well enough to be sure, honestly. Just one person, moving around near the counter, lights off. You'd probably want to check whatever camera they've got.",
+            "attachments": [],
+            "nextMessageId": "msg-00-6"
+        },
+        "msg-00-6": {
+            "id": "msg-00-6",
+            "type": "npc",
+            "sender": "Priya Shah",
+            "timestamp": "2026-08-01T09:11:00",
+            "text": "Let me know if you need anything else — Nora's been a good neighbor, I hope this gets sorted out.",
+            "attachments": []
+        }
+    }
+}

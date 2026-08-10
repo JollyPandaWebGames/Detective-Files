@@ -12,11 +12,13 @@
  *   condition `type`, which stays stable even if an application's
  *   internal event name changes later (only the table below updates).
  *
- * Supported condition types (Mission 16 spec):
+ * Supported condition types (Mission 16 spec, plus four added for
+ * Case 00's tutorial — see below):
  *   applicationOpened, emailRead, messageRead, evidenceViewed,
  *   evidenceTagged, locationVisited, cameraViewed, analysisRequested,
  *   analysisCollected, personProfileOpened, boardConnectionCreated,
- *   theoryCreated, customEvent
+ *   theoryCreated, attachmentOpened, evidenceNoted, timestampBookmarked,
+ *   investigationSolved, customEvent
  *
  * Rules:
  *   Contains no investigation-specific logic — every mapping here is
@@ -93,6 +95,40 @@ const CONDITION_EVENT_MAP = {
 
     theoryCreated: {
         event:          'board:theory-created',
+        extractTarget:  () => null,
+    },
+
+    // Added for Case 00 — generic, not tutorial-specific. Both events
+    // already existed (Police Mail's attachment click, Evidence
+    // Database's note autosave); this only adds the condition-type
+    // mapping so objective JSON can reference them.
+    attachmentOpened: {
+        event:          'mail:attachment-opened',
+        extractTarget:  payload => payload.attachmentId,
+    },
+
+    evidenceNoted: {
+        event:          'evidence:note-updated',
+        extractTarget:  payload => payload.evidenceId,
+    },
+
+    // CCTV's bookmark event carries the camera id, not a per-timestamp
+    // id — a condition targeting a specific camera is matched the
+    // moment any bookmark is added to it. Good enough for "the player
+    // found and flagged the important moment"; a case wanting to
+    // enforce which exact timestamp was bookmarked would need a finer
+    // event, which doesn't exist yet.
+    timestampBookmarked: {
+        event:          'cctv:bookmark-added',
+        extractTarget:  payload => payload.cameraId,
+    },
+
+    // ResolutionManager already only emits this on a correct submission
+    // (see managers/ResolutionManager.js) — an incorrect/incomplete
+    // submission never fires it, matching "resolution submitted and
+    // validated correct" without needing new validation logic.
+    investigationSolved: {
+        event:          'investigation:completed',
         extractTarget:  () => null,
     },
 

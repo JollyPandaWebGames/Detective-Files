@@ -1,0 +1,19 @@
+{
+    "id": "T00-09",
+    "caseId": "case-00",
+    "title": "Complete Forensics",
+    "description": "One piece of evidence requires laboratory analysis. Open the Forensics Lab and submit the pawn shop receipt for analysis.",
+    "category": "Laboratory",
+    "priority": "critical",
+    "hidden": false,
+    "optional": false,
+    "dependencies": [ "T00-08" ],
+    "conditions": [
+        { "type": "analysisRequested", "target": "analysis-00-1" },
+        { "type": "analysisCollected", "target": "analysis-00-1" }
+    ],
+    "actions": [
+        { "type": "revealHiddenObjective", "target": "T00-10" },
+        { "type": "changePhase", "target": "background-check" }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "id": "ev-00-1",
+    "caseId": "case-00",
+    "title": "Incident Report",
+    "category": "Documents",
+    "type": "document",
+    "status": "Collected",
+    "location": "Police Headquarters",
+    "collectedBy": "Captain Morgan",
+    "date": "2026-08-01",
+    "description": "Nora Finch's incident report: her till was found short of cash and a locked display case broken into the morning after closing.",
+    "thumbnail": "ev-00-1-thumb.png",
+    "preview": "ev-00-1-preview.png",
+    "tags": [ "briefing", "official", "tutorial" ],
+    "related": [ "ev-00-2" ],
+    "sourceAttachmentId": "att-00-1",
+    "chainOfCustody": [
+        { "stage": "Collected",   "by": "Captain Morgan", "date": "2026-08-01 08:00" },
+        { "stage": "Transferred", "by": "Records Office",  "date": "2026-08-01 08:10" }
+    ]
+}
