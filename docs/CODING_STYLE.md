@@ -604,6 +604,14 @@ Suggest a better solution.
 
 Do not silently violate architecture.
 
+Never assume a data field is rendered just because it exists in the schema.
+
+Before relying on a field (description, message, label, etc.) to reach the player, trace it through the actual rendering code to the exact DOM output.
+
+Do not infer rendering behavior from a similar field, a doc comment, or what "should" happen - read the component that consumes the data.
+
+If the renderer only uses part of an object (e.g. `.title` but not `.description`), fix the renderer or change the plan - do not keep writing content into a field nothing displays.
+
 ---
 
 # Golden Rule

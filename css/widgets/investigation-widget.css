@@ -132,6 +132,14 @@
     font-weight:      bold;
 }
 
+.investigation-widget__objective-desc {
+    font-size:        10px;
+    color:            var(--color-text-secondary);
+    opacity:          0.85;
+    line-height:      1.4;
+    margin-bottom:    10px;
+}
+
 .investigation-widget__progress-track {
     width:            100%;
     height:           6px;

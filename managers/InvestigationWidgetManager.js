@@ -145,9 +145,11 @@ class InvestigationWidgetManagerClass {
             `;
         }
 
-        const currentObjective = ( inv.currentObjectives ?? [] )[ 0 ] ?? 'No objectives remaining';
         const details          = ApplicationContext.getAvailableObjectiveDetails();
-        const isCritical       = details[ 0 ]?.priority === 'critical';
+        const current          = details[ 0 ] ?? null;
+        const currentTitle     = current?.title ?? ( inv.currentObjectives ?? [] )[ 0 ] ?? 'No objectives remaining';
+        const currentDesc      = current?.description ?? '';
+        const isCritical       = current?.priority === 'critical';
 
         return `
             <div class="investigation-widget__header">
@@ -155,7 +157,8 @@ class InvestigationWidgetManagerClass {
                 <button type="button" class="investigation-widget__toggle" data-action="collapse" aria-label="Collapse">–</button>
             </div>
             <div class="investigation-widget__status investigation-widget__status--active">${ inv.status }</div>
-            <div class="investigation-widget__objective${ isCritical ? ' investigation-widget__objective--critical' : '' }">${ this._escape( currentObjective ) }</div>
+            <div class="investigation-widget__objective${ isCritical ? ' investigation-widget__objective--critical' : '' }">${ this._escape( currentTitle ) }</div>
+            ${ currentDesc ? `<div class="investigation-widget__objective-desc">${ this._escape( currentDesc ) }</div>` : '' }
             <div class="investigation-widget__progress-track">
                 <div class="investigation-widget__progress-fill" style="width:${ Math.max( 0, Math.min( 100, inv.progress ) ) }%"></div>
             </div>
