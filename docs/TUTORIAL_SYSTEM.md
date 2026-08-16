@@ -162,22 +162,36 @@ separate full-screen overlay element is needed.
 it does not lock anything itself. A future contextual-hint feature could use
 it for a non-blocking nudge.
 
-## 8. Replay Behavior
+## 8. Replay vs. Resume Behavior
 
-Case 00's case definition already has `"replayable": true`. On top of that:
+Case 00's case definition already has `"replayable": true`. On top of that,
+`TutorialManager` distinguishes two situations that both look like
+"Case 00 becomes active again," but call for opposite behavior:
 
-- `TutorialManager` listens for `investigationStarted`. Whenever the payload
-  is for `case-00` **and the tutorial isn't already mid-sequence**, it calls
-  `start()`, which resets to the first node — regardless of whether the
-  tutorial was completed or skipped before.
-- On `workstation:ready`, if Case 00 has never been started
-  (`CaseManager.getById('case-00').status === 'Unlocked'`), the tutorial
-  auto-starts with the Welcome phase so a first-time player isn't dropped
-  into a blank desktop.
+- **Resume** — the tutorial was left mid-sequence (page reload, tab closed,
+  browser crash) while Case 00 was still active. The player's actual
+  investigation progress (objectives, read mail, etc.) survived that
+  reload untouched — persisted the same way it always was — so the
+  mentor's dialogue must not pretend none of it happened by restarting
+  at "Welcome, Detective." On `workstation:ready`, if Case 00 is the
+  active investigation **and** a saved tutorial run exists with
+  `status: "in-progress"`, `TutorialManager` re-enters at that exact
+  saved node.
+- **Reset** — Case 00 is started as a genuinely fresh run: the previous
+  tutorial run finished normally (`status: "completed"`) or the player
+  used the Skip control (`status: "skipped"`). On the next
+  `investigationStarted` for Case 00, `start()` resets to the first node,
+  matching the original "Case 00 is always a tutorial" requirement — a
+  deliberate replay should feel like a full replay.
 
-No flag permanently disables the tutorial. Completion/skip statistics may be
-tracked via the `tutorial:completed` / `tutorial:skipped` events, but nothing
-about having seen it before blocks it from running again.
+Progress is persisted via `StorageManager` (never `localStorage` directly)
+under the key `tutorial:case-00:progress` as `{ nodeId, status }`, written
+on every node transition and on completion/skip. No flag permanently
+disables the tutorial, and nothing about having seen it before blocks a
+genuine replay from starting over — only an *interrupted* run resumes.
+
+Completion/skip statistics may be read from the same persisted record or
+from the `tutorial:completed` / `tutorial:skipped` events.
 
 ## 9. Adding a Future Tutorial
 

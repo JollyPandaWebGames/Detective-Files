@@ -16,8 +16,16 @@
  *   - Delegate rendering to TutorialDialog and TutorialHighlight
  *   - Detect the required action for an instruction node by listening
  *     for the real gameplay EventBus event it names, then advance
- *   - Reset and replay from the beginning every time Case 00 is
- *     started (Case 00 is always a tutorial — see EPIC Part 8)
+ *   - Persist tutorial progress (StorageManager) so an abandoned
+ *     tutorial resumes exactly where it left off — e.g. a page reload
+ *     mid-sequence — rather than restarting from the Welcome phase
+ *     while the player's actual investigation progress has moved on
+ *   - Only reset and replay from the beginning when Case 00 is
+ *     started as a genuine new run, i.e. the previous tutorial run
+ *     was completed or explicitly skipped (Case 00 is always a
+ *     tutorial — see EPIC Part 8 — but "always" means "every fresh
+ *     start", not "every time the player reopens an already-active
+ *     Case 00")
  *
  * Node types (from the dialogue JSON):
  *   "dialogue"    — a mentor line with a Continue button
@@ -28,17 +36,22 @@
  *   TutorialManager never hardcodes dialogue text — see PART 4 of the
  *   spec and docs/TUTORIAL_SYSTEM.md. It never reaches into an
  *   application's internals; it only listens for events those
- *   applications already emit on EventBus.
+ *   applications already emit on EventBus. It never touches
+ *   localStorage directly — all persistence goes through
+ *   StorageManager, per project rules.
  *
  * Events emitted:
  *   tutorial:started    { caseId }
+ *   tutorial:resumed    { caseId, nodeId }
  *   tutorial:locked      {}
  *   tutorial:unlocked    {}
  *   tutorial:completed  { caseId }
  *   tutorial:skipped    { caseId }
  *
  * Dependencies:
- *   EventBus, TutorialDialog, TutorialHighlight, CaseManager
+ *   EventBus, TutorialDialog, TutorialHighlight, CaseManager,
+ *   ApplicationManager, ActiveInvestigationManager, MailManager,
+ *   ForensicsManager, StorageManager
  */
 
 import EventBus                    from '../core/EventBus.js';
@@ -49,9 +62,11 @@ import ApplicationManager          from './ApplicationManager.js';
 import ActiveInvestigationManager  from './ActiveInvestigationManager.js';
 import MailManager                 from './MailManager.js';
 import ForensicsManager            from './ForensicsManager.js';
+import StorageManager              from './StorageManager.js';
 
 const DIALOGUE_URL = './data/tutorial/case-00-dialogue.json';
 const TUTORIAL_CASE_ID = 'case-00';
+const PROGRESS_STORAGE_KEY = 'tutorial:case-00:progress';
 
 // DOM/keyboard event types intercepted while the tutorial is locked.
 const INTERCEPTED_EVENTS = [ 'click', 'pointerdown', 'mousedown', 'keydown', 'touchstart' ];
@@ -103,12 +118,13 @@ class TutorialManagerClass {
 
         await this._loadDialogue();
 
-        // Case 00 is always a tutorial (EPIC Part 8) — every time an
-        // investigation starts on it, reset and replay from the top,
-        // UNLESS we are already mid-tutorial and this is exactly the
-        // action a live instruction step is waiting on (handled by
+        // Case 00 is always a tutorial (EPIC Part 8) — every time a
+        // FRESH investigation starts on it, reset and replay from the
+        // top, UNLESS we are already mid-tutorial and this is exactly
+        // the action a live instruction step is waiting on (handled by
         // the generic requiredAction listener below, which runs first
-        // since it is registered before this one).
+        // since it is registered before this one). `start()` itself
+        // decides reset-vs-resume based on saved progress — see below.
         EventBus.on( 'investigationStarted', ( { investigation } ) => {
 
             if ( !investigation || investigation.caseId !== TUTORIAL_CASE_ID ) return;
@@ -118,11 +134,23 @@ class TutorialManagerClass {
 
         } );
 
-        // First-run auto-start: if the player has never touched Case 00
-        // and nothing else is currently active, open with the mentor
-        // introduction unprompted.
+        // Resume-after-reload: Case 00 is still the active investigation
+        // (ActiveInvestigationManager already re-affirmed it during boot,
+        // step 7d, before this listener is even reached) and a prior
+        // tutorial run was left mid-sequence rather than completed or
+        // skipped. Re-enter exactly where the player left off instead of
+        // restarting — their actual objective progress didn't reset
+        // either, so the mentor shouldn't seem to forget it happened.
         EventBus.on( 'workstation:ready', () => {
 
+            const active = ActiveInvestigationManager.getActive();
+
+            if ( active?.caseId === TUTORIAL_CASE_ID && this._hasResumableProgress() ) {
+                this.start();
+                return;
+            }
+
+            // First-run: player has never touched Case 00 at all.
             const tutorialCase = CaseManager.getById( TUTORIAL_CASE_ID );
             if ( tutorialCase && tutorialCase.status === 'Unlocked' ) {
                 this.start();
@@ -169,8 +197,10 @@ class TutorialManagerClass {
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * (Re)start the tutorial from its first node. Safe to call while
-     * already active — resets tutorial progression, per EPIC Part 8.
+     * (Re)start the tutorial. If a prior run was left mid-sequence
+     * (not completed, not skipped), resumes exactly at that node —
+     * see the class doc and docs/TUTORIAL_SYSTEM.md §10. Otherwise
+     * starts fresh from the first node, per EPIC Part 8.
      *
      * @returns {void}
      */
@@ -182,8 +212,16 @@ class TutorialManagerClass {
         this._injectStylesheet();
         this._bindRequiredActionListener();
 
-        EventBus.emit( 'tutorial:started', { caseId: TUTORIAL_CASE_ID } );
+        if ( this._hasResumableProgress() ) {
 
+            const saved = StorageManager.load( PROGRESS_STORAGE_KEY );
+            EventBus.emit( 'tutorial:resumed', { caseId: TUTORIAL_CASE_ID, nodeId: saved.nodeId } );
+            this._goTo( saved.nodeId );
+            return;
+
+        }
+
+        EventBus.emit( 'tutorial:started', { caseId: TUTORIAL_CASE_ID } );
         this._goTo( this._data.nodes[ 0 ].id );
 
     }
@@ -232,6 +270,11 @@ class TutorialManagerClass {
 
         this._current = node;
         this._lock();
+
+        // Persist progress on every step so an abandoned tutorial (page
+        // reload, tab closed) resumes here instead of restarting — see
+        // the resume trigger in initialize() and docs/TUTORIAL_SYSTEM.md.
+        StorageManager.save( PROGRESS_STORAGE_KEY, { nodeId: node.id, status: 'in-progress' } );
 
         // Bug fix (v1.1.1): an instruction step must not wait forever for
         // an event that already happened before we got here — e.g. the
@@ -303,6 +346,11 @@ class TutorialManagerClass {
         TutorialHighlight.hide();
         this._unbindRequiredActionListener();
 
+        // Completed — a future 'investigationStarted' for Case 00 is a
+        // genuine fresh replay, so the next start() should reset, not
+        // resume. See _hasResumableProgress().
+        StorageManager.save( PROGRESS_STORAGE_KEY, { nodeId: null, status: 'completed' } );
+
         EventBus.emit( 'tutorial:completed', { caseId: TUTORIAL_CASE_ID } );
 
     }
@@ -321,7 +369,29 @@ class TutorialManagerClass {
         TutorialHighlight.hide();
         this._unbindRequiredActionListener();
 
+        // Skipped — same reasoning as _finish(): the next fresh start
+        // should reset, not resume mid-way through a sequence the
+        // player deliberately opted out of.
+        StorageManager.save( PROGRESS_STORAGE_KEY, { nodeId: null, status: 'skipped' } );
+
         EventBus.emit( 'tutorial:skipped', { caseId: TUTORIAL_CASE_ID } );
+
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Progress Persistence (resume support)
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Whether a saved tutorial run exists that was left mid-sequence
+     * (neither completed nor skipped) and can be resumed.
+     *
+     * @returns {boolean}
+     */
+    _hasResumableProgress() {
+
+        const saved = StorageManager.load( PROGRESS_STORAGE_KEY );
+        return !!( saved && saved.status === 'in-progress' && saved.nodeId && this._nodesById.has( saved.nodeId ) );
 
     }
 
