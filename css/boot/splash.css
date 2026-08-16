@@ -1,0 +1,104 @@
+/*
+ * CID OS
+ * Splash Screen Stylesheet
+ *
+ * Scoped to: .splash-screen
+ * Loaded by: SplashScreen.js
+ *
+ * This file owns every style for the pre-boot studio splash.
+ * Do not add splash styles anywhere else.
+ */
+
+.splash-screen {
+    position:        fixed;
+    inset:           0;
+    z-index:         9500;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    background:      var(--color-bg-primary);
+    font-family:     var(--font-ui), monospace;
+    opacity:         0;
+    transition:      opacity var(--duration-slow) var(--ease-out);
+}
+
+.splash-screen--visible {
+    opacity: 1;
+}
+
+.splash-screen--fading {
+    opacity:        0;
+    transition:     opacity var(--duration-slow) var(--ease-in);
+    pointer-events: none;
+}
+
+.splash-screen__content {
+    display:        flex;
+    flex-direction: column;
+    align-items:    center;
+    text-align:     center;
+    gap:            var(--space-1);
+}
+
+/* ── Studio Block ─────────────────────────────────────────────── */
+.splash-screen__studio-logo {
+    font-size:     40px;
+    margin-bottom: var(--space-2);
+}
+
+.splash-screen__studio-name {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-md);
+    color:          var(--color-text-primary);
+    letter-spacing: 1px;
+}
+
+.splash-screen__presents {
+    font-size:     var(--font-size-xs);
+    color:         var(--color-text-secondary);
+    margin-top:    var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+/* ── Divider ──────────────────────────────────────────────────── */
+.splash-screen__divider {
+    width:      64px;
+    height:     1px;
+    background: var(--color-border-window);
+    margin-bottom: var(--space-4);
+}
+
+/* ── Game Block ───────────────────────────────────────────────── */
+.splash-screen__game-badge {
+    font-size:     32px;
+    margin-bottom: var(--space-2);
+}
+
+.splash-screen__game-title {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-xl);
+    color:          var(--color-highlight);
+    letter-spacing: 2px;
+}
+
+.splash-screen__game-version {
+    font-size:     var(--font-size-xs);
+    color:         var(--color-text-disabled);
+    margin-top:    var(--space-2);
+}
+
+/* ── Loading Spinner ──────────────────────────────────────────── */
+.splash-screen__spinner {
+    margin-top:  var(--space-8);
+    width:       16px;
+    height:      16px;
+    border:      2px solid var(--color-border-window);
+    border-top-color: var(--color-highlight);
+    border-radius: 50%;
+    animation:   splash-spin 900ms linear infinite;
+}
+
+@keyframes splash-spin {
+    from { transform: rotate( 0deg ); }
+    to   { transform: rotate( 360deg ); }
+}

@@ -386,7 +386,10 @@ class CaseManagement extends BaseApp {
 
         // Architecture: row selection is local preview only. The rest
         // of the workstation reacts to context.startInvestigation(), not
-        // to browsing the list — see class doc for rationale.
+        // to browsing the list — see class doc for rationale. This event
+        // is informational only (e.g. consumed by TutorialManager); no
+        // application is permitted to treat it as an investigation change.
+        EventBus.emit( 'case:card-selected', { caseId } );
 
         // Phone: navigate to detail view.
         if ( this._detailEl ) {

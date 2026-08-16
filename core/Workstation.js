@@ -6,6 +6,8 @@
  *   Controls the startup sequence and wires the global event bridge.
  *
  * Boot Sequence:
+ *   0a. Splash screen    — studio/game branding, shown immediately (v1.1.0)
+ *   0b. Orientation guard — landscape enforcement begins as soon as root exists
  *   1.  Theme            — CSS variables before any rendering
  *   1b. Settings         — load persisted settings, apply UI scale + animations
  *   1c. Session          — load persisted session (Architecture 2.0)
@@ -45,6 +47,7 @@
 
 import EventBus                    from './EventBus.js';
 import BootScreen                  from './BootScreen.js';
+import SplashScreen                from './SplashScreen.js';
 import ApplicationContext          from './ApplicationContext.js';
 import ThemeManager                from '../managers/ThemeManager.js';
 import DesktopManager              from '../managers/DesktopManager.js';
@@ -66,6 +69,9 @@ import ForensicsManager            from '../managers/ForensicsManager.js';
 import BoardManager                from '../managers/BoardManager.js';
 import RecycleBinManager           from '../managers/RecycleBinManager.js';
 import TooltipManager              from '../managers/TooltipManager.js';
+import VersionManager              from '../managers/VersionManager.js';
+import TutorialManager             from '../managers/TutorialManager.js';
+import OrientationGuard            from '../utils/OrientationGuard.js';
 
 class Workstation {
 
@@ -89,6 +95,21 @@ class Workstation {
             console.error( 'Workstation: #workstation-root not found. Aborting.' );
             return;
         }
+
+        // ── 0a. Splash Screen ───────────────────────────────────────
+        // Appears immediately, before anything else — studio branding
+        // + version. Waits on VersionManager so the version shown is
+        // always real. See docs/SPLASH_SCREEN.md.
+        this._injectStylesheet( './css/boot/splash.css' );
+        const splashScreen = new SplashScreen();
+        await splashScreen.run( this._root, VersionManager.initialize() );
+
+        // ── 0b. Orientation Guard ───────────────────────────────────
+        // Landscape-only enforcement begins as soon as the root exists,
+        // so a portrait phone/tablet is blocked before anything else
+        // renders underneath it. See docs/PLATFORM_REQUIREMENTS.md.
+        this._injectStylesheet( './css/orientation/orientation.css' );
+        OrientationGuard.initialize( this._root );
 
         // ── 1. Theme ─────────────────────────────────────────────
         await ThemeManager.initialize();
@@ -185,6 +206,12 @@ class Workstation {
         // Mission 20 — subtle contextual guidance. Listens for
         // 'investigationChanged' itself; no case-specific wiring needed.
         TooltipManager.initialize();
+
+        // ── 7n. Tutorial ───────────────────────────────────────────
+        // Data-driven, mentor-guided Case 00 tutorial (v1.1.0). Loads
+        // its dialogue JSON and wires its own 'workstation:ready' /
+        // 'investigationStarted' triggers — see docs/TUTORIAL_SYSTEM.md.
+        await TutorialManager.initialize();
 
         // ── 8. Event Bridge ───────────────────────────────────────
         // Desktop icons, Start Menu items, and taskbar buttons all emit

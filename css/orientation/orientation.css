@@ -1,0 +1,48 @@
+/*
+ * CID OS
+ * Orientation Guard Stylesheet
+ *
+ * Scoped to: .orientation-guard
+ * Loaded by: OrientationGuard.js (injected once at boot)
+ *
+ * Blocks the game UI underneath — see docs/PLATFORM_REQUIREMENTS.md.
+ */
+
+.orientation-guard {
+    position:        fixed;
+    inset:           0;
+    z-index:         9999;
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    gap:             var(--space-4);
+    padding:         var(--space-8);
+    background:      var(--color-bg-primary);
+    color:           var(--color-text-primary);
+    font-family:     var(--font-ui), monospace;
+    text-align:      center;
+}
+
+.orientation-guard__icon {
+    font-size:   40px;
+    animation:   orientation-guard-spin 2400ms linear infinite;
+}
+
+@keyframes orientation-guard-spin {
+    from { transform: rotate( 0deg ); }
+    to   { transform: rotate( 360deg ); }
+}
+
+.orientation-guard__title {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-md);
+    letter-spacing: 1px;
+}
+
+.orientation-guard__message {
+    max-width: 320px;
+    font-size: var(--font-size-sm);
+    color:     var(--color-text-secondary);
+    line-height: var(--line-height-normal);
+}

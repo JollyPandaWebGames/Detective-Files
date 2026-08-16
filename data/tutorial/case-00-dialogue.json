@@ -1,0 +1,597 @@
+{
+    "version": "1.0",
+    "caseId": "case-00",
+    "speakers": {
+        "senior-detective": {
+            "name": "Senior Detective",
+            "portrait": "senior-detective",
+            "emoji": "🕵️‍♂️"
+        }
+    },
+    "nodes": [
+        {
+            "id": "t00-001",
+            "phase": "welcome",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Detective. Glad you're here — take a seat.",
+            "next": "t00-002"
+        },
+        {
+            "id": "t00-002",
+            "phase": "welcome",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "You're new, so I'll walk you through everything myself.",
+            "next": "t00-003"
+        },
+        {
+            "id": "t00-003",
+            "phase": "welcome",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "This is CID OS — the system every detective in this department uses to run investigations.",
+            "next": "t00-004"
+        },
+        {
+            "id": "t00-004",
+            "phase": "welcome",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "No paper files, no separate tools. Mail, evidence, maps, cameras — all of it lives here.",
+            "next": "t00-005"
+        },
+        {
+            "id": "t00-005",
+            "phase": "welcome",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "I've assigned you a small case — a bookstore break-in. Nothing dangerous, just enough to learn the ropes.",
+            "next": "t00-006"
+        },
+        {
+            "id": "t00-006",
+            "phase": "welcome",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Let's start with the desktop in front of you.",
+            "next": "t00-007"
+        },
+        {
+            "id": "t00-007",
+            "phase": "desktop",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "This is your desktop. Every icon here opens one of our applications.",
+            "next": "t00-008"
+        },
+        {
+            "id": "t00-008",
+            "phase": "desktop",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Down there is your taskbar — it shows what's open and gives you quick access to everything else through the Start Menu.",
+            "next": "t00-009"
+        },
+        {
+            "id": "t00-009",
+            "phase": "desktop",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "You can open more than one application at a time, drag windows around, minimize them — it behaves like any workstation should.",
+            "next": "t00-010"
+        },
+        {
+            "id": "t00-010",
+            "phase": "desktop",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Every case starts in the same place. Let's open it.",
+            "next": "t00-011"
+        },
+        {
+            "id": "t00-011",
+            "phase": "desktop",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open Case Management.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "case-management"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"case-management\"]",
+            "highlightScope": "desktop",
+            "next": "t00-012"
+        },
+        {
+            "id": "t00-012",
+            "phase": "case-management",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Good. This is Case Management — every case you're assigned or can pick up shows up here.",
+            "next": "t00-013"
+        },
+        {
+            "id": "t00-013",
+            "phase": "case-management",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "A case only becomes an Active Investigation once you actually start it. Until then it's just sitting in the list.",
+            "next": "t00-014"
+        },
+        {
+            "id": "t00-014",
+            "phase": "case-management",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Your case is right there — Case 00. Select it.",
+            "next": "t00-015"
+        },
+        {
+            "id": "t00-015",
+            "phase": "case-management",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Select Case 00.",
+            "requiredAction": {
+                "event": "case:card-selected",
+                "match": {
+                    "caseId": "case-00"
+                }
+            },
+            "highlightTarget": "[data-case-id=\"case-00\"]",
+            "highlightScope": "window:case-management",
+            "next": "t00-016"
+        },
+        {
+            "id": "t00-016",
+            "phase": "case-management",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "That's the case brief. When you're ready, start the investigation — from that point on, this system tracks everything for you.",
+            "next": "t00-017"
+        },
+        {
+            "id": "t00-017",
+            "phase": "case-management",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Start the investigation.",
+            "requiredAction": {
+                "event": "investigationStarted",
+                "match": {
+                    "caseId": "case-00"
+                }
+            },
+            "highlightTarget": ".casemgmt__detail-action-wrap button, .casemgmt__detail-action-wrap [data-action=\"start\"]",
+            "highlightScope": "window:case-management",
+            "next": "t00-018"
+        },
+        {
+            "id": "t00-018",
+            "phase": "active-investigation",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "There it is. That panel is your Active Investigation — it stays with you no matter which application you open.",
+            "next": "t00-019"
+        },
+        {
+            "id": "t00-019",
+            "phase": "active-investigation",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "It always shows your current case and your current objective, so you never lose track of what to do next.",
+            "next": "t00-020"
+        },
+        {
+            "id": "t00-020",
+            "phase": "active-investigation",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "You can minimize it if it's in your way, but it can't be closed while a case is active — every application depends on it.",
+            "next": "t00-021"
+        },
+        {
+            "id": "t00-021",
+            "phase": "active-investigation",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Your first objective is already up. Let's follow it.",
+            "next": "t00-022"
+        },
+        {
+            "id": "t00-022",
+            "phase": "police-mail",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Every case starts with a briefing in your inbox. Let's check it.",
+            "next": "t00-023"
+        },
+        {
+            "id": "t00-023",
+            "phase": "police-mail",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open Police Mail.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "police-mail"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"police-mail\"]",
+            "highlightScope": "desktop",
+            "next": "t00-024"
+        },
+        {
+            "id": "t00-024",
+            "phase": "police-mail",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open and read the incident report — that's where your case begins.",
+            "requiredAction": {
+                "event": "mail:read"
+            },
+            "highlightTarget": ".mail__list-item",
+            "highlightScope": "window:police-mail",
+            "next": "t00-025"
+        },
+        {
+            "id": "t00-025",
+            "phase": "police-mail",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Nora Finch, the bookstore owner — till was short, and someone forced a locked display case. Straightforward enough to start.",
+            "next": "t00-026"
+        },
+        {
+            "id": "t00-026",
+            "phase": "police-mail",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Attachments in a report like this often link straight to evidence. Worth checking every one.",
+            "next": "t00-027"
+        },
+        {
+            "id": "t00-027",
+            "phase": "evidence",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Now let's look at what was actually collected at the scene.",
+            "next": "t00-028"
+        },
+        {
+            "id": "t00-028",
+            "phase": "evidence",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open the Evidence Database.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "evidence"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"evidence\"]",
+            "highlightScope": "desktop",
+            "next": "t00-029"
+        },
+        {
+            "id": "t00-029",
+            "phase": "evidence",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open an evidence item and read through its details.",
+            "requiredAction": {
+                "event": "evidence:opened"
+            },
+            "highlightTarget": ".ev__list-item",
+            "highlightScope": "window:evidence",
+            "next": "t00-030"
+        },
+        {
+            "id": "t00-030",
+            "phase": "evidence",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Notice the notes field — write down anything that seems relevant. Future you will thank present you.",
+            "next": "t00-031"
+        },
+        {
+            "id": "t00-031",
+            "phase": "city-map",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Evidence tells you what happened. The map tells you where.",
+            "next": "t00-032"
+        },
+        {
+            "id": "t00-032",
+            "phase": "city-map",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open the City Map.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "city-map"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"city-map\"]",
+            "highlightScope": "desktop",
+            "next": "t00-033"
+        },
+        {
+            "id": "t00-033",
+            "phase": "city-map",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Find the bookstore and inspect the location.",
+            "requiredAction": {
+                "event": "map:focus-request"
+            },
+            "highlightTarget": ".citymap__canvas",
+            "highlightScope": "window:city-map",
+            "next": "t00-034"
+        },
+        {
+            "id": "t00-034",
+            "phase": "city-map",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Good. Locations link back to evidence and people — the map is how you see the case's geography.",
+            "next": "t00-035"
+        },
+        {
+            "id": "t00-035",
+            "phase": "messenger",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Not everyone walks into the precinct. A lot of leads come in through Messenger.",
+            "next": "t00-036"
+        },
+        {
+            "id": "t00-036",
+            "phase": "messenger",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open Messenger.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "messenger"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"messenger\"]",
+            "highlightScope": "desktop",
+            "next": "t00-037"
+        },
+        {
+            "id": "t00-037",
+            "phase": "messenger",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open a conversation and read it.",
+            "requiredAction": {
+                "event": "messenger:conversation-opened"
+            },
+            "highlightTarget": ".msng__conv-item",
+            "highlightScope": "window:messenger",
+            "next": "t00-038"
+        },
+        {
+            "id": "t00-038",
+            "phase": "messenger",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Witnesses don't always say things directly. Read between the lines.",
+            "next": "t00-039"
+        },
+        {
+            "id": "t00-039",
+            "phase": "cctv",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "If there's a camera nearby, check it. Footage doesn't lie.",
+            "next": "t00-040"
+        },
+        {
+            "id": "t00-040",
+            "phase": "cctv",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open CCTV.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "cctv"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"cctv\"]",
+            "highlightScope": "desktop",
+            "next": "t00-041"
+        },
+        {
+            "id": "t00-041",
+            "phase": "cctv",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Select the camera, then play the footage and use the timeline to find the important moment.",
+            "requiredAction": {
+                "event": "cctv:opened"
+            },
+            "highlightTarget": ".cctv__camera-item",
+            "highlightScope": "window:cctv",
+            "next": "t00-042"
+        },
+        {
+            "id": "t00-042",
+            "phase": "cctv",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Bookmark anything worth remembering — you can jump straight back to that timestamp later.",
+            "next": "t00-043"
+        },
+        {
+            "id": "t00-043",
+            "phase": "forensics",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Some answers only come from the lab. That's Forensics.",
+            "next": "t00-044"
+        },
+        {
+            "id": "t00-044",
+            "phase": "forensics",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open Forensics.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "forensics"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"forensics\"]",
+            "highlightScope": "desktop",
+            "next": "t00-045"
+        },
+        {
+            "id": "t00-045",
+            "phase": "forensics",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Submit a piece of evidence for analysis.",
+            "requiredAction": {
+                "event": "forensics:requested"
+            },
+            "highlightTarget": ".flab__action-btn--submit",
+            "highlightScope": "window:forensics",
+            "next": "t00-046"
+        },
+        {
+            "id": "t00-046",
+            "phase": "forensics",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Analysis takes time — check back for the result. Patience is part of the job.",
+            "next": "t00-047"
+        },
+        {
+            "id": "t00-047",
+            "phase": "criminal-database",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Now let's see who's actually involved. The Criminal Database holds every profile connected to a case.",
+            "next": "t00-048"
+        },
+        {
+            "id": "t00-048",
+            "phase": "criminal-database",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open the Criminal Database.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "criminal-database"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"criminal-database\"]",
+            "highlightScope": "desktop",
+            "next": "t00-049"
+        },
+        {
+            "id": "t00-049",
+            "phase": "criminal-database",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Search for a person and open their profile.",
+            "requiredAction": {
+                "event": "person:selected"
+            },
+            "highlightTarget": ".pdb__list-item",
+            "highlightScope": "window:criminal-database",
+            "next": "t00-050"
+        },
+        {
+            "id": "t00-050",
+            "phase": "criminal-database",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Known aliases, history, relationships — all worth cross-checking against your evidence.",
+            "next": "t00-051"
+        },
+        {
+            "id": "t00-051",
+            "phase": "board",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "This is where it all comes together — the Investigation Board.",
+            "next": "t00-052"
+        },
+        {
+            "id": "t00-052",
+            "phase": "board",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open the Investigation Board.",
+            "requiredAction": {
+                "event": "app:opened",
+                "match": {
+                    "appId": "board"
+                }
+            },
+            "highlightTarget": "[data-app-id=\"board\"]",
+            "highlightScope": "desktop",
+            "next": "t00-053"
+        },
+        {
+            "id": "t00-053",
+            "phase": "board",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Add a piece of evidence, a person, or a location to the board.",
+            "requiredAction": {
+                "event": "board:node-added"
+            },
+            "highlightTarget": ".board__tool-btn",
+            "highlightScope": "window:board",
+            "next": "t00-054"
+        },
+        {
+            "id": "t00-054",
+            "phase": "board",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Connect the pieces that relate to each other. A board with clear connections is a theory a prosecutor can actually use.",
+            "next": "t00-055"
+        },
+        {
+            "id": "t00-055",
+            "phase": "solving",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "You've covered mail, evidence, the map, witnesses, footage, forensics, and background checks. That's the whole job.",
+            "next": "t00-056"
+        },
+        {
+            "id": "t00-056",
+            "phase": "solving",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "When you're confident in your theory, submit your conclusion. Get it wrong and you'll see why — get it right and the case closes.",
+            "next": "t00-057"
+        },
+        {
+            "id": "t00-057",
+            "phase": "solving",
+            "speaker": "senior-detective",
+            "type": "dialogue",
+            "text": "Take your time on the real cases. This one's just to get your feet wet. Good luck, Detective.",
+            "next": null
+        }
+    ]
+}

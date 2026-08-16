@@ -25,6 +25,7 @@
 import BaseApp        from '../../core/BaseApp.js';
 import EventBus       from '../../core/EventBus.js';
 import SettingsManager from '../../managers/SettingsManager.js';
+import VersionManager  from '../../managers/VersionManager.js';
 
 // Category definitions — order determines sidebar order.
 const CATEGORIES = [
@@ -309,8 +310,8 @@ class Settings extends BaseApp {
             <div class="settings__about-logo">🕵️</div>
             <div class="settings__about-name">Detective Files</div>
             <div class="settings__about-row">
-                <span class="settings__about-key">CID OS Version</span>
-                <span class="settings__about-val">1.0.0</span>
+                <span class="settings__about-key">Version</span>
+                <span class="settings__about-val">${ VersionManager.getDisplayVersion() }</span>
             </div>
             <div class="settings__about-row">
                 <span class="settings__about-key">App Framework</span>

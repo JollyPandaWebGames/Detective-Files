@@ -1,0 +1,144 @@
+/*
+ * CID OS
+ * Tutorial System Stylesheet
+ *
+ * Scoped to: .tutorial-dialog, .tutorial-highlight, .tutorial-locked
+ * Loaded by: TutorialManager.js (injected once, on first tutorial start)
+ *
+ * See docs/TUTORIAL_SYSTEM.md for the architecture this renders.
+ */
+
+/* ── Dim the desktop while locked (visual only — see
+      TutorialManager._handleIntercept for the actual click lock) ── */
+body.tutorial-locked .cid-desktop__icon-area,
+body.tutorial-locked .cid-desktop__taskbar,
+body.tutorial-locked .cid-desktop__window-layer {
+    filter: brightness( 0.55 );
+}
+
+/* Highlighted target (and the tutorial UI itself) stay at full
+   brightness even while the rest of the desktop is dimmed. */
+body.tutorial-locked .tutorial-highlight {
+    filter: none;
+}
+
+/* ── Dialogue Box ─────────────────────────────────────────────── */
+.tutorial-dialog {
+    position:        fixed;
+    left:             50%;
+    bottom:          var(--space-8);
+    transform:       translateX( -50% );
+    z-index:         9700;
+    display:         flex;
+    align-items:     flex-start;
+    gap:             var(--space-4);
+    width:           min( 640px, 92vw );
+    padding:         var(--space-4) var(--space-6);
+    background:      var(--color-bg-secondary);
+    border:          var(--color-border-pixel);
+    box-shadow:      0 8px 0 rgba( 0, 0, 0, 0.35 );
+    font-family:     var(--font-ui), monospace;
+    opacity:         0;
+    animation:       tutorial-dialog-in var(--duration-normal) var(--ease-out) forwards;
+}
+
+@keyframes tutorial-dialog-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.tutorial-dialog__portrait {
+    flex:        0 0 auto;
+    font-size:   32px;
+    line-height: 1;
+}
+
+.tutorial-dialog__body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tutorial-dialog__speaker {
+    font-family:    var(--font-title), monospace;
+    font-size:      var(--font-size-sm);
+    color:          var(--color-highlight);
+    letter-spacing: 1px;
+    margin-bottom:  var(--space-2);
+}
+
+.tutorial-dialog__text {
+    font-size:   var(--font-size-md);
+    color:       var(--color-text-primary);
+    line-height: var(--line-height-normal);
+    margin-bottom: var(--space-4);
+}
+
+.tutorial-dialog__actions {
+    display:         flex;
+    justify-content: flex-end;
+    gap:             var(--space-3);
+}
+
+.tutorial-dialog__continue,
+.tutorial-dialog__skip {
+    font-family: var(--font-ui), monospace;
+    font-size:   var(--font-size-sm);
+    padding:     var(--space-2) var(--space-4);
+    border:      var(--color-border-pixel);
+    cursor:      pointer;
+}
+
+.tutorial-dialog__continue {
+    background: var(--color-highlight);
+    color:      var(--color-bg-primary);
+}
+
+.tutorial-dialog__continue:hover {
+    filter: brightness( 1.1 );
+}
+
+.tutorial-dialog__skip {
+    background: transparent;
+    color:      var(--color-text-secondary);
+}
+
+.tutorial-dialog__skip:hover {
+    color: var(--color-text-primary);
+}
+
+/* ── Instruction Banner (shown while player performs the action) ── */
+.tutorial-dialog--instruction {
+    bottom:     auto;
+    top:        var(--space-8);
+    flex-direction: row;
+    align-items: center;
+    padding:    var(--space-3) var(--space-5);
+    gap:        var(--space-3);
+}
+
+.tutorial-dialog__instruction-icon {
+    font-size: 18px;
+}
+
+.tutorial-dialog__instruction-text {
+    font-size: var(--font-size-md);
+    color:     var(--color-text-primary);
+}
+
+/* ── Highlight Box ────────────────────────────────────────────── */
+.tutorial-highlight {
+    position:       fixed;
+    z-index:        9600;
+    pointer-events: none;
+    border:         2px solid var(--color-highlight);
+    box-shadow:
+        0 0 0 4px rgba( 45, 168, 255, 0.25 ),
+        0 0 0 9999px rgba( 0, 0, 0, 0.6 );
+    animation:      tutorial-highlight-pulse 1400ms ease-in-out infinite;
+    transition:     top 120ms ease-out, left 120ms ease-out, width 120ms ease-out, height 120ms ease-out;
+}
+
+@keyframes tutorial-highlight-pulse {
+    0%, 100% { border-color: var(--color-highlight); }
+    50%      { border-color: var(--color-text-primary); }
+}
