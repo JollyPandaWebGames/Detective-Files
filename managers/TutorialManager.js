@@ -41,10 +41,14 @@
  *   EventBus, TutorialDialog, TutorialHighlight, CaseManager
  */
 
-import EventBus           from '../core/EventBus.js';
-import TutorialDialog     from '../ui/TutorialDialog.js';
-import TutorialHighlight  from '../ui/TutorialHighlight.js';
-import CaseManager        from './CaseManager.js';
+import EventBus                    from '../core/EventBus.js';
+import TutorialDialog              from '../ui/TutorialDialog.js';
+import TutorialHighlight           from '../ui/TutorialHighlight.js';
+import CaseManager                 from './CaseManager.js';
+import ApplicationManager          from './ApplicationManager.js';
+import ActiveInvestigationManager  from './ActiveInvestigationManager.js';
+import MailManager                 from './MailManager.js';
+import ForensicsManager            from './ForensicsManager.js';
 
 const DIALOGUE_URL = './data/tutorial/case-00-dialogue.json';
 const TUTORIAL_CASE_ID = 'case-00';
@@ -229,6 +233,18 @@ class TutorialManagerClass {
         this._current = node;
         this._lock();
 
+        // Bug fix (v1.1.1): an instruction step must not wait forever for
+        // an event that already happened before we got here — e.g. the
+        // player already had Police Mail open (singleton apps only emit
+        // 'app:opened' on the FIRST open, not on refocus), or is replaying
+        // Case 00 after already reading that mail / submitting that
+        // analysis in a prior playthrough. Check first; only fall back to
+        // listening for the live event if the condition isn't already true.
+        if ( node.type === 'instruction' && this._isAlreadySatisfied( node ) ) {
+            this._advance();
+            return;
+        }
+
         const speaker = this._data.speakers[ node.speaker ] ?? { name: node.speaker, emoji: '🕵️' };
 
         if ( node.type === 'dialogue' ) {
@@ -351,6 +367,47 @@ class TutorialManagerClass {
      */
     _unbindRequiredActionListener() {
         // See docstring — listeners stay bound but become inert.
+    }
+
+    /**
+     * Check whether an instruction node's requiredAction is already true
+     * right now, before waiting for a fresh EventBus event — see the fix
+     * note in `_goTo`. Only a handful of event types have state worth
+     * checking (ones whose underlying action is idempotent/guarded, so a
+     * repeat player action would never re-emit the event); everything
+     * else is left to the live listener, which is safe since those
+     * events fire unconditionally on every user interaction.
+     *
+     * @param {Object} node
+     * @returns {boolean}
+     */
+    _isAlreadySatisfied( node ) {
+
+        const required = node.requiredAction;
+        if ( !required ) return false;
+
+        const match = required.match ?? {};
+
+        switch ( required.event ) {
+
+            case 'app:opened':
+                return !!match.appId && ApplicationManager.isRunning( match.appId );
+
+            case 'investigationStarted':
+                return ActiveInvestigationManager.getActive()?.caseId === match.caseId;
+
+            case 'mail:read':
+                return !match.mailId || MailManager.getById( match.mailId )?.read === true;
+
+            case 'forensics:requested':
+                return !match.analysisId
+                    || ForensicsManager.getById( match.analysisId )?.queueStatus !== 'Available';
+
+            default:
+                return false;
+
+        }
+
     }
 
     /**

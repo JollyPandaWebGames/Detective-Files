@@ -94,6 +94,28 @@ dialogue explains *what/why*, instructions require the player to actually
 
 No tutorial text is hardcoded in JavaScript — see `data/tutorial/case-00-dialogue.json`.
 
+### Avoiding soft-locks on already-true conditions (v1.1.1)
+
+Some gameplay actions are idempotent/guarded — a singleton app only emits
+`app:opened` on its first open (reopening just focuses it), `MailManager`
+only emits `mail:read` the first time a given mail is read, and
+`ForensicsManager` only emits `forensics:requested` the first time a given
+analysis is submitted. If the player reached an instruction step for one of
+these *after* the condition was already true — e.g. they opened Police Mail
+before the tutorial told them to, or they're replaying Case 00 after already
+reading that mail in a prior playthrough — the live event would never fire
+again, and the tutorial would wait forever.
+
+`TutorialManager._isAlreadySatisfied(node)` checks a small set of known
+event types against real manager state (`ApplicationManager.isRunning`,
+`ActiveInvestigationManager.getActive`, `MailManager.getById`,
+`ForensicsManager.getById`) right when an instruction node is entered, and
+auto-advances immediately if the condition already holds. Event types
+outside that set (evidence, CCTV, messenger, criminal database, board,
+map) fire unconditionally on every user interaction in the existing
+codebase, so they don't need this check — the live listener alone is safe
+for those.
+
 ## 5. Case 00 Phases
 
 Welcome → Desktop → Case Management → Active Investigation → Police Mail →

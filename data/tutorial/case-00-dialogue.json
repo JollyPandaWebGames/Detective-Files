@@ -232,7 +232,10 @@
             "type": "instruction",
             "text": "Open and read the incident report — that's where your case begins.",
             "requiredAction": {
-                "event": "mail:read"
+                "event": "mail:read",
+                "match": {
+                    "mailId": "mail-010"
+                }
             },
             "highlightTarget": ".mail__list-item",
             "highlightScope": "window:police-mail",
@@ -328,9 +331,9 @@
             "phase": "city-map",
             "speaker": "senior-detective",
             "type": "instruction",
-            "text": "Find the bookstore and inspect the location.",
+            "text": "Find the bookstore marker and click it to inspect the location.",
             "requiredAction": {
-                "event": "map:focus-request"
+                "event": "map:location-selected"
             },
             "highlightTarget": ".citymap__canvas",
             "highlightScope": "window:city-map",
@@ -465,7 +468,10 @@
             "type": "instruction",
             "text": "Submit a piece of evidence for analysis.",
             "requiredAction": {
-                "event": "forensics:requested"
+                "event": "forensics:requested",
+                "match": {
+                    "analysisId": "analysis-00-1"
+                }
             },
             "highlightTarget": ".flab__action-btn--submit",
             "highlightScope": "window:forensics",

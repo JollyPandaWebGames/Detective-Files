@@ -57,3 +57,4 @@ bump.
 |---|---|
 | 1.0.0 | Baseline release. |
 | 1.1.0 | Rebuilt Case 00 as a fully guided, mentor-driven tutorial (see `docs/TUTORIAL_SYSTEM.md`); added project version control; added landscape-only enforcement (see `docs/PLATFORM_REQUIREMENTS.md`); added a developer splash screen (see `docs/SPLASH_SCREEN.md`). |
+| 1.1.1 | Fixed a tutorial soft-lock: instruction steps waiting on a singleton app-open or other idempotent/guarded action (e.g. Police Mail already open, a mail already read, an analysis already submitted) could wait forever for an event that would never re-fire. Steps now check whether their condition is already true before locking on a live event. |
