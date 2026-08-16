@@ -282,6 +282,39 @@ check back later") rather than blocking on the wait. This is a narrative
 choice, not a gap — the raw event and its single condition can never
 disagree with each other the way a composite/multi-event objective could.
 
+### Instruction steps whose required action spans more than one DOM region (v2.0.1)
+
+Three instruction steps ask for more than a single click on the highlighted
+element:
+
+- Evidence (`t00-033`) — open the item **and write a note**. The note
+  textarea (`.ev__detail-notes`) lives in the app's detail panel, a
+  sibling of the list (`.ev__list`), not a descendant of the list item.
+- CCTV (`t00-045`) — select the camera **and play the footage and
+  bookmark it**. Playback controls and the bookmark button live in the
+  center/right panels, siblings of the camera list.
+- Board (`t00-059`) — add pieces, **connect them on the canvas**, and add
+  a theory card. Connecting happens via `mousedown`/`mousemove` handlers
+  bound directly to `.board__canvas`, a sibling of the toolbar buttons.
+
+Each of these previously set `highlightTarget` to only the *first* element
+the player interacts with (the list item, the camera item, a toolbar
+button). Since `TutorialManager._handleIntercept` only allows events whose
+target is inside `.tutorial-dialog` or inside
+`TutorialHighlight.getTarget()`, every click and keystroke aimed at the
+second/third part of the task — the notes textarea, the playback controls,
+the canvas — was silently swallowed by the capture-phase lock. The result
+was a hard stop the player couldn't see the cause of: the instruction text
+said to do something the lock itself was preventing.
+
+Fixed by widening those three nodes' `highlightTarget` to the app's whole
+content root (`.ev`, `.cctv`, `.board` — the class each app adds to its own
+`contentEl` in `create()`), so the entire window is unlocked once the
+player is inside it for that step, rather than one sub-element. The other
+"open X and do one thing to it" steps (Police Mail, City Map, Messenger,
+Criminal Database) don't have this problem — in each of those, the only
+required action is a click on the exact element already being highlighted.
+
 ## 8. Replay vs. Resume Behavior
 
 Case 00's case definition already has `"replayable": true`. On top of that,

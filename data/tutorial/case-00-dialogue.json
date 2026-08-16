@@ -388,7 +388,7 @@
                 "event": "objective:completed",
                 "match": { "objectiveId": "T00-05" }
             },
-            "highlightTarget": ".ev__list-item",
+            "highlightTarget": ".ev",
             "highlightScope": "window:evidence",
             "next": "t00-034"
         },
@@ -544,7 +544,7 @@
                 "event": "objective:completed",
                 "match": { "objectiveId": "T00-08" }
             },
-            "highlightTarget": ".cctv__camera-item",
+            "highlightTarget": ".cctv",
             "highlightScope": "window:cctv",
             "next": "t00-046"
         },
@@ -720,7 +720,7 @@
                 "event": "objective:completed",
                 "match": { "objectiveId": "T00-11" }
             },
-            "highlightTarget": ".board__tool-btn",
+            "highlightTarget": ".board",
             "highlightScope": "window:board",
             "next": "t00-060"
         },
