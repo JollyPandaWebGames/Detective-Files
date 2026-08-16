@@ -96,7 +96,7 @@ class SplashScreen {
 
         this._element.innerHTML = `
             <div class="splash-screen__content">
-                <div class="splash-screen__studio-logo">🐼</div>
+                <img class="splash-screen__studio-logo" src="./assets/branding/jolly-panda-logo.png" alt="" />
                 <div class="splash-screen__studio-name">${ STUDIO_NAME }</div>
                 <div class="splash-screen__presents">presents</div>
 

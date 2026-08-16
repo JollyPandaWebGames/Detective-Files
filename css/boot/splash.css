@@ -42,8 +42,14 @@
 
 /* ── Studio Block ─────────────────────────────────────────────── */
 .splash-screen__studio-logo {
-    font-size:     40px;
+    width:         56px;
+    height:        56px;
+    object-fit:    contain;
     margin-bottom: var(--space-2);
+    /* Source mark is black line-art on a transparent background —
+       invert so the linework reads clearly against the dark splash
+       background instead of disappearing into it. */
+    filter:        invert( 1 );
 }
 
 .splash-screen__studio-name {

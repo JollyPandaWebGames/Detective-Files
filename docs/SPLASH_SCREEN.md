@@ -15,8 +15,9 @@ DETECTIVE FILES
 v1.1.0
 ```
 
-- **Developer branding** — studio logo/emoji + name ("Jolly Panda Studio"),
-  matching the existing branding already shown in Settings → About.
+- **Developer branding** — the real Jolly Panda Studio paw-print mark
+  (`assets/branding/jolly-panda-logo.png`) + studio name, matching the
+  branding already referenced in Settings → About.
 - **Game branding** — the Detective Files badge and title.
 - **Version** — read from `VersionManager.getDisplayVersion()`. Never a
   literal string — see `docs/VERSIONING.md`.
@@ -26,11 +27,17 @@ Settings → About already established (`apps/settings/index.js`).
 
 ## Asset Requirements
 
-The splash is emoji/CSS-only by design — it needs no image assets and thus
-has no broken-image risk regardless of deployment target. If real
-logo artwork is added later, replace `.splash-screen__studio-logo` /
-`.splash-screen__game-badge` content in `SplashScreen.js` with an `<img>`
-and update `docs/SPLASH_SCREEN.md` accordingly.
+The studio mark is `assets/branding/jolly-panda-logo.png` — a black
+line-art paw print on a transparent background. Since the splash
+background is dark, `.splash-screen__studio-logo` applies
+`filter: invert(1)` so the linework renders in white instead of
+disappearing into the dark background. The Detective Files game badge
+next to it remains emoji/CSS-only (no asset needed).
+
+No new logo was invented; this is the studio's real mark, not a
+placeholder. If a second-color or SVG version is added later, swap the
+`<img src>` in `SplashScreen.js` and drop the `invert(1)` filter if the
+new asset is already light-colored.
 
 ## Loading Behavior
 
