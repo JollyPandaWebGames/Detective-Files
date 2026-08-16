@@ -189,12 +189,26 @@ class CaseManagerClass {
      * persist it, and emit case:started so other systems
      * (e.g. Police Mail) can react.
      *
-     * Case 00 replay support — cases with `replayable: true` never hit
-     * the "already started" short-circuit below. Every start is treated
-     * as fresh: status and progress reset even if the case was
-     * previously 'In Progress' or 'Solved'. ActiveInvestigationManager
-     * is responsible for wiping every other manager's persisted state
-     * to match — this method only owns the case's own status/progress.
+     * Case 00 replay support — cases with `replayable: true` reset
+     * status and progress when started from 'Unlocked' (first time) or
+     * 'Solved' (the player deliberately chose to run it again after
+     * finishing it). ActiveInvestigationManager is responsible for
+     * wiping every other manager's persisted state to match in those
+     * two cases — this method only owns the case's own status/progress.
+     *
+     * Bug fix (v2.0.2): a replayable case that is already 'In Progress'
+     * is NOT reset here, even though it used to be. `startCase()` is
+     * also what runs when the live session pointer was lost (e.g. a
+     * page reload where SessionManager's pointer failed to restore —
+     * see ActiveInvestigationManager.initialize()) and the player just
+     * clicks "Continue Investigation" to reattach to a case whose real
+     * progress is still sitting in every other manager's storage.
+     * Treating that the same as a deliberate replay silently discarded
+     * that progress — objectives showed unchecked, evidence notes were
+     * gone, etc., with no warning it had happened. Only 'Unlocked' and
+     * 'Solved' are genuine "start over" transitions; 'In Progress' now
+     * takes the same re-sync-only short-circuit non-replayable cases
+     * already used.
      *
      * No-op if the case is locked, or already in progress/solved and
      * not marked replayable.
@@ -212,7 +226,15 @@ class CaseManagerClass {
             return;
         }
 
-        if ( ( c.status === 'In Progress' || c.status === 'Solved' ) && !c.replayable ) {
+        if ( c.status === 'In Progress' ) {
+            // Re-attaching to an already-active case (including a
+            // replayable one) must never discard its real progress —
+            // just re-sync. See the v2.0.2 note above.
+            EventBus.emit( 'case:started', { caseId } );
+            return;
+        }
+
+        if ( c.status === 'Solved' && !c.replayable ) {
             // Already started — just re-emit so dependent systems can re-sync.
             EventBus.emit( 'case:started', { caseId } );
             return;

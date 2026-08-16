@@ -424,6 +424,14 @@
     color:       var(--color-text-secondary);
 }
 
+.casemgmt__objective--done {
+    color: var(--color-text-secondary);
+}
+
+.casemgmt__objective--done .casemgmt__objective-box {
+    color: var(--color-success, var(--color-highlight));
+}
+
 /* ── Action Area ──────────────────────────────────────────────── */
 .casemgmt__detail-action-wrap {
     margin-top: auto;

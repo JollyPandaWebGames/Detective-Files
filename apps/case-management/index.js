@@ -418,6 +418,19 @@ class CaseManagement extends BaseApp {
         const isActiveSession   = !!activeInv && activeInv.caseId === c.id;
         const blockedByOther    = !!activeInv && !isActiveSession;
 
+        // Bug fix (v2.0.2): this panel used to render only c.objectives
+        // (the static case-definition strings) with a hardcoded ☐, never
+        // reflecting real progress — ObjectiveManager, the actual source
+        // of truth (see docs/TUTORIAL_SYSTEM.md §7's v1.1.6 note), was
+        // never consulted here at all. context.getActiveInvestigation()
+        // already exposes live progress/completedObjectives whenever
+        // this case is the active session (ActiveInvestigationManager
+        // supersedes the static placeholders with ObjectiveManager's
+        // real numbers — see ActiveInvestigationManager.getActive()) —
+        // this panel just wasn't reading it.
+        const liveProgress     = isActiveSession ? ( activeInv.progress ?? c.progress ?? 0 ) : ( c.progress ?? 0 );
+        const completedTitles  = isActiveSession ? new Set( activeInv.completedObjectives ?? [] ) : new Set();
+
         this._detailEl.innerHTML = `
             <div class="casemgmt__detail-toolbar">
                 <button type="button" class="casemgmt__detail-back" aria-label="Back to list">← Back</button>
@@ -445,9 +458,9 @@ class CaseManagement extends BaseApp {
 
             ${ inProgress ? `
                 <div class="casemgmt__detail-progress-wrap">
-                    <div class="casemgmt__detail-progress-label">Progress: ${ c.progress ?? 0 }%</div>
+                    <div class="casemgmt__detail-progress-label">Progress: ${ liveProgress }%</div>
                     <div class="casemgmt__detail-progress-track">
-                        <div class="casemgmt__detail-progress-fill" style="width:${ c.progress ?? 0 }%"></div>
+                        <div class="casemgmt__detail-progress-fill" style="width:${ liveProgress }%"></div>
                     </div>
                 </div>
             ` : '' }
@@ -467,9 +480,14 @@ class CaseManagement extends BaseApp {
         // Objectives.
         const objEl = this._detailEl.querySelector( '.casemgmt__detail-objectives' );
         ( c.objectives ?? [] ).forEach( obj => {
+            // "Start Investigation" isn't a real ObjectiveManager entry
+            // (see data/cases/case-00/objectives/) — it's implicitly
+            // true the moment this case IS the active session, since
+            // that can't happen otherwise.
+            const done = obj === 'Start Investigation' ? isActiveSession : completedTitles.has( obj );
             const row = document.createElement( 'div' );
-            row.className = 'casemgmt__objective';
-            row.innerHTML = `<span class="casemgmt__objective-box">☐</span><span>${ this._escape( obj ) }</span>`;
+            row.className = `casemgmt__objective${ done ? ' casemgmt__objective--done' : '' }`;
+            row.innerHTML = `<span class="casemgmt__objective-box">${ done ? '☑' : '☐' }</span><span>${ this._escape( obj ) }</span>`;
             objEl.appendChild( row );
         } );
 

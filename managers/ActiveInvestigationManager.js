@@ -203,6 +203,15 @@ class ActiveInvestigationManagerClass {
             return { ok: false, reason: 'blocked', current: this.getActive() };
         }
 
+        // Bug fix (v2.0.2): must be read BEFORE CaseManager.startCase()
+        // below, which mutates c.status. A replayable case is only a
+        // genuine fresh/replay start from 'Unlocked' (never started) or
+        // 'Solved' (finished, player chose to run it again) — see
+        // CaseManager.startCase()'s matching note. If it's already
+        // 'In Progress', this call is reattaching a lost session
+        // pointer to real, still-persisted progress, not replaying.
+        const isGenuineReplayStart = c.replayable && c.status !== 'In Progress';
+
         CaseManager.startCase( caseId );
 
         const startedAt = Date.now();
@@ -210,7 +219,7 @@ class ActiveInvestigationManagerClass {
 
         SessionManager.setActiveSessionPointer( { caseId, startedAt } );
 
-        if ( c.replayable ) {
+        if ( isGenuineReplayStart ) {
             // Case 00 replay support — every application (Evidence,
             // CCTV, Forensics, Messenger, Criminal Database, Board) and
             // TooltipManager lazily call their own manager's

@@ -315,6 +315,48 @@ player is inside it for that step, rather than one sub-element. The other
 Criminal Database) don't have this problem — in each of those, the only
 required action is a click on the exact element already being highlighted.
 
+### "Continue Investigation" silently wiping real progress (v2.0.2)
+
+Two related, pre-existing bugs (not introduced by v2.0's tutorial rewrite,
+but directly undermining §8's resume promise) surfaced once a tutorial run
+was genuinely interrupted:
+
+1. **`CaseManager.startCase()` / `ActiveInvestigationManager.start()`
+   treated every start of a replayable case (Case 00) as a fresh replay —
+   even if its status was already `'In Progress'`.** This is exactly the
+   state a case is left in when the live session pointer is lost (e.g. a
+   page reload where `SessionManager`'s pointer failed to restore) while
+   the case's on-disk status/progress survived. Clicking **Continue
+   Investigation** in that state called the same reset path as a genuine
+   replay — `ActiveInvestigationManager._resetThenStart()` — wiping
+   evidence notes, CCTV bookmarks, forensics requests, board state, and
+   every objective's completion, with no indication to the player that it
+   had happened. Fixed: both methods now only treat `'Unlocked'` (never
+   started) or `'Solved'` (finished, deliberately replayed) as a genuine
+   reset. `'In Progress'` re-syncs without touching any manager's
+   persisted state — matching how non-replayable cases already behaved.
+   Case 00 replay (EPIC Part 18) is unaffected: solving it still flips
+   status to `'Solved'`, and starting it again from there still resets.
+
+2. **Case Management's objectives checklist and progress bar never
+   consulted `ObjectiveManager` at all** — `_renderDetail()` rendered the
+   case's static `objectives` string list with a hardcoded `☐` and the
+   case's static (rarely-updated) `c.progress` field, regardless of what
+   was actually completed. `context.getActiveInvestigation()` already
+   exposes live `progress`/`completedObjectives` whenever the case is the
+   active session (`ActiveInvestigationManager.getActive()` supersedes the
+   static placeholders with `ObjectiveManager`'s real numbers whenever
+   `ObjectiveManager.hasGraph()` — see `core/InvestigationSession.js`);
+   the panel just wasn't reading it. Fixed: the checklist now checks off
+   (`☑`) any objective whose title appears in
+   `activeInv.completedObjectives`, and the progress bar reads
+   `activeInv.progress` while this case is the active session.
+
+Bug 1 masked bug 2 in practice — every time bug 1's silent reset fired,
+the checklist correctly showed nothing checked because nothing genuinely
+was, right after the reset. But bug 2 was real and independent: even
+without bug 1, the checklist would never have reflected real progress.
+
 ## 8. Replay vs. Resume Behavior
 
 Case 00's case definition already has `"replayable": true`. On top of that,
