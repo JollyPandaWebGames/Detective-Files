@@ -53,6 +53,62 @@ body.tutorial-locked .tutorial-highlight {
     line-height: 1;
 }
 
+/* ── Two-Detective Portrait Row (EPIC Part 5/6) ──────────────────
+   Both detectives are always visible; whichever one is speaking is
+   emphasized, the other is de-emphasized. Declaration order from
+   TutorialDialog.js keeps the male detective on the left, female on
+   the right. */
+.tutorial-dialog__portraits {
+    flex:     0 0 auto;
+    display:  flex;
+    gap:      var(--space-3);
+}
+
+.tutorial-dialog__portrait-slot {
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    gap:             var(--space-1);
+    padding:         var(--space-1) var(--space-2);
+    transition:      opacity 150ms ease-out, filter 150ms ease-out, transform 150ms ease-out;
+}
+
+.tutorial-dialog__portrait-slot--active {
+    opacity: 1;
+    filter:  none;
+    transform: translateY( -2px );
+}
+
+.tutorial-dialog__portrait-slot--dim {
+    opacity: 0.45;
+    filter:  grayscale( 0.6 ) brightness( 0.8 );
+}
+
+.tutorial-dialog__portrait-slot .tutorial-dialog__portrait {
+    font-size: 30px;
+}
+
+.tutorial-dialog__portrait-name {
+    font-family:    var(--font-ui), monospace;
+    font-size:      10px;
+    color:          var(--color-text-secondary);
+    letter-spacing: 0.5px;
+    text-align:     center;
+    white-space:    nowrap;
+}
+
+.tutorial-dialog__portrait-slot--active .tutorial-dialog__portrait-name {
+    color: var(--color-highlight);
+}
+
+/* ── Resume Prompt (EPIC Part 11) ────────────────────────────────
+   Same dialogue-box chrome, single generic portrait — this appears
+   before the tutorial has re-identified which detective would be
+   speaking at the saved node, so it isn't attributed to either one. */
+.tutorial-dialog--resume .tutorial-dialog__speaker {
+    color: var(--color-text-primary);
+}
+
 .tutorial-dialog__body {
     flex: 1 1 auto;
     min-width: 0;

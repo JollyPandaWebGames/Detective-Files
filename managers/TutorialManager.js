@@ -17,9 +17,11 @@
  *   - Detect the required action for an instruction node by listening
  *     for the real gameplay EventBus event it names, then advance
  *   - Persist tutorial progress (StorageManager) so an abandoned
- *     tutorial resumes exactly where it left off — e.g. a page reload
- *     mid-sequence — rather than restarting from the Welcome phase
- *     while the player's actual investigation progress has moved on
+ *     tutorial CAN resume exactly where it left off — e.g. a page
+ *     reload mid-sequence. It never resumes automatically, though:
+ *     it asks first (EPIC Part 11 — "Continue Training" / "Restart
+ *     Tutorial"), so the player isn't silently dropped back into a
+ *     multi-step sequence, or silently reset out of one
  *   - Only reset and replay from the beginning when Case 00 is
  *     started as a genuine new run, i.e. the previous tutorial run
  *     was completed or explicitly skipped (Case 00 is always a
@@ -72,6 +74,51 @@ const PROGRESS_STORAGE_KEY = 'tutorial:case-00:progress';
 // DOM/keyboard event types intercepted while the tutorial is locked.
 const INTERCEPTED_EVENTS = [ 'click', 'pointerdown', 'mousedown', 'keydown', 'touchstart' ];
 
+/**
+ * Tutorial State Machine (EPIC Part 10).
+ *
+ * These are presentation-layer labels over the same node/phase graph
+ * driven by the dialogue JSON — TutorialManager doesn't run a second,
+ * parallel state engine. Each dialogue node's `phase` field maps to
+ * exactly one of these via PHASE_TO_STATE below, so `getState()` is
+ * always in sync with whatever node is actually on screen.
+ */
+export const TUTORIAL_STATES = Object.freeze( {
+    NOT_STARTED:                'NOT_STARTED',
+    INTRODUCTION:                'INTRODUCTION',
+    DESKTOP_TRAINING:            'DESKTOP_TRAINING',
+    CASE_MANAGEMENT_TRAINING:    'CASE_MANAGEMENT_TRAINING',
+    ACTIVE_CASE_TRAINING:        'ACTIVE_CASE_TRAINING',
+    MAIL_TRAINING:                'MAIL_TRAINING',
+    EVIDENCE_TRAINING:            'EVIDENCE_TRAINING',
+    MAP_TRAINING:                'MAP_TRAINING',
+    MESSENGER_TRAINING:        'MESSENGER_TRAINING',
+    CCTV_TRAINING:                'CCTV_TRAINING',
+    FORENSICS_TRAINING:        'FORENSICS_TRAINING',
+    DATABASE_TRAINING:            'DATABASE_TRAINING',
+    BOARD_TRAINING:                'BOARD_TRAINING',
+    SOLVING_TRAINING:            'SOLVING_TRAINING',
+    COMPLETED:                    'COMPLETED',
+    PAUSED:                        'PAUSED',
+} );
+
+// Dialogue-JSON `phase` string -> TUTORIAL_STATES value.
+const PHASE_TO_STATE = {
+    'welcome':                TUTORIAL_STATES.INTRODUCTION,
+    'desktop':                TUTORIAL_STATES.DESKTOP_TRAINING,
+    'case-management':        TUTORIAL_STATES.CASE_MANAGEMENT_TRAINING,
+    'active-investigation':    TUTORIAL_STATES.ACTIVE_CASE_TRAINING,
+    'police-mail':            TUTORIAL_STATES.MAIL_TRAINING,
+    'evidence':                TUTORIAL_STATES.EVIDENCE_TRAINING,
+    'city-map':                TUTORIAL_STATES.MAP_TRAINING,
+    'messenger':                TUTORIAL_STATES.MESSENGER_TRAINING,
+    'cctv':                    TUTORIAL_STATES.CCTV_TRAINING,
+    'forensics':                TUTORIAL_STATES.FORENSICS_TRAINING,
+    'criminal-database':        TUTORIAL_STATES.DATABASE_TRAINING,
+    'board':                    TUTORIAL_STATES.BOARD_TRAINING,
+    'solving':                    TUTORIAL_STATES.SOLVING_TRAINING,
+};
+
 class TutorialManagerClass {
 
     constructor() {
@@ -102,6 +149,9 @@ class TutorialManagerClass {
 
         /** @type {Set<string>} Every distinct event name any node's requiredAction listens for */
         this._watchedEvents = new Set();
+
+        /** @type {string} Current TUTORIAL_STATES value — see PHASE_TO_STATE */
+        this._state = TUTORIAL_STATES.NOT_STARTED;
 
     }
 
@@ -215,15 +265,47 @@ class TutorialManagerClass {
 
         if ( this._hasResumableProgress() ) {
 
+            // EPIC Part 11: never auto-resume and never auto-restart.
+            // Ask the player. Neither branch below runs until they
+            // choose, so nothing in the saved state is touched yet.
             const saved = StorageManager.load( PROGRESS_STORAGE_KEY );
-            EventBus.emit( 'tutorial:resumed', { caseId: TUTORIAL_CASE_ID, nodeId: saved.nodeId } );
-            this._goTo( saved.nodeId );
+            this._promptResume( saved );
             return;
 
         }
 
         EventBus.emit( 'tutorial:started', { caseId: TUTORIAL_CASE_ID } );
         this._goTo( this._data.nodes[ 0 ].id );
+
+    }
+
+    /**
+     * Show the "Welcome back, Detective" resume prompt (EPIC Part 11)
+     * instead of silently continuing or restarting. Locks the world
+     * the same way an active dialogue node would, so the player can't
+     * poke at the game while deciding.
+     *
+     * @param {{nodeId:string}} saved
+     * @returns {void}
+     */
+    _promptResume( saved ) {
+
+        this._lock();
+
+        TutorialDialog.showResumePrompt( {
+
+            onContinue: () => {
+                EventBus.emit( 'tutorial:resumed', { caseId: TUTORIAL_CASE_ID, nodeId: saved.nodeId } );
+                this._goTo( saved.nodeId );
+            },
+
+            onRestart: () => {
+                StorageManager.save( PROGRESS_STORAGE_KEY, { nodeId: null, status: 'not-started' } );
+                EventBus.emit( 'tutorial:started', { caseId: TUTORIAL_CASE_ID } );
+                this._goTo( this._data.nodes[ 0 ].id );
+            },
+
+        } );
 
     }
 
@@ -243,6 +325,25 @@ class TutorialManagerClass {
      */
     isLocked() {
         return this._locked;
+    }
+
+    /**
+     * The current TUTORIAL_STATES value (EPIC Part 10).
+     *
+     * @returns {string}
+     */
+    getState() {
+        return this._state;
+    }
+
+    /**
+     * The lesson number (1-18, EPIC Part 9) of the node currently on
+     * screen, or null if the tutorial isn't active.
+     *
+     * @returns {number|null}
+     */
+    getCurrentLessonId() {
+        return this._current?.lesson ?? null;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -270,12 +371,24 @@ class TutorialManagerClass {
         }
 
         this._current = node;
+        this._state   = PHASE_TO_STATE[ node.phase ] ?? this._state;
         this._lock();
 
         // Persist progress on every step so an abandoned tutorial (page
         // reload, tab closed) resumes here instead of restarting — see
         // the resume trigger in initialize() and docs/TUTORIAL_SYSTEM.md.
-        StorageManager.save( PROGRESS_STORAGE_KEY, { nodeId: node.id, status: 'in-progress' } );
+        // EPIC Part 19 fields: tutorialState/currentLessonId/currentDialogueId
+        // live here; activeInvestigationId and completedObjectives are NOT
+        // duplicated here — InvestigationSession/ObjectiveManager already
+        // own those (EPIC Part 13), and TutorialManager only guides.
+        StorageManager.save( PROGRESS_STORAGE_KEY, {
+            nodeId:            node.id,
+            status:            'in-progress',
+            tutorialCaseId:    TUTORIAL_CASE_ID,
+            tutorialState:    this._state,
+            currentLessonId:    node.lesson ?? null,
+            currentDialogueId: node.id,
+        } );
 
         // Bug fix (v1.1.1): an instruction step must not wait forever for
         // an event that already happened before we got here — e.g. the
@@ -289,13 +402,11 @@ class TutorialManagerClass {
             return;
         }
 
-        const speaker = this._data.speakers[ node.speaker ] ?? { name: node.speaker, emoji: '🕵️' };
-
         if ( node.type === 'dialogue' ) {
 
             TutorialHighlight.hide();
             TutorialDialog.showDialogue(
-                { speakerName: speaker.name, portraitEmoji: speaker.emoji, text: node.text },
+                { speakers: this._data.speakers, activeSpeaker: node.speaker, text: node.text },
                 {
                     onContinue: () => this._goTo( node.next ),
                     onSkip:     () => this._skip(),
@@ -342,6 +453,7 @@ class TutorialManagerClass {
 
         this._active  = false;
         this._current = null;
+        this._state   = TUTORIAL_STATES.COMPLETED;
         this._unlock();
         TutorialDialog.hide();
         TutorialHighlight.hide();
@@ -350,7 +462,10 @@ class TutorialManagerClass {
         // Completed — a future 'investigationStarted' for Case 00 is a
         // genuine fresh replay, so the next start() should reset, not
         // resume. See _hasResumableProgress().
-        StorageManager.save( PROGRESS_STORAGE_KEY, { nodeId: null, status: 'completed' } );
+        StorageManager.save( PROGRESS_STORAGE_KEY, {
+            nodeId: null, status: 'completed', tutorialCaseId: TUTORIAL_CASE_ID,
+            tutorialState: this._state, currentLessonId: null, currentDialogueId: null,
+        } );
 
         EventBus.emit( 'tutorial:completed', { caseId: TUTORIAL_CASE_ID } );
 
@@ -365,6 +480,7 @@ class TutorialManagerClass {
 
         this._active  = false;
         this._current = null;
+        this._state   = TUTORIAL_STATES.NOT_STARTED;
         this._unlock();
         TutorialDialog.hide();
         TutorialHighlight.hide();
@@ -373,7 +489,10 @@ class TutorialManagerClass {
         // Skipped — same reasoning as _finish(): the next fresh start
         // should reset, not resume mid-way through a sequence the
         // player deliberately opted out of.
-        StorageManager.save( PROGRESS_STORAGE_KEY, { nodeId: null, status: 'skipped' } );
+        StorageManager.save( PROGRESS_STORAGE_KEY, {
+            nodeId: null, status: 'skipped', tutorialCaseId: TUTORIAL_CASE_ID,
+            tutorialState: this._state, currentLessonId: null, currentDialogueId: null,
+        } );
 
         EventBus.emit( 'tutorial:skipped', { caseId: TUTORIAL_CASE_ID } );
 

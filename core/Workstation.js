@@ -208,7 +208,7 @@ class Workstation {
         TooltipManager.initialize();
 
         // ── 7n. Tutorial ───────────────────────────────────────────
-        // Data-driven, mentor-guided Case 00 tutorial (v1.1.0). Loads
+        // Data-driven, two-detective Case 00 tutorial (v2.0.0). Loads
         // its dialogue JSON and wires its own 'workstation:ready' /
         // 'investigationStarted' triggers — see docs/TUTORIAL_SYSTEM.md.
         await TutorialManager.initialize();

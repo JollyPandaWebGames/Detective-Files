@@ -1,43 +1,53 @@
 # Tutorial System
 
-**Status:** v1.1.0
+**Status:** v2.0.0
 **Related files:**
 `managers/TutorialManager.js` · `ui/TutorialDialog.js` · `ui/TutorialHighlight.js` ·
-`css/tutorial/tutorial.css` · `data/tutorial/case-00-dialogue.json`
+`css/tutorial/tutorial.css` · `data/tutorial/case-00-dialogue.json` ·
+`docs/missions/case-00/character-presentation-prompts.md`
 
 ---
 
 ## 1. Overview
 
 The tutorial system is a reusable, **data-driven** engine that walks a new
-player through CID OS via a mentor character (the Senior Detective) before
-and during Case 00. It is not hardcoded to Case 00 — every dialogue line,
-required action, and highlight target lives in a JSON file, so future cases
-or feature introductions can define their own tutorial without touching
-`TutorialManager.js`.
+player through CID OS as a conversation between two detectives — **Det.
+Marcus Reyes** and **Det. Elena Cho** — before and during Case 00. It is not
+hardcoded to Case 00 — every dialogue line, required action, and highlight
+target lives in a JSON file, so future cases or feature introductions can
+define their own tutorial without touching `TutorialManager.js`.
+
+v2.0 replaced the original single-mentor design (a single unillustrated
+"Senior Detective") with this two-detective conversation. See
+`docs/missions/case-00/character-presentation-prompts.md` for why — no
+existing male+female character pair or artwork existed in the project to
+reuse, so Reyes and Cho are newly established here, not a redesign of
+something pre-existing.
 
 ```
-Senior Detective
+Reyes            explains a concept
       ↓
-Explains CID OS / desktop / applications
+Cho               gives the concrete instruction / demonstrates
       ↓
-Player confirms understanding (Continue)
+Player            performs the real action
       ↓
-Case 00 begins (a real player action, not a cutscene)
+Reyes or Cho      reacts to what the player did
       ↓
-Senior Detective continues guiding through every application
-      ↓
-Player solves Case 00
+Next lesson
 ```
+
+Both detectives are shown at all times during dialogue (Reyes left, Cho
+right); whichever one is currently speaking is emphasized, the other is
+dimmed. See §4 and §10.
 
 ## 2. Architecture
 
 | Piece                     | Responsibility |
 |----------------------------|----------------|
-| `TutorialManager`          | Owns tutorial state, sequencing, locking, and required-action detection. The only piece that knows *when* to show what. |
-| `TutorialDialog`           | Pure view — renders the dialogue box or the instruction banner. Holds no state. |
+| `TutorialManager`          | Owns tutorial state, sequencing, locking, and required-action detection. The only piece that knows *when* to show what. Exposes the state machine (§10) as a thin read-only layer over the same node graph — there is no separate parallel state engine. |
+| `TutorialDialog`           | Pure view — renders the two-detective dialogue box, the instruction banner, or the resume prompt (§9). Holds no state. |
 | `TutorialHighlight`        | Pure view — draws and tracks the pulsing highlight box around a target element. Holds no state. |
-| `data/tutorial/*.json`     | Content. Speaker, text, sequencing, required action, highlight target — see §4. |
+| `data/tutorial/*.json`     | Content. Speakers, text, sequencing, required action, highlight target, lesson — see §4. |
 
 `TutorialManager` never reaches into an application's internals. It only
 listens for the same `EventBus` events those applications already emit
@@ -68,23 +78,27 @@ dialogue explains *what/why*, instructions require the player to actually
 
 ```json
 {
-    "id": "t00-011",
+    "id": "t00-013",
     "phase": "desktop",
-    "speaker": "senior-detective",
+    "lesson": 3,
+    "lessonTitle": "Opening Applications",
+    "speaker": "female-detective",
     "type": "instruction",
     "text": "Open Case Management.",
     "requiredAction": { "event": "app:opened", "match": { "appId": "case-management" } },
     "highlightTarget": "[data-app-id=\"case-management\"]",
     "highlightScope": "desktop",
-    "next": "t00-012"
+    "next": "t00-014"
 }
 ```
 
 | Field              | Meaning |
 |---------------------|---------|
 | `id`                | Unique node id. |
-| `phase`             | Which tutorial phase this belongs to (see §5) — informational, used for analytics/debugging. |
-| `speaker`           | Key into the file's `speakers` map (name + portrait emoji). |
+| `phase`             | Which tutorial phase this belongs to (see §5) — drives `TutorialManager.getState()`, see §10. |
+| `lesson`            | Lesson number 1–18 (EPIC Part 9) — drives `TutorialManager.getCurrentLessonId()` and the persisted `currentLessonId` (§8). |
+| `lessonTitle`       | Human-readable lesson name, for any future progress UI. Informational only. |
+| `speaker`           | Key into the file's top-level `speakers` map — `"male-detective"` (Det. Marcus Reyes) or `"female-detective"` (Det. Elena Cho). |
 | `type`              | `"dialogue"` or `"instruction"`. |
 | `text`              | The line shown to the player. |
 | `requiredAction`    | *(instruction only)* `{ event, match? }` — the EventBus event (and optional payload fields) that completes this step. |
@@ -93,6 +107,9 @@ dialogue explains *what/why*, instructions require the player to actually
 | `next`              | The next node's `id`, or `null` to end the tutorial. |
 
 No tutorial text is hardcoded in JavaScript — see `data/tutorial/case-00-dialogue.json`.
+Both speakers are declared once in the file's top-level `speakers` map
+(`{ name, portrait, emoji }` each); `TutorialDialog` always renders both
+portraits and highlights whichever one the current node names.
 
 ### Avoiding soft-locks on already-true conditions (v1.1.1, v1.1.4)
 
@@ -130,15 +147,30 @@ has no reason to reselect the case. `_isAlreadySatisfied` now treats
 `ActiveInvestigationManager.getActive()?.caseId === 'case-00'` is already
 true, and fast-forwards through them on resume.
 
-## 5. Case 00 Phases
+## 5. Case 00 Phases and Lessons
 
-Welcome → Desktop → Case Management → Active Investigation → Police Mail →
-Evidence Database → City Map → Messenger → CCTV → Forensics →
-Criminal Database → Investigation Board → Solving.
+| Phase (`phase` field) | `TUTORIAL_STATES` value | Lesson(s) |
+|---|---|---|
+| `welcome` | `INTRODUCTION` | 1. Welcome to CID OS |
+| `desktop` | `DESKTOP_TRAINING` | 2. Understanding the Desktop · 3. Opening Applications |
+| `case-management` | `CASE_MANAGEMENT_TRAINING` | 4. Case Management · 5. Starting an Investigation |
+| `active-investigation` | `ACTIVE_CASE_TRAINING` | 6. Understanding Active Investigation |
+| `police-mail` | `MAIL_TRAINING` | 7. Police Mail |
+| `evidence` | `EVIDENCE_TRAINING` | 8. Evidence Database |
+| `city-map` | `MAP_TRAINING` | 9. City Map |
+| `messenger` | `MESSENGER_TRAINING` | 10. Messenger |
+| `cctv` | `CCTV_TRAINING` | 11. CCTV Viewer |
+| `forensics` | `FORENSICS_TRAINING` | 12. Forensics Lab |
+| `criminal-database` | `DATABASE_TRAINING` | 13. Criminal Database |
+| `board` | `BOARD_TRAINING` | 14. Investigation Board · 15. Connecting Evidence · 16. Creating a Theory |
+| `solving` | `SOLVING_TRAINING` | 17. Solving the Investigation · 18. Completing Case 00 |
 
 Each phase (after "Welcome") maps directly onto an application the player
 must actually open and use — see `data/cases/case-00/objectives/phases.json`
-for the underlying gameplay phases this mirrors.
+for the underlying gameplay phases this mirrors. Lessons 17–18 wait on the
+real `T00-12` (Solve Investigation) and `T00-13` (Complete Tutorial)
+objectives, the same way every earlier lesson waits on a real objective —
+see §3's `objective:completed` note in §7's v1.1.6 section below.
 
 ## 6. Locking the Game World
 
@@ -259,12 +291,14 @@ Case 00's case definition already has `"replayable": true`. On top of that,
 - **Resume** — the tutorial was left mid-sequence (page reload, tab closed,
   browser crash) while Case 00 was still active. The player's actual
   investigation progress (objectives, read mail, etc.) survived that
-  reload untouched — persisted the same way it always was — so the
-  mentor's dialogue must not pretend none of it happened by restarting
-  at "Welcome, Detective." On `workstation:ready`, if Case 00 is the
-  active investigation **and** a saved tutorial run exists with
-  `status: "in-progress"`, `TutorialManager` re-enters at that exact
-  saved node.
+  reload untouched — persisted the same way it always was. On
+  `workstation:ready`, if Case 00 is the active investigation **and** a
+  saved tutorial run exists with `status: "in-progress"`,
+  `TutorialManager` does **not** silently jump back in. It shows the
+  resume prompt (§9) and waits for the player to choose:
+  - **Continue Training** re-enters at the exact saved node.
+  - **Restart Tutorial** clears the saved node and starts fresh from the
+    first node, exactly like a normal replay (below).
 - **Reset** — Case 00 is started as a genuinely fresh run: the previous
   tutorial run finished normally (`status: "completed"`) or the player
   used the Skip control (`status: "skipped"`). On the next
@@ -273,15 +307,57 @@ Case 00's case definition already has `"replayable": true`. On top of that,
   deliberate replay should feel like a full replay.
 
 Progress is persisted via `StorageManager` (never `localStorage` directly)
-under the key `tutorial:case-00:progress` as `{ nodeId, status }`, written
-on every node transition and on completion/skip. No flag permanently
-disables the tutorial, and nothing about having seen it before blocks a
-genuine replay from starting over — only an *interrupted* run resumes.
+under the key `tutorial:case-00:progress` as
+`{ nodeId, status, tutorialCaseId, tutorialState, currentLessonId, currentDialogueId }`,
+written on every node transition and on completion/skip. `nodeId` and
+`currentDialogueId` are always the same value — the field is duplicated
+under both names because `nodeId` is what `_hasResumableProgress()` reads
+and `currentDialogueId` is the name the spec (EPIC Part 19) asks the save
+data to use. `tutorialState` is the `TUTORIAL_STATES` value (§10) and
+`currentLessonId` the 1–18 lesson number (§5) at that node, so a save
+inspector doesn't need to cross-reference the dialogue JSON to know roughly
+where a save is. No flag permanently disables the tutorial, and nothing
+about having seen it before blocks a genuine replay from starting over —
+only an *interrupted* run gets asked.
+
+Two fields the EPIC spec also lists for save data —
+`activeInvestigationId` and `completedObjectives` — are deliberately **not**
+duplicated in the tutorial's own save record. `InvestigationSession` and
+`ObjectiveManager` already own those (see §13 of the EPIC and
+`core/InvestigationSession.js`), and the tutorial only guides; storing a
+second copy here would create exactly the two-source-of-truth problem
+`objective:completed` matching (§7, v1.1.6) was written to eliminate.
 
 Completion/skip statistics may be read from the same persisted record or
 from the `tutorial:completed` / `tutorial:skipped` events.
 
-## 9. Adding a Future Tutorial
+## 9. Resume Prompt
+
+`TutorialDialog.showResumePrompt({ onContinue, onRestart })` renders the
+same dialogue-box chrome as a normal dialogue node, with a single generic
+portrait (not yet attributed to either detective — the saved node hasn't
+been re-entered yet) and two buttons: **Restart Tutorial** and **Continue
+Training**. The game world is locked the same way an active dialogue node
+locks it (§6), so the player can't interact with anything else while
+deciding. Neither button is pre-focused into an accidental default beyond
+normal keyboard focus order; both require a deliberate click.
+
+## 10. Tutorial State Machine
+
+`TutorialManager` exposes the states from EPIC Part 10 as
+`TUTORIAL_STATES` (a frozen object of string constants) and
+`TutorialManager.getState()` / `getCurrentLessonId()`. This is **not** a
+second state engine running in parallel with the node graph — each node's
+`phase` field maps to exactly one `TUTORIAL_STATES` value via a fixed table
+in `TutorialManager.js` (`PHASE_TO_STATE`), so the state is always in sync
+with whatever node is actually on screen. `PAUSED` is defined as a state
+value for future use (e.g. an explicit pause control) but nothing in the
+current flow transitions into it — Case 00 has no pause feature yet, only
+resume-after-interruption (§8–9), which is a different thing (leaving vs.
+explicitly pausing). See "Known issues" in the Case 00 implementation
+report for the same caveat.
+
+## 11. Adding a Future Tutorial
 
 1. Write a new dialogue JSON file following the structure in §4.
 2. Point a new `TutorialManager`-style trigger at it (or generalize

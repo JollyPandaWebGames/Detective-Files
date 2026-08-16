@@ -22,6 +22,15 @@ As with `media-assets.md`, none of these are currently required —
 generate only when an application is updated to actually render image
 fields.
 
+**Note (tutorial rewrite, v2.0):** the tutorial mentor pair — Det. Marcus
+Reyes and Det. Elena Cho — are documented separately in
+`docs/missions/case-00/character-presentation-prompts.md`, since they're
+established by and scoped to the tutorial dialogue system rather than
+Case 00's investigation cast below. That file is the first real Character
+Bible entry this project has; the note above about no Character Bible
+existing yet applies only to the investigation cast (Nora Finch, Callum
+Voss, the witness) until one is written for them too.
+
 ---
 
 ## Characters
