@@ -232,9 +232,9 @@
             "type": "instruction",
             "text": "Open and read the incident report — that's where your case begins.",
             "requiredAction": {
-                "event": "mail:read",
+                "event": "objective:completed",
                 "match": {
-                    "mailId": "mail-010"
+                    "objectiveId": "T00-03"
                 }
             },
             "highlightTarget": ".mail__list-item",
@@ -255,6 +255,22 @@
             "speaker": "senior-detective",
             "type": "dialogue",
             "text": "Attachments in a report like this often link straight to evidence. Worth checking every one.",
+            "next": "t00-026b"
+        },
+        {
+            "id": "t00-026b",
+            "phase": "police-mail",
+            "speaker": "senior-detective",
+            "type": "instruction",
+            "text": "Open the attachment on that report.",
+            "requiredAction": {
+                "event": "objective:completed",
+                "match": {
+                    "objectiveId": "T00-04"
+                }
+            },
+            "highlightTarget": ".mail__attachment-chip",
+            "highlightScope": "window:police-mail",
             "next": "t00-027"
         },
         {
@@ -262,7 +278,7 @@
             "phase": "evidence",
             "speaker": "senior-detective",
             "type": "dialogue",
-            "text": "Now let's look at what was actually collected at the scene.",
+            "text": "Now let's look at what was actually collected at the scene. Whatever you find, jot a note on it — future you will thank present you.",
             "next": "t00-028"
         },
         {
@@ -286,9 +302,12 @@
             "phase": "evidence",
             "speaker": "senior-detective",
             "type": "instruction",
-            "text": "Open an evidence item and read through its details.",
+            "text": "Open the evidence tied to the break-in — the broken display case latch — read its details, and add a note about what you find.",
             "requiredAction": {
-                "event": "evidence:opened"
+                "event": "objective:completed",
+                "match": {
+                    "objectiveId": "T00-05"
+                }
             },
             "highlightTarget": ".ev__list-item",
             "highlightScope": "window:evidence",
@@ -299,7 +318,7 @@
             "phase": "evidence",
             "speaker": "senior-detective",
             "type": "dialogue",
-            "text": "Notice the notes field — write down anything that seems relevant. Future you will thank present you.",
+            "text": "Good instinct. A clear note now saves you from re-reading everything later once the case gets complicated.",
             "next": "t00-031"
         },
         {
@@ -333,7 +352,10 @@
             "type": "instruction",
             "text": "Find the bookstore marker and click it to inspect the location.",
             "requiredAction": {
-                "event": "map:location-selected"
+                "event": "objective:completed",
+                "match": {
+                    "objectiveId": "T00-06"
+                }
             },
             "highlightTarget": ".citymap__canvas",
             "highlightScope": "window:city-map",
@@ -378,7 +400,10 @@
             "type": "instruction",
             "text": "Open a conversation and read it.",
             "requiredAction": {
-                "event": "messenger:conversation-opened"
+                "event": "objective:completed",
+                "match": {
+                    "objectiveId": "T00-07"
+                }
             },
             "highlightTarget": ".msng__conv-item",
             "highlightScope": "window:messenger",
@@ -397,7 +422,7 @@
             "phase": "cctv",
             "speaker": "senior-detective",
             "type": "dialogue",
-            "text": "If there's a camera nearby, check it. Footage doesn't lie.",
+            "text": "If there's a camera nearby, check it. Footage doesn't lie — and bookmark anything worth remembering so you can jump straight back to it later.",
             "next": "t00-040"
         },
         {
@@ -421,9 +446,12 @@
             "phase": "cctv",
             "speaker": "senior-detective",
             "type": "instruction",
-            "text": "Select the camera, then play the footage and use the timeline to find the important moment.",
+            "text": "Select the camera, play the footage, and bookmark the moment that matters.",
             "requiredAction": {
-                "event": "cctv:opened"
+                "event": "objective:completed",
+                "match": {
+                    "objectiveId": "T00-08"
+                }
             },
             "highlightTarget": ".cctv__camera-item",
             "highlightScope": "window:cctv",
@@ -434,7 +462,7 @@
             "phase": "cctv",
             "speaker": "senior-detective",
             "type": "dialogue",
-            "text": "Bookmark anything worth remembering — you can jump straight back to that timestamp later.",
+            "text": "Good — that bookmark means you won't have to scrub through the whole tape again to find it.",
             "next": "t00-043"
         },
         {
@@ -514,9 +542,12 @@
             "phase": "criminal-database",
             "speaker": "senior-detective",
             "type": "instruction",
-            "text": "Search for a person and open their profile.",
+            "text": "Search for Callum Voss and open his profile.",
             "requiredAction": {
-                "event": "person:selected"
+                "event": "objective:completed",
+                "match": {
+                    "objectiveId": "T00-10"
+                }
             },
             "highlightTarget": ".pdb__list-item",
             "highlightScope": "window:criminal-database",
@@ -535,7 +566,7 @@
             "phase": "board",
             "speaker": "senior-detective",
             "type": "dialogue",
-            "text": "This is where it all comes together — the Investigation Board.",
+            "text": "This is where it all comes together — the Investigation Board. Add the pieces that matter, connect the ones that relate, and lay out your theory.",
             "next": "t00-052"
         },
         {
@@ -559,9 +590,12 @@
             "phase": "board",
             "speaker": "senior-detective",
             "type": "instruction",
-            "text": "Add a piece of evidence, a person, or a location to the board.",
+            "text": "Add a few pieces to the board, connect the ones that relate, and mark your theory.",
             "requiredAction": {
-                "event": "board:node-added"
+                "event": "objective:completed",
+                "match": {
+                    "objectiveId": "T00-11"
+                }
             },
             "highlightTarget": ".board__tool-btn",
             "highlightScope": "window:board",
@@ -572,7 +606,7 @@
             "phase": "board",
             "speaker": "senior-detective",
             "type": "dialogue",
-            "text": "Connect the pieces that relate to each other. A board with clear connections is a theory a prosecutor can actually use.",
+            "text": "That's the idea — a board with clear connections is a theory a prosecutor can actually use.",
             "next": "t00-055"
         },
         {

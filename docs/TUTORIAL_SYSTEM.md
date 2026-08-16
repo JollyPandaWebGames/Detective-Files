@@ -94,7 +94,7 @@ dialogue explains *what/why*, instructions require the player to actually
 
 No tutorial text is hardcoded in JavaScript — see `data/tutorial/case-00-dialogue.json`.
 
-### Avoiding soft-locks on already-true conditions (v1.1.1)
+### Avoiding soft-locks on already-true conditions (v1.1.1, v1.1.4)
 
 Some gameplay actions are idempotent/guarded — a singleton app only emits
 `app:opened` on its first open (reopening just focuses it), `MailManager`
@@ -102,9 +102,9 @@ only emits `mail:read` the first time a given mail is read, and
 `ForensicsManager` only emits `forensics:requested` the first time a given
 analysis is submitted. If the player reached an instruction step for one of
 these *after* the condition was already true — e.g. they opened Police Mail
-before the tutorial told them to, or they're replaying Case 00 after already
-reading that mail in a prior playthrough — the live event would never fire
-again, and the tutorial would wait forever.
+before the tutorial told them to, or they're resuming Case 00 after already
+reading that mail — the live event would never fire again, and the tutorial
+would wait forever.
 
 `TutorialManager._isAlreadySatisfied(node)` checks a small set of known
 event types against real manager state (`ApplicationManager.isRunning`,
@@ -115,6 +115,20 @@ outside that set (evidence, CCTV, messenger, criminal database, board,
 map) fire unconditionally on every user interaction in the existing
 codebase, so they don't need this check — the live listener alone is safe
 for those.
+
+This same idea covers a second, related case (v1.1.4): every instruction
+step that logically **precedes** starting the investigation — open Case
+Management, select Case 00's card, click Start Investigation — is trivially
+already true the instant Case 00 **is** the active investigation, since
+none of those could have happened otherwise. Without this check, a resumed
+tutorial that lands on e.g. "Select Case 00" (because that's exactly where
+the player abandoned it) would wait forever for a card click that will
+never happen again — the player already has an active investigation and
+has no reason to reselect the case. `_isAlreadySatisfied` now treats
+`case:card-selected`, `investigationStarted`, and `app:opened` for
+`case-management` as satisfied whenever
+`ActiveInvestigationManager.getActive()?.caseId === 'case-00'` is already
+true, and fast-forwards through them on resume.
 
 ## 5. Case 00 Phases
 
@@ -161,6 +175,80 @@ separate full-screen overlay element is needed.
 `TutorialHighlight` is intentionally reusable outside the tutorial system —
 it does not lock anything itself. A future contextual-hint feature could use
 it for a non-blocking nudge.
+
+### Avoiding a lock with no valid target when content loads asynchronously (v1.1.5)
+
+Several apps load their case data asynchronously *after* their window
+opens rather than before — Evidence Database calls
+`EvidenceManager.loadForCase()` (an async fetch) from inside its own
+mount, and CCTV, Messenger, and Criminal Database follow the same
+pattern. `app:opened` fires as soon as the window exists, which can be
+before that fetch resolves. If an instruction step's `highlightTarget`
+selector matched content from that fetch (e.g. `.ev__list-item`),
+`TutorialHighlight` used to look it up exactly once and give up silently
+if it wasn't there yet — leaving the lock with no valid target at all, so
+the *entire* screen appeared locked with nothing clickable, even after
+the list finished loading a moment later.
+
+`TutorialHighlight.show()` now retries the lookup every frame for up to
+8 seconds instead of giving up on the first miss, and if the DOM node it
+was tracking is later removed (e.g. a list re-renders with fresh nodes on
+a filter change), it resumes searching rather than hiding permanently.
+This is handled entirely inside `TutorialHighlight` — no per-app or
+per-node changes were needed, and it protects every future highlighted
+step against the same class of race, not just Evidence Database.
+
+### Tutorial progress vs. real objective state must never disagree (v1.1.6)
+
+Several instruction steps map onto a real Case 00 objective (e.g. "open an
+evidence item" corresponds to the objective **Inspect Evidence**, which
+Case Management and the Active Investigation panel track independently).
+Earlier versions matched these steps against a single raw gameplay event —
+`mail:read`, `evidence:opened`, `person:selected`, etc. — chosen to
+resemble the objective's condition. This went wrong two ways:
+
+1. **The chosen event didn't always match what the real objective actually
+   listens for.** `core/objectives/ConditionMatcher.js` is CID OS's
+   authoritative table of which event completes which condition type, and
+   several of the events the tutorial guessed at didn't match it exactly
+   — e.g. the real "Inspect Evidence" objective requires the item both
+   **viewed and noted** (two conditions), not just opened; "Review CCTV"
+   requires the footage viewed **and a timestamp bookmarked**; "Build
+   Investigation Board" requires a **connection and a theory**, not just
+   any node added.
+2. **Even where the event matched, checking it directly could go stale.**
+   `mail:read` only fires the *first* time a mail is marked read — if that
+   happened before the objective existed to listen for it (e.g. during
+   free exploration before Case 00 was even started), the objective can
+   never complete from that event again, but the tutorial's own proxy
+   check couldn't tell the difference.
+
+Both problems have one root cause: the tutorial was re-deriving objective
+completion instead of asking the objective system directly. Every
+instruction step that maps to a real objective now uses
+`requiredAction: { "event": "objective:completed", "match": { "objectiveId": "T00-05" } }`
+— the exact event `ObjectiveManager._completeObjective()` emits, which is
+also what Case Management and the Active Investigation panel are driven
+by. `_isAlreadySatisfied()` mirrors this with
+`ObjectiveManager.getVisibleObjectives()`, so a resumed tutorial checks
+the same source of truth. The tutorial and the real objective display can
+no longer disagree, because they're now reading the same fact rather than
+two independently-derived approximations of it.
+
+This also surfaced one missing step entirely: the real objective chain
+requires **opening the mail's attachment** (`T00-04`) between reading the
+report and evidence becoming available — the dialogue previously jumped
+straight from "read the mail" to "check the evidence," which would have
+left the real Evidence objective permanently unavailable. A new
+instruction node (`t00-026b`) was added for it.
+
+`forensics:requested` is intentionally left as a raw event rather than
+switched to `objective:completed`: "Complete Forensics" requires both
+submission *and* waiting for the lab to finish, and the tutorial
+deliberately treats "submitted" as its own beat ("analysis takes time,
+check back later") rather than blocking on the wait. This is a narrative
+choice, not a gap — the raw event and its single condition can never
+disagree with each other the way a composite/multi-event objective could.
 
 ## 8. Replay vs. Resume Behavior
 

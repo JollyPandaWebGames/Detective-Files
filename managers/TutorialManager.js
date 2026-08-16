@@ -62,6 +62,7 @@ import ApplicationManager          from './ApplicationManager.js';
 import ActiveInvestigationManager  from './ActiveInvestigationManager.js';
 import MailManager                 from './MailManager.js';
 import ForensicsManager            from './ForensicsManager.js';
+import ObjectiveManager            from './ObjectiveManager.js';
 import StorageManager              from './StorageManager.js';
 
 const DIALOGUE_URL = './data/tutorial/case-00-dialogue.json';
@@ -448,6 +449,15 @@ class TutorialManagerClass {
      * else is left to the live listener, which is safe since those
      * events fire unconditionally on every user interaction.
      *
+     * Bug fix (v1.1.4): every step that logically precedes "start the
+     * investigation" — open Case Management, select Case 00, start it —
+     * is trivially already true the moment Case 00 IS the active
+     * investigation, since none of those could have happened otherwise.
+     * A resumed tutorial that lands on one of those steps (e.g. the
+     * player selected the case, started the investigation, and closed
+     * Case Management before reaching the next dialogue line) must not
+     * wait for a click that will never come again.
+     *
      * @param {Object} node
      * @returns {boolean}
      */
@@ -457,14 +467,20 @@ class TutorialManagerClass {
         if ( !required ) return false;
 
         const match = required.match ?? {};
+        const investigationAlreadyActive =
+            ActiveInvestigationManager.getActive()?.caseId === TUTORIAL_CASE_ID;
 
         switch ( required.event ) {
 
             case 'app:opened':
+                if ( match.appId === 'case-management' && investigationAlreadyActive ) return true;
                 return !!match.appId && ApplicationManager.isRunning( match.appId );
 
+            case 'case:card-selected':
+                return investigationAlreadyActive;
+
             case 'investigationStarted':
-                return ActiveInvestigationManager.getActive()?.caseId === match.caseId;
+                return investigationAlreadyActive;
 
             case 'mail:read':
                 return !match.mailId || MailManager.getById( match.mailId )?.read === true;
@@ -473,11 +489,39 @@ class TutorialManagerClass {
                 return !match.analysisId
                     || ForensicsManager.getById( match.analysisId )?.queueStatus !== 'Available';
 
+            // Bug fix (v1.1.6): several instruction steps map onto a real
+            // gameplay objective whose completion condition is more than
+            // a single raw event (e.g. Inspect Evidence needs the item
+            // both viewed AND noted; Review CCTV needs it viewed AND
+            // bookmarked). Checking a single proxy event/manager flag for
+            // these repeatedly went out of sync with what Case Management
+            // and the Active Investigation panel actually show as
+            // complete — see docs/TUTORIAL_SYSTEM.md. `objective:completed`
+            // is the exact event those panels themselves are driven by, so
+            // matching against it (rather than re-deriving completion from
+            // a lower-level event) is the only way the tutorial and the
+            // real objective state can never disagree.
+            case 'objective:completed':
+                return !!match.objectiveId && this._isObjectiveComplete( match.objectiveId );
+
             default:
                 return false;
 
         }
 
+    }
+
+    /**
+     * Whether a real gameplay objective is currently marked complete —
+     * the same status Case Management and the Active Investigation
+     * panel read. See the 'objective:completed' case above.
+     *
+     * @param {string} objectiveId
+     * @returns {boolean}
+     */
+    _isObjectiveComplete( objectiveId ) {
+        return ObjectiveManager.getVisibleObjectives()
+            .some( o => o.id === objectiveId && o.status === 'completed' );
     }
 
     /**
@@ -500,6 +544,10 @@ class TutorialManagerClass {
 
             if ( eventName === 'investigationStarted' && key === 'caseId' ) {
                 return payload?.investigation?.caseId === expected;
+            }
+
+            if ( eventName === 'objective:completed' && key === 'objectiveId' ) {
+                return payload?.objective?.id === expected;
             }
 
             return payload?.[ key ] === expected;
