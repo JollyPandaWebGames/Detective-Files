@@ -357,6 +357,62 @@ the checklist correctly showed nothing checked because nothing genuinely
 was, right after the reset. But bug 2 was real and independent: even
 without bug 1, the checklist would never have reflected real progress.
 
+### "Read the mail" instruction stuck even after actually reading it (v2.0.3)
+
+A third bug, exposed by the same "Continue → Restart Tutorial" sequence
+that surfaced v2.0.2's issues: the player opens Police Mail, clicks the
+incident report (visibly opens, content shown, list item highlighted
+selected), but the instruction never advances and the corner widget still
+shows the objective incomplete.
+
+Root cause: `ActiveInvestigationManager.start()` and `_resetThenStart()`
+both used to call `ObjectiveManager.loadForCase()` (and three sibling
+managers' `loadForCase()`) **without awaiting them**, then immediately
+emit `investigationStarted`/`investigationChanged` in the same tick.
+`ObjectiveManager.loadForCase()` doesn't start listening for anything
+until its internal `_subscribeToEvents()` runs — and that only happens
+after `_loadDefinitions()` finishes fetching every one of Case 00's 11
+objective JSON files (previously one at a time, sequentially awaited in a
+loop — see the matching fix below). A player who reaches a one-shot
+action (reading a mail — `MailManager.markRead()` no-ops and never
+re-emits `mail:read` once `mail.read` is already `true`) faster than that
+fetch chain resolves has that action's event fire into an empty room: no
+listener registered yet, and — because the underlying action is genuinely
+already done (`mail.read` is `true`) — nothing will ever trigger it again.
+The mail looks read because it is; the objective that was supposed to be
+watching for that never got the chance to see it happen.
+
+This is easy to hit right after "Continue Investigation" reattaches a
+case, because `TutorialManager._isAlreadySatisfied` (§3) then
+fast-forwards through every already-completed dialogue/instruction step
+in a row with no real user pacing between them — reaching a genuinely
+new, objective-gated step far faster than a normal first playthrough
+(where the player is naturally reading dialogue between each step) ever
+would.
+
+Fixed two ways:
+- `ObjectiveManager._loadDefinitions()` now fetches all objective files
+  in parallel (`Promise.all`) instead of one at a time, shrinking the
+  window on its own.
+- `ActiveInvestigationManager.start()`'s plain path (extracted into
+  `_loadThenAnnounce()`) and `_resetThenStart()` now both `await` every
+  manager's `loadForCase()` before emitting `investigationStarted` /
+  `investigationChanged`, closing the race outright rather than just
+  narrowing it. `start()` itself is unaffected and still returns
+  synchronously — callers already had to treat "started" and "data
+  loaded" as separate moments (see `_resetThenStart()`'s docstring); this
+  only changes when the *announcement* events fire, not `start()`'s own
+  contract.
+
+**Known remaining gap:** `ActiveInvestigationManager.initialize()` (the
+boot-time re-affirm path, not the "Continue Investigation" button) has
+the same fire-and-forget shape and wasn't changed here — boot already has
+several awaited steps ahead of it (`MessengerManager.initialize()`,
+`TutorialManager.initialize()` — see `core/Workstation.js` §7h/7n) that
+happen to provide a natural buffer, making this specific race much less
+likely to fire there in practice, but it isn't structurally closed the
+same way. Worth the same fix if it's ever observed at boot.
+
 ## 8. Replay vs. Resume Behavior
 
 Case 00's case definition already has `"replayable": true`. On top of that,

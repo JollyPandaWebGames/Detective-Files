@@ -154,11 +154,21 @@ class ObjectiveManagerClass {
      */
     async _loadDefinitions( caseId, files ) {
 
-        for ( const file of files ) {
+        // Bug fix (v2.0.3): these used to be awaited one at a time in a
+        // for-loop — for Case 00's 11 objective files, that's 11
+        // sequential round-trips before _subscribeToEvents() ever runs,
+        // widening the window in which a fast player's one-shot event
+        // (e.g. reading a mail that's never marked unread again) fires
+        // before anything is listening for it and is lost for good. See
+        // ActiveInvestigationManager's matching v2.0.3 fix, which closes
+        // the rest of that same window.
+        const defs = await Promise.all( files.map( async file => {
             const res = await fetch( `${ CASE_BASE }${ caseId }/objectives/${ file }` );
-            if ( !res.ok ) continue;
-            const def = await res.json();
-            this._definitions.set( def.id, def );
+            return res.ok ? res.json() : null;
+        } ) );
+
+        for ( const def of defs ) {
+            if ( def ) this._definitions.set( def.id, def );
         }
 
     }

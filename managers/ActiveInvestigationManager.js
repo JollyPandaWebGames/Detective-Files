@@ -232,42 +232,77 @@ class ActiveInvestigationManagerClass {
             return { ok: true };
         }
 
-        // Mission 16 — fire-and-forget, consistent with every other
-        // per-case manager's loadForCase() pattern; 'objective:loaded'
-        // and 'objective:progress' fire once the fetch resolves.
-        ObjectiveManager.loadForCase( caseId );
-
-        // Mission 17 — load this case's solution.json, if it has one.
-        ResolutionManager.loadForCase( caseId );
-
-        // Mission 18 — load this case's investigation state machine.
-        StateMachineManager.loadForCase( caseId );
-
-        // Mission 19 — load this case's unlock rules.
-        UnlockManager.loadForCase( caseId );
-
-        const investigation = this.getActive();
-
-        EventBus.emit( 'investigationStarted', { investigation } );
-        EventBus.emit( 'investigationChanged', { investigation } );
+        // Bug fix (v2.0.3): these four loadForCase() calls, and the
+        // investigationStarted/investigationChanged emit right after
+        // them, used to run in the same synchronous tick — i.e. the
+        // events fired immediately, well before any of these promises
+        // resolved. ObjectiveManager.loadForCase() in particular fetches
+        // several JSON files before it starts listening for anything
+        // (see its _loadDefinitions/_subscribeToEvents), so a player who
+        // reaches a one-shot action (like marking a mail read) faster
+        // than those fetches finish had that action's event fire into an
+        // empty room — no listener registered yet — and lost forever,
+        // since the same mail can't be "read" a second time to re-fire
+        // it. This surfaced most reliably right after "Continue
+        // Investigation" reattaches a case and the tutorial fast-forwards
+        // through several already-satisfied steps in a row (see
+        // TutorialManager._isAlreadySatisfied), reaching a real
+        // objective-gated step faster than a normal first playthrough
+        // would. Awaiting here doesn't change start()'s own synchronous
+        // contract (callers still get {ok:true} immediately, per the
+        // _resetThenStart note above) — it only delays the announcement
+        // events until every manager listening for them is actually
+        // ready, the same discipline _resetThenStart already applies to
+        // its reset step.
+        this._loadThenAnnounce( caseId );
 
         return { ok: true };
 
     }
 
     /**
+     * @param {string} caseId
+     * @returns {Promise<void>}
+     */
+    async _loadThenAnnounce( caseId ) {
+
+        await Promise.all( [
+            // Mission 16 — 'objective:loaded' and 'objective:progress'
+            // fire once this resolves, same as before; the difference is
+            // investigationStarted now waits for it too.
+            ObjectiveManager.loadForCase( caseId ),
+            // Mission 17 — load this case's solution.json, if it has one.
+            ResolutionManager.loadForCase( caseId ),
+            // Mission 18 — load this case's investigation state machine.
+            StateMachineManager.loadForCase( caseId ),
+            // Mission 19 — load this case's unlock rules.
+            UnlockManager.loadForCase( caseId ),
+        ] );
+
+        const investigation = this.getActive();
+
+        EventBus.emit( 'investigationStarted', { investigation } );
+        EventBus.emit( 'investigationChanged', { investigation } );
+
+    }
+
+    /**
      * Case 00 replay support. Wipes every manager's persisted state for
-     * `caseId`, then loads it fresh and only THEN emits
+     * `caseId`, loads it fresh, and only THEN emits
      * investigationStarted/investigationChanged — so every listener
      * (apps' own loadForCase() calls, TooltipManager) sees clean state
-     * the first time it reacts, never a stale cache.
+     * the first time it reacts, never a stale cache, AND has actually
+     * finished loading before anything downstream can act.
      *
      * Not awaited by start() — start() already returns synchronously
      * before any per-case data is loaded even in the non-replayable
-     * path (loadForCase() calls there are fire-and-forget too), so
-     * callers already have to treat "started" and "data loaded" as
-     * separate moments; this just makes that gap slightly longer for
-     * replayable cases specifically.
+     * path (see _loadThenAnnounce()), so callers already have to treat
+     * "started" and "data loaded" as separate moments; this just makes
+     * that gap slightly longer for replayable cases specifically.
+     *
+     * Bug fix (v2.0.3): the load calls below used to be fire-and-forget,
+     * same bug as start()'s plain path — see _loadThenAnnounce()'s note.
+     * Now awaited before the announce, for the same reason.
      *
      * @param {string} caseId
      * @returns {Promise<void>}
@@ -289,10 +324,12 @@ class ActiveInvestigationManagerClass {
             MailManager.resetForCase( caseId ),
         ] );
 
-        ObjectiveManager.loadForCase( caseId );
-        ResolutionManager.loadForCase( caseId );
-        StateMachineManager.loadForCase( caseId );
-        UnlockManager.loadForCase( caseId );
+        await Promise.all( [
+            ObjectiveManager.loadForCase( caseId ),
+            ResolutionManager.loadForCase( caseId ),
+            StateMachineManager.loadForCase( caseId ),
+            UnlockManager.loadForCase( caseId ),
+        ] );
 
         const investigation = this.getActive();
 
