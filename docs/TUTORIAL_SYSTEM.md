@@ -413,67 +413,77 @@ happen to provide a natural buffer, making this specific race much less
 likely to fire there in practice, but it isn't structurally closed the
 same way. Worth the same fix if it's ever observed at boot.
 
-## 8. Replay vs. Resume Behavior
+### Design decision: Case 00 has no continue/resume at all (v2.0.4)
 
-Case 00's case definition already has `"replayable": true`. On top of that,
-`TutorialManager` distinguishes two situations that both look like
-"Case 00 becomes active again," but call for opposite behavior:
+v2.0.2 and v2.0.3 above were both consequences of the same root choice:
+letting Case 00's tutorial dialogue and its real game state (objectives,
+evidence notes, mail read-state, etc.) each persist and reattach
+independently across an interruption, then trying to keep them in sync.
+Two different sync bugs later, the product decision was made to remove
+that whole class of problem instead of continuing to patch instances of
+it: **Case 00 has no continue/resume capability anywhere in the stack.**
+Every entry point is a full, clean reset:
 
-- **Resume** — the tutorial was left mid-sequence (page reload, tab closed,
-  browser crash) while Case 00 was still active. The player's actual
-  investigation progress (objectives, read mail, etc.) survived that
-  reload untouched — persisted the same way it always was. On
-  `workstation:ready`, if Case 00 is the active investigation **and** a
-  saved tutorial run exists with `status: "in-progress"`,
-  `TutorialManager` does **not** silently jump back in. It shows the
-  resume prompt (§9) and waits for the player to choose:
-  - **Continue Training** re-enters at the exact saved node.
-  - **Restart Tutorial** clears the saved node and starts fresh from the
-    first node, exactly like a normal replay (below).
-- **Reset** — Case 00 is started as a genuinely fresh run: the previous
-  tutorial run finished normally (`status: "completed"`) or the player
-  used the Skip control (`status: "skipped"`). On the next
-  `investigationStarted` for Case 00, `start()` resets to the first node,
-  matching the original "Case 00 is always a tutorial" requirement — a
-  deliberate replay should feel like a full replay.
+- `ActiveInvestigationManager.initialize()` (the boot-time re-affirm)
+  now drops the saved session pointer instead of restoring it whenever
+  the saved case is `replayable` — Case 00 never comes back as the
+  active investigation after a reload, full stop.
+- `CaseManager.startCase()` and `ActiveInvestigationManager.start()` are
+  back to treating every start of a replayable case as a genuine reset,
+  regardless of its current status (this is what v2.0.2 had carved an
+  `'In Progress'` exception out of — that exception is gone again).
+- Case Management (`apps/case-management/index.js`) never renders
+  "Continue Investigation" for a replayable case, even while its
+  on-disk status still reads `'In Progress'` from an earlier
+  interrupted run — it shows "Start Investigation," and clicking it
+  performs the same full reset as a first-time start.
+- `TutorialManager` no longer has a resume prompt, a resumable-progress
+  check, or a `tutorial:resumed` event. `start()` always begins at the
+  first node. Progress is still written to `StorageManager` on every
+  step, but purely for debugging — nothing reads it back.
 
-Progress is persisted via `StorageManager` (never `localStorage` directly)
-under the key `tutorial:case-00:progress` as
+Practically: reloading mid-Case-00 drops the player back at Case
+Management with no active investigation, exactly as if they'd never
+started it. Clicking Start/Continue/whatever the button says always
+gives them the same clean run, every time. This trades away EPIC Part 11
+(interrupted-tutorial resume) entirely, by direct request, in favor of
+Case 00 having exactly one state a player can ever observe it in: "not
+started" or "the run in front of you right now." Non-replayable cases
+are unaffected — they keep normal continue/resume behavior throughout
+(the `!c.replayable` / `c.replayable` branches above are the only
+distinction).
+
+## 8. Replay Behavior
+
+Case 00's case definition has `"replayable": true`, and — per the v2.0.4
+design decision above — every start of it is unconditionally a fresh run.
+`TutorialManager.start()` always begins at the first node; there is no
+resume path, saved-node lookup, or prompt of any kind. On the next
+`investigationStarted` for Case 00, wherever it came from (first-ever
+start, replaying after solving it, or reattaching after an interruption
+that would previously have tried to resume), the dialogue restarts from
+the top and every other manager's Case 00 state resets to match (see
+`ActiveInvestigationManager._resetThenStart()`).
+
+Progress is still persisted via `StorageManager` (never `localStorage`
+directly) under the key `tutorial:case-00:progress` as
 `{ nodeId, status, tutorialCaseId, tutorialState, currentLessonId, currentDialogueId }`,
-written on every node transition and on completion/skip. `nodeId` and
-`currentDialogueId` are always the same value — the field is duplicated
-under both names because `nodeId` is what `_hasResumableProgress()` reads
-and `currentDialogueId` is the name the spec (EPIC Part 19) asks the save
-data to use. `tutorialState` is the `TUTORIAL_STATES` value (§10) and
+written on every node transition and on completion/skip — this is kept
+purely for debugging/analytics (e.g. "how far do players usually get
+before closing the tab"). Nothing in `TutorialManager` reads it back to
+decide anything; the tutorial engine is otherwise fully stateless across
+runs. `tutorialState` is the `TUTORIAL_STATES` value (§9) and
 `currentLessonId` the 1–18 lesson number (§5) at that node, so a save
-inspector doesn't need to cross-reference the dialogue JSON to know roughly
-where a save is. No flag permanently disables the tutorial, and nothing
-about having seen it before blocks a genuine replay from starting over —
-only an *interrupted* run gets asked.
+inspector doesn't need to cross-reference the dialogue JSON to know
+roughly how far a past run got.
 
 Two fields the EPIC spec also lists for save data —
-`activeInvestigationId` and `completedObjectives` — are deliberately **not**
-duplicated in the tutorial's own save record. `InvestigationSession` and
-`ObjectiveManager` already own those (see §13 of the EPIC and
-`core/InvestigationSession.js`), and the tutorial only guides; storing a
-second copy here would create exactly the two-source-of-truth problem
-`objective:completed` matching (§7, v1.1.6) was written to eliminate.
+`activeInvestigationId` and `completedObjectives` — are deliberately
+**not** duplicated in the tutorial's own save record, for the same
+separation-of-concerns reason as before: `InvestigationSession` and
+`ObjectiveManager` already own those, and the tutorial only guides.
 
-Completion/skip statistics may be read from the same persisted record or
-from the `tutorial:completed` / `tutorial:skipped` events.
-
-## 9. Resume Prompt
-
-`TutorialDialog.showResumePrompt({ onContinue, onRestart })` renders the
-same dialogue-box chrome as a normal dialogue node, with a single generic
-portrait (not yet attributed to either detective — the saved node hasn't
-been re-entered yet) and two buttons: **Restart Tutorial** and **Continue
-Training**. The game world is locked the same way an active dialogue node
-locks it (§6), so the player can't interact with anything else while
-deciding. Neither button is pre-focused into an accidental default beyond
-normal keyboard focus order; both require a deliberate click.
-
-## 10. Tutorial State Machine
+## 9. Tutorial State Machine
 
 `TutorialManager` exposes the states from EPIC Part 10 as
 `TUTORIAL_STATES` (a frozen object of string constants) and
@@ -483,12 +493,11 @@ second state engine running in parallel with the node graph — each node's
 in `TutorialManager.js` (`PHASE_TO_STATE`), so the state is always in sync
 with whatever node is actually on screen. `PAUSED` is defined as a state
 value for future use (e.g. an explicit pause control) but nothing in the
-current flow transitions into it — Case 00 has no pause feature yet, only
-resume-after-interruption (§8–9), which is a different thing (leaving vs.
-explicitly pausing). See "Known issues" in the Case 00 implementation
-report for the same caveat.
+current flow transitions into it — Case 00 has no pause feature, and (as
+of v2.0.4) no resume-after-interruption feature either; leaving mid-run
+now just means the next start is a fresh one, not a paused one.
 
-## 11. Adding a Future Tutorial
+## 10. Adding a Future Tutorial
 
 1. Write a new dialogue JSON file following the structure in §4.
 2. Point a new `TutorialManager`-style trigger at it (or generalize

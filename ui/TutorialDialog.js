@@ -6,8 +6,7 @@
  *   detectives side by side (left/right), emphasizing whichever one
  *   is currently speaking, plus the message text and a Continue/Skip
  *   control. Also renders the lightweight "instruction banner" shown
- *   while the player performs a required action, and a resume prompt
- *   shown when an interrupted tutorial run is found on load.
+ *   while the player performs a required action.
  *
  * Responsibilities:
  *   - Mount/unmount its own DOM
@@ -15,9 +14,7 @@
  *     always visible so the "two detectives talking" framing holds
  *     even while one of them is silent
  *   - Render one instruction banner at a time
- *   - Render the "Continue Training / Restart Tutorial" resume prompt
- *   - Report Continue / Skip / Resume choice back to its owner via
- *     callbacks
+ *   - Report Continue / Skip choice back to its owner via callbacks
  *
  * Rules:
  *   TutorialDialog holds no tutorial state of its own — it is a pure
@@ -29,7 +26,6 @@
  *       { onContinue, onSkip }
  *   );
  *   TutorialDialog.showInstruction( 'Open Case Management.' );
- *   TutorialDialog.showResumePrompt( { onContinue, onRestart } );
  *   TutorialDialog.hide();
  */
 
@@ -101,40 +97,6 @@ class TutorialDialogClass {
             this._element.querySelector( '.tutorial-dialog__skip' )
                 .addEventListener( 'click', handlers.onSkip );
         }
-
-    }
-
-    /**
-     * Render the "Welcome back" resume prompt shown when the player
-     * returns to a Case 00 tutorial run that was left mid-sequence
-     * (EPIC Part 11). Neither option is chosen automatically.
-     *
-     * @param {{onContinue:Function, onRestart:Function}} handlers
-     * @returns {void}
-     */
-    showResumePrompt( handlers ) {
-
-        this._mount();
-
-        this._element.className = 'tutorial-dialog tutorial-dialog--resume';
-        this._element.innerHTML = `
-            <div class="tutorial-dialog__portrait" aria-hidden="true">🕵️</div>
-            <div class="tutorial-dialog__body">
-                <div class="tutorial-dialog__speaker">Welcome back, Detective.</div>
-                <div class="tutorial-dialog__text">You were in the middle of your training.</div>
-                <div class="tutorial-dialog__actions">
-                    <button type="button" class="tutorial-dialog__skip">Restart Tutorial</button>
-                    <button type="button" class="tutorial-dialog__continue">Continue Training ▸</button>
-                </div>
-            </div>
-        `;
-
-        const continueBtn = this._element.querySelector( '.tutorial-dialog__continue' );
-        const restartBtn  = this._element.querySelector( '.tutorial-dialog__skip' );
-
-        continueBtn.addEventListener( 'click', handlers.onContinue );
-        restartBtn.addEventListener( 'click', handlers.onRestart );
-        continueBtn.focus();
 
     }
 

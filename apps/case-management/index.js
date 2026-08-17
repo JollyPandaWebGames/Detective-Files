@@ -414,6 +414,13 @@ class CaseManagement extends BaseApp {
         const canStart     = c.status === 'Unlocked';
         const inProgress   = c.status === 'In Progress';
 
+        // Design decision (v2.0.4): replayable cases (Case 00) have no
+        // continue capability — every start is a full reset, so the
+        // button must never read "Continue Investigation" for one, even
+        // while its on-disk status is still 'In Progress' from an
+        // earlier interrupted run. See CaseManager.startCase().
+        const alwaysRestarts = !!c.replayable && inProgress;
+
         const activeInv         = this.context.getActiveInvestigation();
         const isActiveSession   = !!activeInv && activeInv.caseId === c.id;
         const blockedByOther    = !!activeInv && !isActiveSession;
@@ -509,13 +516,13 @@ class CaseManagement extends BaseApp {
             if ( canStart || inProgress ) {
                 const disabledBtn = document.createElement( 'button' );
                 disabledBtn.className  = 'casemgmt__start-btn';
-                disabledBtn.textContent = canStart ? 'Start Investigation' : 'Continue Investigation';
+                disabledBtn.textContent = ( canStart || alwaysRestarts ) ? 'Start Investigation' : 'Continue Investigation';
                 disabledBtn.setAttribute( 'type', 'button' );
                 disabledBtn.disabled = true;
                 actionWrap.appendChild( disabledBtn );
             }
         }
-        else if ( canStart ) {
+        else if ( canStart || alwaysRestarts ) {
             const startBtn = document.createElement( 'button' );
             startBtn.className   = 'casemgmt__start-btn';
             startBtn.textContent  = 'Start Investigation';

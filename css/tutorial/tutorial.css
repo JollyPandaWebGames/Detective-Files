@@ -101,14 +101,6 @@ body.tutorial-locked .tutorial-highlight {
     color: var(--color-highlight);
 }
 
-/* ── Resume Prompt (EPIC Part 11) ────────────────────────────────
-   Same dialogue-box chrome, single generic portrait — this appears
-   before the tutorial has re-identified which detective would be
-   speaking at the saved node, so it isn't attributed to either one. */
-.tutorial-dialog--resume .tutorial-dialog__speaker {
-    color: var(--color-text-primary);
-}
-
 .tutorial-dialog__body {
     flex: 1 1 auto;
     min-width: 0;

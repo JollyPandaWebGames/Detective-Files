@@ -99,6 +99,20 @@ class ActiveInvestigationManagerClass {
             return;
         }
 
+        // Design decision (v2.0.4): replayable cases (Case 00) have no
+        // continue/resume capability — see CaseManager.startCase()'s
+        // note. That means they must never survive a reload as an
+        // active session either, or the player would land back inside
+        // a half-finished tutorial run with no "Continue" button able
+        // to get them there again on purpose. Drop the pointer and let
+        // them land on Case Management, where "Start Investigation" is
+        // always a full, clean run — see TutorialManager.start(), which
+        // no longer has a resume path to match.
+        if ( c.replayable ) {
+            SessionManager.setActiveSessionPointer( null );
+            return;
+        }
+
         this._session = createInvestigationSession( c, this._statusFor( c ), saved.startedAt );
 
         // Mission 16 — resume the objective graph along with the session.
@@ -203,14 +217,12 @@ class ActiveInvestigationManagerClass {
             return { ok: false, reason: 'blocked', current: this.getActive() };
         }
 
-        // Bug fix (v2.0.2): must be read BEFORE CaseManager.startCase()
-        // below, which mutates c.status. A replayable case is only a
-        // genuine fresh/replay start from 'Unlocked' (never started) or
-        // 'Solved' (finished, player chose to run it again) — see
-        // CaseManager.startCase()'s matching note. If it's already
-        // 'In Progress', this call is reattaching a lost session
-        // pointer to real, still-persisted progress, not replaying.
-        const isGenuineReplayStart = c.replayable && c.status !== 'In Progress';
+        // Design decision (v2.0.4): replayable cases (Case 00) have no
+        // continue/resume capability at all — every start is a genuine
+        // reset, regardless of current status. See CaseManager.startCase()'s
+        // matching note for why v2.0.2's 'In Progress' exception was
+        // removed again.
+        const isGenuineReplayStart = c.replayable;
 
         CaseManager.startCase( caseId );
 
