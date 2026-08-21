@@ -71,6 +71,85 @@
 .citymap__search-input:focus { border-color: var(--color-highlight); }
 .citymap__search-input::placeholder { color: var(--color-disabled); }
 
+.citymap__search-row {
+    display:     flex;
+    align-items: center;
+    gap:         var(--space-1);
+}
+
+.citymap__search-row .citymap__search-input { flex: 1 1 auto; min-width: 0; }
+
+.citymap__search-clear {
+    flex-shrink:  0;
+    width:        26px;
+    height:       26px;
+    display:      flex;
+    align-items:  center;
+    justify-content: center;
+    background:   var(--color-bg-window);
+    border:       1px solid var(--color-border-window);
+    color:        var(--color-text-secondary);
+    font-size:    var(--font-size-xs);
+    cursor:       pointer;
+}
+
+.citymap__search-clear:hover { color: var(--color-text-primary); border-color: var(--color-highlight); }
+
+.citymap__search-results {
+    margin-top:    var(--space-2);
+    max-height:    220px;
+    overflow-y:    auto;
+    border:        1px solid var(--color-border-window);
+    background:    var(--color-bg-window);
+}
+
+.citymap__search-empty {
+    padding:    var(--space-2);
+    font-size:  var(--font-size-xs);
+    color:      var(--color-text-secondary);
+    text-align: center;
+}
+
+.citymap__search-result {
+    display:        flex;
+    align-items:    center;
+    gap:            var(--space-2);
+    width:          100%;
+    padding:        var(--space-2);
+    background:     transparent;
+    border:         none;
+    border-bottom:  1px solid var(--color-border-window);
+    color:          var(--color-text-primary);
+    font-family:    var(--font-ui), monospace;
+    text-align:     left;
+    cursor:         pointer;
+}
+
+.citymap__search-result:last-child { border-bottom: none; }
+.citymap__search-result:hover,
+.citymap__search-result:focus { background: rgba( 45, 168, 255, 0.12 ); outline: none; }
+
+.citymap__search-result-icon { font-size: var(--font-size-md); flex-shrink: 0; }
+
+.citymap__search-result-text {
+    display:        flex;
+    flex-direction: column;
+    min-width:      0;
+}
+
+.citymap__search-result-name {
+    font-size:     var(--font-size-xs);
+    color:         var(--color-text-primary);
+    white-space:   nowrap;
+    overflow:      hidden;
+    text-overflow: ellipsis;
+}
+
+.citymap__search-result-sub {
+    font-size: 10px;
+    color:     var(--color-text-secondary);
+}
+
 /* ── Filter List ──────────────────────────────────────────────── */
 .citymap__filter-list {
     padding:       var(--space-2) var(--space-1);

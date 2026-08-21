@@ -366,14 +366,12 @@ class TutorialManagerClass {
             // The dialogue box closes temporarily; the relevant UI is
             // highlighted and a short instruction banner is shown —
             // EPIC Part 3/6. The player must perform the real action;
-            // there is no Continue button here by design.
-            if ( node.highlightTarget ) {
-                TutorialHighlight.show( node.highlightTarget, node.highlightScope ?? null );
-            } else {
-                TutorialHighlight.hide();
-            }
-
-            TutorialDialog.showInstruction( node.text );
+            // there is no Continue button here by design. A "Need
+            // Help?" control and a permanently-available Skip Tutorial
+            // control are always shown alongside it (EPIC Part 11/12)
+            // so the player is never left with no way forward if the
+            // required action or highlight target never resolves.
+            this._showInstructionNode( node );
 
         }
 
@@ -389,6 +387,58 @@ class TutorialManagerClass {
 
         if ( !this._current ) return;
         this._goTo( this._current.next );
+
+    }
+
+    /**
+     * Render an instruction node's highlight + banner, wired up with
+     * a "Need Help?" control (re-explains the step and re-resolves
+     * the highlight target — recovers from a target that momentarily
+     * wasn't in the DOM, e.g. a window that was closed and reopened)
+     * and an always-visible Skip Tutorial control, so an instruction
+     * step can never leave the player with no way forward (EPIC Part
+     * 11/14).
+     *
+     * @param {Object} node
+     * @returns {void}
+     */
+    _showInstructionNode( node ) {
+
+        if ( node.highlightTarget ) {
+            TutorialHighlight.show( node.highlightTarget, node.highlightScope ?? null );
+        } else {
+            TutorialHighlight.hide();
+        }
+
+        TutorialDialog.showInstruction( node.text, {
+            onHint: () => this._showHint( node ),
+            onSkip: () => this._skip(),
+        } );
+
+    }
+
+    /**
+     * Show a brief mentor explanation of the current instruction step,
+     * then return to it. Never advances or completes the objective —
+     * it only re-explains and re-attempts to resolve/highlight the
+     * target (EPIC Part 12).
+     *
+     * @param {Object} node
+     * @returns {void}
+     */
+    _showHint( node ) {
+
+        const hintText = node.hint ?? node.text;
+
+        TutorialDialog.showDialogue(
+            { speakers: this._data.speakers, activeSpeaker: node.hintSpeaker ?? node.speaker ?? 'female-detective', text: hintText },
+            {
+                onContinue: () => {
+                    if ( this._current !== node ) return; // node changed while hint was open
+                    this._showInstructionNode( node );
+                },
+            }
+        );
 
     }
 
@@ -596,6 +646,22 @@ class TutorialManagerClass {
 
             if ( eventName === 'objective:completed' && key === 'objectiveId' ) {
                 return payload?.objective?.id === expected;
+            }
+
+            // map:search-performed carries { query, resultIds } — a step
+            // that wants "the player searched and this location showed
+            // up in the results" (without requiring an exact query
+            // string, which would be brittle against case/whitespace)
+            // uses this key instead of a flat field match.
+            if ( eventName === 'map:search-performed' && key === 'containsLocationId' ) {
+                return !!payload?.resultIds?.includes( expected );
+            }
+
+            // map:location-selected carries { location } — a step that
+            // wants a specific location's id uses this key rather than
+            // trying to flat-match a nested object.
+            if ( eventName === 'map:location-selected' && key === 'locationId' ) {
+                return payload?.location?.id === expected;
             }
 
             return payload?.[ key ] === expected;

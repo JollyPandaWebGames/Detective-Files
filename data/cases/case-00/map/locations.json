@@ -19,10 +19,12 @@
             "id": "loc-00-2",
             "name": "Ellery & Finch Books",
             "type": "Incident Location",
+            "district": "Downtown",
             "address": "3 Ellery Row, Downtown",
             "x": 560,
             "y": 340,
             "description": "A small street-corner bookstore. The till was found short and a display case broken into the morning after closing.",
+            "keywords": [ "bookstore", "book store", "books", "ellery", "finch" ],
             "relatedEvidence": [ "ev-00-2", "ev-00-3" ],
             "relatedCameras": [ "camera-00-1" ],
             "relatedWitnesses": [ "person-00-3" ]

@@ -409,7 +409,17 @@
             "lessonTitle": "City Map",
             "speaker": "female-detective",
             "type": "dialogue",
-            "text": "Evidence tells you what happened. The map tells you where.",
+            "text": "Evidence tells you what happened. The map tells you where. The next clue points us to a bookstore.",
+            "next": "t00-035b"
+        },
+        {
+            "id": "t00-035b",
+            "phase": "city-map",
+            "lesson": 9,
+            "lessonTitle": "City Map",
+            "speaker": "male-detective",
+            "type": "dialogue",
+            "text": "You don't need to search the entire city manually. Use the search field on the City Map.",
             "next": "t00-036"
         },
         {
@@ -426,6 +436,7 @@
             },
             "highlightTarget": "[data-app-id=\"city-map\"]",
             "highlightScope": "desktop",
+            "hint": "Open the City Map from the desktop or the taskbar to bring up the investigation map.",
             "next": "t00-037"
         },
         {
@@ -435,13 +446,31 @@
             "lessonTitle": "City Map",
             "speaker": "female-detective",
             "type": "instruction",
-            "text": "Find the bookstore marker and click it to inspect the location.",
+            "text": "Search for \"Bookstore\" using the search field.",
+            "requiredAction": {
+                "event": "map:search-performed",
+                "match": { "containsLocationId": "loc-00-2" }
+            },
+            "highlightTarget": ".citymap__search-input",
+            "highlightScope": "window:city-map",
+            "hint": "Open City Map first, then type \"Bookstore\" into the search field on the left.",
+            "next": "t00-037b"
+        },
+        {
+            "id": "t00-037b",
+            "phase": "city-map",
+            "lesson": 9,
+            "lessonTitle": "City Map",
+            "speaker": "female-detective",
+            "type": "instruction",
+            "text": "Select Bookstore from the results to view it on the map.",
             "requiredAction": {
                 "event": "objective:completed",
                 "match": { "objectiveId": "T00-06" }
             },
-            "highlightTarget": ".citymap__canvas",
+            "highlightTarget": ".citymap__search-results",
             "highlightScope": "window:city-map",
+            "hint": "Click the \"Ellery & Finch Books\" result in the search list to focus the map on it and open its details.",
             "next": "t00-038"
         },
         {

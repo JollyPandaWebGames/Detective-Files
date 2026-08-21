@@ -23,6 +23,7 @@
  * Events emitted:
  *   map:location-selected — user selected a marker   { location }
  *   map:location-focused  — marker centred on screen { locationId }
+ *   map:search-performed  — search executed          { caseId, query, resultIds }
  *   map:note-updated      — via MapManager
  */
 
@@ -79,8 +80,10 @@ class CityMap extends BaseApp {
         this._lastPinchDist = null;
 
         // DOM refs.
-        this._filterListEl  = null;
-        this._searchInputEl = null;
+        this._filterListEl   = null;
+        this._searchInputEl  = null;
+        this._searchResultsEl = null;
+        this._searchClearBtn  = null;
         this._canvasEl      = null;
         this._ctx            = null;
         this._detailEl       = null;
@@ -142,7 +145,9 @@ class CityMap extends BaseApp {
         window.removeEventListener( 'resize', this._onResize );
         this._canvasEl    = null;
         this._ctx          = null;
-        this._filterListEl = null;
+        this._filterListEl  = null;
+        this._searchResultsEl = null;
+        this._searchClearBtn  = null;
         this._detailEl     = null;
         this._notesEl      = null;
         super.destroy();
@@ -161,16 +166,37 @@ class CityMap extends BaseApp {
         const searchWrap = document.createElement( 'div' );
         searchWrap.className = 'citymap__search-wrap';
 
+        const searchRow = document.createElement( 'div' );
+        searchRow.className = 'citymap__search-row';
+
         this._searchInputEl = document.createElement( 'input' );
         this._searchInputEl.type        = 'text';
         this._searchInputEl.className   = 'citymap__search-input';
         this._searchInputEl.placeholder = 'Search locations...';
         this._searchInputEl.setAttribute( 'aria-label', 'Search map locations' );
-        this._searchInputEl.addEventListener( 'input', () => {
-            this._searchQuery = this._searchInputEl.value;
-            this._renderMap();
+        this._searchInputEl.addEventListener( 'input', () => this._handleSearchInput() );
+        this._searchInputEl.addEventListener( 'keydown', ( e ) => {
+            if ( e.key === 'Enter' ) this._handleSearchInput();
+            if ( e.key === 'Escape' ) this._clearSearch();
         } );
-        searchWrap.appendChild( this._searchInputEl );
+
+        this._searchClearBtn = document.createElement( 'button' );
+        this._searchClearBtn.type      = 'button';
+        this._searchClearBtn.className = 'citymap__search-clear';
+        this._searchClearBtn.textContent = '✕';
+        this._searchClearBtn.setAttribute( 'aria-label', 'Clear search' );
+        this._searchClearBtn.hidden = true;
+        this._searchClearBtn.addEventListener( 'click', () => this._clearSearch() );
+
+        searchRow.appendChild( this._searchInputEl );
+        searchRow.appendChild( this._searchClearBtn );
+
+        this._searchResultsEl = document.createElement( 'div' );
+        this._searchResultsEl.className = 'citymap__search-results';
+        this._searchResultsEl.hidden = true;
+
+        searchWrap.appendChild( searchRow );
+        searchWrap.appendChild( this._searchResultsEl );
 
         const filterHeader = document.createElement( 'div' );
         filterHeader.className   = 'citymap__panel-header';
@@ -266,6 +292,125 @@ class CityMap extends BaseApp {
 
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Search
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Handle live input on the search field: update the canvas filter,
+     * render the results list, and notify listeners (tutorial included)
+     * that a search was performed.
+     *
+     * @returns {void}
+     */
+    _handleSearchInput() {
+
+        this._searchQuery = this._searchInputEl.value;
+        this._searchClearBtn.hidden = this._searchQuery.trim().length === 0;
+
+        const query = this._searchQuery.trim();
+        const results = query ? MapManager.search( query ) : [];
+
+        this._renderSearchResults( query, results );
+        this._renderMap();
+
+        if ( query ) {
+            EventBus.emit( 'map:search-performed', {
+                caseId:    this._activeCaseId,
+                query,
+                resultIds: results.map( r => r.id ),
+            } );
+        }
+
+    }
+
+    /**
+     * Render the search results dropdown below the search input.
+     *
+     * @param {string}   query
+     * @param {Object[]} results
+     * @returns {void}
+     */
+    _renderSearchResults( query, results ) {
+
+        if ( !this._searchResultsEl ) return;
+
+        if ( !query ) {
+            this._searchResultsEl.hidden = true;
+            this._searchResultsEl.innerHTML = '';
+            return;
+        }
+
+        this._searchResultsEl.hidden = false;
+
+        if ( results.length === 0 ) {
+            this._searchResultsEl.innerHTML =
+                '<div class="citymap__search-empty">No locations found.</div>';
+            return;
+        }
+
+        this._searchResultsEl.innerHTML = '';
+
+        results.forEach( loc => {
+
+            const def = MARKER_TYPES[ loc.type ] ?? DEFAULT_MARKER;
+
+            const item = document.createElement( 'button' );
+            item.type      = 'button';
+            item.className = 'citymap__search-result';
+            item.dataset.locationId = loc.id;
+            item.innerHTML = `
+                <span class="citymap__search-result-icon">${ def.emoji }</span>
+                <span class="citymap__search-result-text">
+                    <span class="citymap__search-result-name">${ this._escape( loc.name ) }</span>
+                    <span class="citymap__search-result-sub">${ this._escape( loc.district || loc.address || loc.type ) }</span>
+                </span>
+            `;
+
+            item.addEventListener( 'click', () => this._selectSearchResult( loc.id ) );
+            this._searchResultsEl.appendChild( item );
+
+        } );
+
+    }
+
+    /**
+     * Player picked a result from the search list — focus the map on
+     * it, select it, and open its details, then close the results
+     * dropdown. This is the only path that should ever count as the
+     * player having "found" a location via search (EPIC Part 7 — no
+     * auto-complete).
+     *
+     * @param {string} locationId
+     * @returns {void}
+     */
+    _selectSearchResult( locationId ) {
+
+        this._focusLocation( locationId );
+        this._searchResultsEl.hidden = true;
+        this._searchResultsEl.innerHTML = '';
+
+    }
+
+    /**
+     * Reset the search field, hide results, and restore the full
+     * unfiltered marker set on the canvas.
+     *
+     * @returns {void}
+     */
+    _clearSearch() {
+
+        this._searchQuery = '';
+        if ( this._searchInputEl ) this._searchInputEl.value = '';
+        if ( this._searchClearBtn ) this._searchClearBtn.hidden = true;
+        if ( this._searchResultsEl ) {
+            this._searchResultsEl.hidden = true;
+            this._searchResultsEl.innerHTML = '';
+        }
+        this._renderMap();
+
+    }
+
     _makeNavBtn( symbol, title, onClick ) {
         const btn = document.createElement( 'button' );
         btn.className   = 'citymap__nav-btn';
@@ -296,6 +441,7 @@ class CityMap extends BaseApp {
 
         this._activeCaseId = investigation.caseId;
         this._selectedId   = null;
+        this._clearSearch();
         this._renderEmptyDetail();
         this._drawNoCaseMessage();
         MapManager.loadForCase( investigation.caseId ).then( () => {
@@ -370,7 +516,15 @@ class CityMap extends BaseApp {
             : null;
 
         locations.forEach( loc => {
-            if ( !this._activeFilters.has( loc.type ) ) return;
+            // Bug fix: only a location whose type has an actual filter
+            // checkbox (i.e. is a key in MARKER_TYPES) can be hidden by
+            // that checkbox. Types outside MARKER_TYPES — e.g. Case 00's
+            // "Incident Location" (Bookstore) and "Secondary Location"
+            // (Pawn Shop) — have no checkbox and must never be silently
+            // excluded, since the player would have no way to ever
+            // re-enable them. This was the root cause of the Bookstore
+            // marker never rendering on the canvas at all.
+            if ( MARKER_TYPES[ loc.type ] && !this._activeFilters.has( loc.type ) ) return;
             if ( matched && !matched.includes( loc.id ) ) return;
             this._drawMarker( ctx, loc );
         } );
@@ -772,7 +926,9 @@ class CityMap extends BaseApp {
         const hitRadius = 24 / this._zoom;
 
         for ( const loc of locations ) {
-            if ( !this._activeFilters.has( loc.type ) ) continue;
+            // See matching fix note in _renderMap — only a type with an
+            // actual filter checkbox can be excluded by it.
+            if ( MARKER_TYPES[ loc.type ] && !this._activeFilters.has( loc.type ) ) continue;
             const dx = mapX - loc.x;
             const dy = mapY - loc.y;
             if ( dx * dx + dy * dy <= hitRadius * hitRadius ) return loc;

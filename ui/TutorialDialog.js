@@ -105,10 +105,11 @@ class TutorialDialogClass {
      * dialogue box is temporarily closed and the player must perform
      * the required action — see EPIC Part 3/6).
      *
-     * @param {string} text
+     * @param {string}                                      text
+     * @param {{onHint?:Function, onSkip?:Function}}         [handlers]
      * @returns {void}
      */
-    showInstruction( text ) {
+    showInstruction( text, handlers = {} ) {
 
         this._mount();
 
@@ -116,7 +117,21 @@ class TutorialDialogClass {
         this._element.innerHTML = `
             <div class="tutorial-dialog__instruction-icon" aria-hidden="true">👉</div>
             <div class="tutorial-dialog__instruction-text">${ this._escape( text ) }</div>
+            <div class="tutorial-dialog__instruction-actions">
+                ${ handlers.onHint ? '<button type="button" class="tutorial-dialog__hint">Need Help?</button>' : '' }
+                ${ handlers.onSkip ? '<button type="button" class="tutorial-dialog__skip tutorial-dialog__skip--instruction">Skip Tutorial</button>' : '' }
+            </div>
         `;
+
+        if ( handlers.onHint ) {
+            this._element.querySelector( '.tutorial-dialog__hint' )
+                .addEventListener( 'click', handlers.onHint );
+        }
+
+        if ( handlers.onSkip ) {
+            this._element.querySelector( '.tutorial-dialog__skip--instruction' )
+                .addEventListener( 'click', handlers.onSkip );
+        }
 
     }
 

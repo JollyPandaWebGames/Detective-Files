@@ -166,13 +166,15 @@ class MapManagerClass {
 
         if ( !query.trim() ) return this.getAllLocations();
 
-        const q = query.toLowerCase();
+        const q = query.toLowerCase().trim();
 
         return Array.from( this._locations.values() ).filter( l =>
             l.name.toLowerCase().includes( q ) ||
             ( l.address ?? '' ).toLowerCase().includes( q ) ||
+            ( l.district ?? '' ).toLowerCase().includes( q ) ||
             l.type.toLowerCase().includes( q ) ||
-            ( l.description ?? '' ).toLowerCase().includes( q )
+            ( l.description ?? '' ).toLowerCase().includes( q ) ||
+            ( l.keywords ?? [] ).some( kw => kw.toLowerCase().includes( q ) )
         );
 
     }
