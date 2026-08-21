@@ -627,6 +627,41 @@
             },
             "highlightTarget": ".flab__action-btn--submit",
             "highlightScope": "window:forensics",
+            "hint": "Select the pawn shop receipt and click the Submit for Analysis button.",
+            "next": "t00-049b"
+        },
+        {
+            "id": "t00-049b",
+            "phase": "forensics",
+            "lesson": 12,
+            "lessonTitle": "Forensics Lab",
+            "speaker": "male-detective",
+            "type": "instruction",
+            "text": "Analysis takes a short while. Wait for it to finish.",
+            "requiredAction": {
+                "event": "forensics:completed",
+                "match": { "analysisId": "analysis-00-1" }
+            },
+            "highlightTarget": ".flab__queue-item[data-analysis-id=\"analysis-00-1\"]",
+            "highlightScope": "window:forensics",
+            "hint": "The receipt is now processing in the queue on the left. No action needed — just wait a few seconds for it to finish.",
+            "next": "t00-049c"
+        },
+        {
+            "id": "t00-049c",
+            "phase": "forensics",
+            "lesson": 12,
+            "lessonTitle": "Forensics Lab",
+            "speaker": "female-detective",
+            "type": "instruction",
+            "text": "Collect the report.",
+            "requiredAction": {
+                "event": "forensics:collected",
+                "match": { "analysisId": "analysis-00-1" }
+            },
+            "highlightTarget": ".flab__action-btn--collect",
+            "highlightScope": "window:forensics",
+            "hint": "Click the Collect Report button to retrieve the analysis results.",
             "next": "t00-050"
         },
         {
@@ -636,7 +671,7 @@
             "lessonTitle": "Forensics Lab",
             "speaker": "male-detective",
             "type": "dialogue",
-            "text": "Analysis takes time. Check back for the result later — patience is half the job.",
+            "text": "Good. That receipt just gave us a name — patience is half the job.",
             "next": "t00-051"
         },
         {

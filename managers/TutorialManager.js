@@ -587,6 +587,14 @@ class TutorialManagerClass {
                 return !match.analysisId
                     || ForensicsManager.getById( match.analysisId )?.queueStatus !== 'Available';
 
+            case 'forensics:completed':
+                return !!match.analysisId
+                    && [ 'Completed', 'Collected' ].includes( ForensicsManager.getById( match.analysisId )?.queueStatus );
+
+            case 'forensics:collected':
+                return !!match.analysisId
+                    && ForensicsManager.getById( match.analysisId )?.queueStatus === 'Collected';
+
             // Bug fix (v1.1.6): several instruction steps map onto a real
             // gameplay objective whose completion condition is more than
             // a single raw event (e.g. Inspect Evidence needs the item

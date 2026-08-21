@@ -88,9 +88,9 @@ class Forensics extends BaseApp {
 
         // Bound EventBus handlers.
         this._onInvestigationChanged = ( { investigation } ) => this._syncInvestigation( investigation );
-        this._onCompleted       = ()               => this._refreshQueue();
+        this._onCompleted       = ( payload ) => this._onQueueItemChanged( payload );
         this._onContentUnlocked = ()               => this._refreshQueue();
-        this._onCollected       = ()               => this._refreshQueue();
+        this._onCollected       = ( payload ) => this._onQueueItemChanged( payload );
 
     }
 
@@ -232,6 +232,28 @@ class Forensics extends BaseApp {
             btn.classList.toggle( 'flab__tab-btn--active', btn.dataset.tab === tabId );
         } );
         this._refreshQueue();
+    }
+
+    /**
+     * Bug fix: `forensics:completed`/`forensics:collected` only used to
+     * refresh the queue list — the center detail panel (which holds
+     * the Submit/Collect Report button) was never re-rendered, so a
+     * player watching an analysis finish had to click away and back
+     * onto it before "Collect Report" would actually appear. Re-render
+     * the center panel too whenever the change affects whichever
+     * analysis is currently selected.
+     *
+     * @param {{analysisId?: string}} [payload]
+     * @returns {void}
+     */
+    _onQueueItemChanged( payload ) {
+
+        this._refreshQueue();
+
+        if ( this._selectedId && payload?.analysisId === this._selectedId ) {
+            this._selectAnalysis( this._selectedId );
+        }
+
     }
 
     _refreshQueue() {
