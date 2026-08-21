@@ -663,6 +663,24 @@
             },
             "highlightTarget": "[data-app-id=\"criminal-database\"]",
             "highlightScope": "desktop",
+            "hint": "Open the Criminal Database from the desktop or the taskbar.",
+            "next": "t00-052b"
+        },
+        {
+            "id": "t00-052b",
+            "phase": "criminal-database",
+            "lesson": 13,
+            "lessonTitle": "Criminal Database",
+            "speaker": "female-detective",
+            "type": "instruction",
+            "text": "Search for \"Callum Voss\" using the search field.",
+            "requiredAction": {
+                "event": "person:search-performed",
+                "match": { "containsPersonId": "person-00-2" }
+            },
+            "highlightTarget": ".pdb__search-input",
+            "highlightScope": "window:criminal-database",
+            "hint": "Type \"Callum\" or \"Voss\" into the search field at the top of the people list.",
             "next": "t00-053"
         },
         {
@@ -672,13 +690,14 @@
             "lessonTitle": "Criminal Database",
             "speaker": "female-detective",
             "type": "instruction",
-            "text": "Search for Callum Voss and open his profile.",
+            "text": "Select Callum Voss from the results to open his profile.",
             "requiredAction": {
                 "event": "objective:completed",
                 "match": { "objectiveId": "T00-10" }
             },
-            "highlightTarget": ".pdb__list-item",
+            "highlightTarget": ".pdb__list-item[data-person-id=\"person-00-2\"]",
             "highlightScope": "window:criminal-database",
+            "hint": "Click the \"Callum Voss\" entry in the list on the left to open his profile.",
             "next": "t00-054"
         },
         {

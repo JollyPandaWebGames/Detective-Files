@@ -664,6 +664,13 @@ class TutorialManagerClass {
                 return payload?.location?.id === expected;
             }
 
+            // person:search-performed carries { query, resultIds } —
+            // same shape/reasoning as map:search-performed above, for
+            // the Criminal Database's own search field.
+            if ( eventName === 'person:search-performed' && key === 'containsPersonId' ) {
+                return !!payload?.resultIds?.includes( expected );
+            }
+
             return payload?.[ key ] === expected;
 
         } );

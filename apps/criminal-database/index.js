@@ -22,9 +22,10 @@
  *   person:focus-request — select and highlight a profile (cross-app)
  *
  * Events emitted:
- *   person:selected      — user selected a profile  { person }
- *   person:pinned        — via PeopleManager
- *   person:note-updated  — via PeopleManager
+ *   person:selected        — user selected a profile  { person }
+ *   person:search-performed — search field used        { caseId, query, resultIds }
+ *   person:pinned          — via PeopleManager
+ *   person:note-updated    — via PeopleManager
  */
 
 import BaseApp       from '../../core/BaseApp.js';
@@ -182,6 +183,7 @@ class CriminalDatabase extends BaseApp {
         this._searchInput.addEventListener( 'input', () => {
             this._searchQuery = this._searchInput.value;
             this._refreshList();
+            this._emitSearchPerformed();
         } );
 
         this._statusSelect = document.createElement( 'select' );
@@ -321,6 +323,30 @@ class CriminalDatabase extends BaseApp {
             const el = this._listEl.querySelector( `[data-person-id="${ this._selectedId }"]` );
             if ( el ) el.classList.add( 'pdb__list-item--selected' );
         }
+
+    }
+
+    /**
+     * Emit `person:search-performed` with the ids the current search
+     * query actually matched, so the tutorial can gate a step on
+     * "the player searched and the right person showed up in the
+     * results" without needing to auto-complete on category-only
+     * views (mirrors CityMap's `map:search-performed`).
+     *
+     * @returns {void}
+     */
+    _emitSearchPerformed() {
+
+        const query = this._searchQuery.trim();
+        if ( !query || !this._activeCaseId ) return;
+
+        const resultIds = PeopleManager.search( query ).map( p => p.id );
+
+        EventBus.emit( 'person:search-performed', {
+            caseId: this._activeCaseId,
+            query,
+            resultIds,
+        } );
 
     }
 
